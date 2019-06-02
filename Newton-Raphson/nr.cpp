@@ -41,7 +41,7 @@ nrvar nr(const int maxit,const double tol,const double start,
 
 // The proposed new value.
         y=x+d;
-// New bounds.
+// The case of a
         if(y>x)
         {
             lower=x;
@@ -52,6 +52,8 @@ nrvar nr(const int maxit,const double tol,const double start,
             upper=x;
             if(x<lower)y=lower;
         }
+// Update d in case y was modified.
+        d=y-x;
 // Get new function value, new derivative, and new second derivative.
         vary=nrvarf(y,f);
 // Stop for 0 derivative.
@@ -59,7 +61,7 @@ nrvar nr(const int maxit,const double tol,const double start,
 
 // Look for adequate progress.
         deltaf=vary.max-varx.max;
-        if(deltaf>=b*fabs((y-x)*vary.der1))
+        if(deltaf>=b*fabs(d*vary.der1))
         {
 // Check for convergence.
             if(deltaf<tol) return vary;
@@ -67,7 +69,7 @@ nrvar nr(const int maxit,const double tol,const double start,
 // Treat inadequate progress.
         else
         {
-            if((y-x)*vary.der1<0.0)
+            if(d*vary.der1<0.0)
             {
                 if(y>x)
                 {
@@ -77,7 +79,8 @@ nrvar nr(const int maxit,const double tol,const double start,
                 {
                     lower=y;
                 }
-                y=x+(y-x)*varx.der1/(varx.der1-vary.der1);
+                
+                y=x+d*varx.der1/(2.0*(varx.der1-deltaf/d));
                 vary=nrvarf(y,f);
             }
         }
