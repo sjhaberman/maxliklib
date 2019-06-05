@@ -54,7 +54,7 @@ nrvvar nrvs(const int maxit,const int maxits,const double tol,const vec start,
         }
         else
         {
-            d=sum(v*varx.grad)/sum(varx.grad*varx.grad);
+            d=dot(v,varx.grad)/dot(varx.grad,varx.grad);
             if(d<mult)v=varx.grad;
         }
         d=norm(v,"inf");
