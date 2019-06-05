@@ -1,16 +1,18 @@
-//Newton-Raphson algorithm for function maximization for a strictly concave function
-//of real vectors of some fixed finite dimension.
+//Newton-Raphson algorithm for function maximization for a real function
+//on the space real vectors of some fixed finite dimension.
 //The function, gradient, and Hessian are
 //f.value, f.grad, and f.hess.
-//The Hessian is assumed continuous and negative-definite.
+//The Hessian is assumed continuous.
 //The function must approach negative infinitely whenever the vector norm of the function argument
-//approaches infinity.  This condition holds if the function achieves its supremum.
+//approaches infinity, and there must be a single critical point.
 //Maximum number of main iterations is maxit.
 //Maximum number of secondary iterations per main iteration is maxits.
 //If change in approximation to maximum is less
 //than tol, then iterations cease.
-//The largest permitted step is stepmax>0.
+//The largest permitted step is stepmax>0
 //The improvement check is b>1.
+//The minimum ratio of inner product of tentative step and gradient versus inner product of
+//gradient and gradient must at least be mult>0.
 //See Chapter 3 of Analysis of Frequency Data by S. J. Haberman for a very closely-related
 //algorithm.
 
@@ -21,13 +23,13 @@ using namespace std;
 using namespace arma;
 #include "nrv.h"
 
-nrvvar nrv(const int maxit,const int maxits,const double tol,const vec start,
-        const double stepmax,const double b,
+nrvvar nrvs(const int maxit,const int maxits,const double tol,const vec start,
+        const double stepmax,const double b,const double mult,
         function<fd2v(vec)> f)
 {
     
     
-   
+    bool sing;
     double c,cc,d,dd,deltaf,dirx,diry,dir2y,dirz,dir2z,ee,lower,upper,steplim;
     int i,j;
     nrvvar varx,vary,varz;
@@ -44,7 +46,17 @@ nrvvar nrv(const int maxit,const int maxits,const double tol,const vec start,
     for(i=0;i<maxit;i++)
     {
 // The basic step.
-        v=solve(-varx.hess,varx.grad);
+        sing=solve(v,-varx.hess,varx.grad);
+// Revert to steepest ascent.
+        if(sing)
+        {
+            v=varx.grad;
+        }
+        else
+        {
+            d=sum(v*varx.grad)/sum(varx.grad*varx.grad);
+            if(d<mult)v=varx.grad;
+        }
         d=norm(v,"inf");
 
 // Step truncation.
@@ -86,7 +98,23 @@ nrvvar nrv(const int maxit,const int maxits,const double tol,const vec start,
             for(j=0;j<maxits;j++)
             {
 // The proposed step.
-                dd=fmax(-stepmax,fmin(stepmax,-diry/dir2y));
+                if(dir2y<0.0)
+                {
+                    dd=fmax(-stepmax,fmin(stepmax,-diry/dir2y));
+                }
+                else
+                {
+                    if(diry<0.0)
+                    {
+                        dd=-stepmax;
+                    }
+                    else
+                    {
+                        dd=stepmax;
+                    }
+                    
+                }
+                
                 
                 
 // The proposed new value.
