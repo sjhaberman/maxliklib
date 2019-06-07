@@ -15,7 +15,7 @@ struct nrvvar
     vec grad;
     mat hess;
 };
-struct logitvar
+struct mlevar
 {
     double maxloglik;
     vec mle;
@@ -33,12 +33,13 @@ struct regvars
     vec y;
     vec weight;
 };
+
 fd2v logitfunct(vec);
-nrvvar nrv(int,int,double,vec,double,function<fd2v(vec)>);
+nrvvar nrv(int,int,double,vec,double,double,function<fd2v(vec)>);
 
 
 
-logitvar logits(const int maxit,
+mlevar logits(const int maxit,
                 const int maxits,
                 const double tol,
                 const vec start,
@@ -47,8 +48,8 @@ logitvar logits(const int maxit,
                 )
 {
     nrvvar varx;
-    logitvar results;
-    varx=nrv(maxit,maxits,tol,start,b,logitfunct);
+    mlevar results;
+    varx=nrv(maxit,maxits,tol,start,stepmax,b,logitfunct);
     results.maxloglik=varx.max;
     results.mle=varx.locmax;
     results.covmle=inv_sympd(-varx.hess);
