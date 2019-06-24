@@ -1,19 +1,15 @@
-//Newton-Raphson algorithm for function maximization of a continuously
+//Gradient ascent algorithm for function maximization of a continuously
 //differentiable real function of real vectors of dimension p.
 //The function, gradient, and Hessian are
-//f.value, f.grad, and f.hess.
+//f.value, and f.grad.
 //The function should approach negative infinity whenever the vector norm of the function argument
-//approaches infinity.  The Hessian matrix is continuous.
+//approaches infinity.
 //Maximum number of main iterations is maxit.
 //Maximum number of secondary iterations per main iteration is maxits.
 //If change in approximation to maximum is less
 //than tol, then iterations cease.
 //The largest permitted step is stepmax>0.
 //The improvement check is b>1.
-//The minimum ratio of inner product of tentative step and gradient versus inner product of
-//gradient and gradient must at least be mult>0.
-//See Chapter 3 of Analysis of Frequency Data by S. J. Haberman for a very closely-related
-//algorithm.
 
 
 
@@ -21,38 +17,35 @@
 using namespace std;
 using namespace arma;
 
-struct fd2v
+struct fd1v
 {
     double value;
     vec grad;
-    mat hess;
 };
 
-struct nrvvar
+struct twopointgvar
 {
     vec locmax;
     double max;
     vec grad;
-    mat hess;
 };
-nrvvar nrvvarf(vec x,function<fd2v(vec)> f)
+twopointgvar twopointgvarf(vec x,function<fd1v(vec)> f)
 {
-    fd2v resultf;
-    nrvvar result;
+    fd1v resultf;
+    twopointgvar result;
     resultf=f(x);
     result.locmax=x;
     result.max=resultf.value;
     result.grad=resultf.grad;
-    result.hess=resultf.hess;
     return result;
 };
 
-nrvvar nrswv(const int,
-            const double,const double,vec,nrvvar,
-            function<fd2v(vec)>);
-nrvvar nrvs(const int maxit,const int maxits,const double tol,const vec start,
-        const double stepmax,const double b,const double mult,
-        function<fd2v(vec)> f)
+twopointgvar twopointg(const int,
+            const double,vec,twopointgvar,const double,const double,
+            function<fd1v(vec)>);
+twopointgvar gradascent(const int maxit,const int maxits,const double tol,const vec start,
+        const double stepmax,const double b,
+        function<fd1v(vec)> f)
 {
     
     
@@ -60,33 +53,21 @@ nrvvar nrvs(const int maxit,const int maxits,const double tol,const vec start,
     double c,d;
     int i;
     
-    nrvvar varx,vary;
+    twopointgvar varx,vary;
     vec v,x,y;
 
 // Function settings at start.
-    varx=nrvvarf(start,f);
+    varx=twopointgvarf(start,f);
 
 // Iterations.
     for(i=0;i<maxit;i++)
     {
+
 // Stop if gradient of zero.
         if(!any(varx.grad)) return varx;
-// Get direction.
+// Direction.
+        v=varx.grad;
         
-        if ((-varx.hess).is_sympd())
-        {
-            v=solve(-varx.hess,varx.grad);
-            if(dot(v,varx.grad)<mult*dot(varx.grad,varx.grad))v=varx.grad;
-            
-        }
-        else
-        {
-            v=varx.grad;
-        }
-
-
-
-
 
 // Step truncation.
         
@@ -101,7 +82,7 @@ nrvvar nrvs(const int maxit,const int maxits,const double tol,const vec start,
         }
         v=c*v;
         
-        vary = nrswv(maxit,stepmax,b,v,varx,f);
+        vary = twopointg(maxits,tol,v,varx,stepmax,b,f);
         
         if(vary.max<varx.max+tol) return vary;
 

@@ -12,7 +12,35 @@
 #include<cmath>
 #include<float.h>
 using namespace std;
-#include "nr.h"
+struct fd2
+{
+    double value;
+    double der1;
+    double der2;
+};
+
+struct nrvar
+{
+    double locmax;
+    double max;
+    double der1;
+    double der2;
+};
+nrvar nrvarf(double x,function <fd2(double)> f)
+{
+    fd2 resultf;
+    nrvar result;
+    resultf=f(x);
+    result.locmax=x;
+    result.max=resultf.value;
+    result.der1=resultf.der1;
+    result.der2=resultf.der2;
+    return result;
+}
+double davidon(double,double,double,double,double,double);
+double newton(double,double,double);
+double modit(double,double,double,double,double);
+void rebound(double,double,double &,double &);
 nrvar nrs(const int maxit,const double tol,const double start,
          const double stepmax,const double b,
          function<fd2(double)> f)
@@ -30,41 +58,23 @@ nrvar nrs(const int maxit,const double tol,const double start,
     varx=nrvarf(x,f);
 // Stop if derivative is 0.
     if(varx.der1==0.0) return varx;
+    rebound(x,varx.der1,lower,upper);
 // Up to maxit iterations.
     for(i=0;i<maxit;i++)
     {
-// The proposed step.
+// The proposed new value.
         if(varx.der2<0.0)
         {
-            d=fmax(-stepmax,fmin(stepmax,-varx.der1/varx.der2));
+            y=newton(x,varx.der1,varx.der2);
         }
         else
         {
-            if(varx.der1<0.0)
-            {
-                d=-stepmax;
-            }
-            else
-            {
-                d=stepmax;
-            }
-            
+            y=x-varx.der1;
         }
-// The proposed new value.
-        y=x+d;
-// New bounds.
-        if(y>x)
-        {
-            lower=x;
-            if(y>=upper)y=upper;
-        }
-        if(y<x)
-        {
-            upper=x;
-            if(y<=lower)y=lower;
-        }
-        // Update d in case y was modified.
-        d=y-x;
+//Truncate if needed.
+        y=modit(x,y,stepmax,lower,upper);
+        
+
 
 // Get new function value, new derivative, and new second derivative.
 
@@ -72,7 +82,9 @@ nrvar nrs(const int maxit,const double tol,const double start,
         vary=nrvarf(y,f);
 // Stop for 0 derivative.
         if(vary.der1==0.0) return vary;
+        rebound(y,vary.der1,lower,upper);
 // Look for adequate progress.
+        d=y-x;
         deltaf=vary.max-varx.max;
         if(deltaf>=b*fabs(d*vary.der1))
         {
@@ -84,16 +96,12 @@ nrvar nrs(const int maxit,const double tol,const double start,
         {
             if(d*vary.der1<0.0)
             {
-                if(y>x)
-                {
-                    upper=y;
-                }
-                else
-                {
-                    lower=y;
-                }
-                y=x+d*varx.der1/(2.0*(varx.der1-deltaf/d));
+                
+// Cubic interpolation.
+                y=davidon(x,y,varx.locmax,vary.locmax,varx.der1,vary.der1);
                 vary=nrvarf(y,f);
+                if(vary.der1==0.0)return vary;
+                rebound(y,vary.der1,lower,upper);
             }
         }
         
