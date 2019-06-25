@@ -41,7 +41,7 @@ twopointgvar twopointgvarf(vec x,function<fd1v(vec)> f)
 };
 
 twopointgvar twopointg(const int,
-            const double,vec,twopointgvar,const double,const double,
+            vec,twopointgvar,const double,const double,
             function<fd1v(vec)>);
 twopointgvar gradascent(const int maxit,const int maxits,const double tol,const vec start,
         const double stepmax,const double b,
@@ -82,7 +82,7 @@ twopointgvar gradascent(const int maxit,const int maxits,const double tol,const 
         }
         v=c*v;
         
-        vary = twopointg(maxits,tol,v,varx,stepmax,b,f);
+        vary = twopointg(maxits,v,varx,stepmax,b,f);
         
         if(vary.max<varx.max+tol) return vary;
 

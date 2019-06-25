@@ -30,7 +30,7 @@ twopointgvar twopointgvarf(vec,function <fd1v(vec)>);
 double davidon(double,double,double,double,double,double);
 double modit(double,double,double,double,double);
 void rebound(double,double,double &,double &);
-twopointgvar twopointg(const int maxits,const double tol,vec v,
+twopointgvar twopointg(const int maxits,vec v,
                          twopointgvar varx,const double stepmax,const double b,
                          function<fd1v(vec)> f)
 {
