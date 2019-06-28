@@ -1,5 +1,6 @@
 //
-//Find maximum likelihood estimates for logit model.
+//Find maximum likelihood estimates for quantal response model
+//based on one parameter for a response.
 //Maximum number of iterations is maxit.
 //Tolerance is tol.
 //Starting vector is start.
@@ -19,7 +20,7 @@ struct mlevar
 {
     double maxloglik;
     vec mle;
-    mat covmle;
+    mat hess;
 };
 struct fd2v
 {
@@ -27,19 +28,14 @@ struct fd2v
     vec grad;
     mat hess;
 };
-struct regvars
-{
-    mat x;
-    vec y;
-    vec weight;
-};
 
-fd2v logitfunct(vec);
+
+fd2v quantallik(vec);
 nrvvar nrv(int,int,double,vec,double,double,function<fd2v(vec)>);
 
 
 
-mlevar logits(const int maxit,
+mlevar quantalmle(const int maxit,
                 const int maxits,
                 const double tol,
                 const vec start,
@@ -49,9 +45,9 @@ mlevar logits(const int maxit,
 {
     nrvvar varx;
     mlevar results;
-    varx=nrv(maxit,maxits,tol,start,stepmax,b,logitfunct);
+    varx=nrv(maxit,maxits,tol,start,stepmax,b,quantallik);
     results.maxloglik=varx.max;
     results.mle=varx.locmax;
-    results.covmle=inv_sympd(-varx.hess);
+    results.hess=varx.hess;
     return results;
 }
