@@ -18,9 +18,10 @@ fd2 cloglog(int y,double beta)
     fd2 results;
     p=1.0-exp(-exp(beta));
     q=1.0-p;
-    r=exp(beta)/p;
+    
     if(y==1)
     {
+        r=exp(beta)/p;
         results.value=log(p);
         results.der1=q/p;
         results.der2=q*r*(1.0-r);
