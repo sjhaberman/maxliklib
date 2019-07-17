@@ -4,8 +4,9 @@
 //Maximum number of iterations is maxit.
 //Tolerance is tol.
 //Starting vector is start.
-//Responses are y.
-//Predictors are x.
+//Responses are global_y.
+//Predictors are global_x.
+//Weights are global_w.
 #include<armadillo>
 using namespace arma;
 using namespace std;

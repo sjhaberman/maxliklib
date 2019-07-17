@@ -1,7 +1,8 @@
 //Log likelihood and its gradient and Hessian
-//for quantal response model with response vector y and
-//predictor matrix x.
-//Weight w is used.
+//for quantal response model with response vector global_y and
+//predictor matrix global_x.
+//Weight global_w is used.
+//Model codes are found in quantal.cpp.
 #include<armadillo>
 using namespace arma;
 struct fd2

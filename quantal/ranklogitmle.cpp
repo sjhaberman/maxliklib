@@ -1,5 +1,5 @@
 //Maximum likelihood, location of maximum likelihood estimate, and corresponding
-//Hessian matrix for multinomial quantal model with integer response vector global_y and
+//Hessian matrix for rank logit model with integer vector responses in global_y and
 //predictor array of matrices global_x.
 //Weight vector global_w is used.
 //Maximum number of iterations is maxit.
@@ -7,9 +7,10 @@
 //Tolerance is tol.
 //Starting vector is start.
 //Maximum step is stepmax.
-//Progress constant is b.
-
-
+//Progress constant is b.//Log likelihood and its gradient and Hessian
+//for rank model of ranklogit.cpp with array of response vectors global_y and
+//predictor array of matrices global_x.
+//Weight vector global_w is used.
 
 #include<armadillo>
 using namespace arma;
@@ -34,11 +35,9 @@ struct fd2v
     mat hess;
 };
 
-
-
-fd2v multquantallik(vec);
+fd2v ranklogitlik(vec);
 nrvvar nrv(const int,const int,const double,vec,const double,const double b,function<fd2v(vec)>);
-mlevar multquantalmle(const int maxit,
+mlevar ranklogitmle(const int maxit,
                       const int maxits,
                       const double tol,
                       const vec start,
@@ -47,10 +46,9 @@ mlevar multquantalmle(const int maxit,
 {
     nrvvar varx;
     mlevar results;
-    varx=nrv(maxit,maxits,tol,start,stepmax,b,multquantallik);
+    varx=nrv(maxit,maxits,tol,start,stepmax,b,ranklogitlik);
     results.maxloglik=varx.max;
     results.mle=varx.locmax;
     results.hess=varx.hess;
     return results;
-    
 }
