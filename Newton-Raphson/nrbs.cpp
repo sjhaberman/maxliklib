@@ -1,12 +1,15 @@
-//Newton-Raphson algorithm for function maximization.
-//Function and first two derivatives are f.value, f.der1, and f.der2<0,
-//Maximum number of iterations is maxit.
+//Modified Newton-Raphson algorithm for function maximization on an open interval.
+//Function and its first two derivatives are f.value, f.der1, and f.der2 when the argument is
+//in the interval.  The bool variable f.fin is true if the argument is in the interval and
+//false otherwise. It is not assumed that the function is concave.
+//The maximum number of main iterations is maxit.
 //If change in approximation to maximum is less
 //than tol, then iterations cease.
 //The largest permitted step is stepmax>0.
 //The improvement check is b>1.
-//See Chapter 3 of Analysis of Frequency Data by S. J. Haberman for a very closely-related
-//algorithm.
+//The approach here is related to an algorithm in Chapter 3 of Analysis of Frequency Data
+// by S. J. Haberman and to a similar algorithm in an article of S. J. Haberman
+// in Sociological Methodology, 1988.
 #include<cstdlib>
 #include<functional>
 #include<cmath>
@@ -17,6 +20,7 @@ struct fd2
     double value;
     double der1;
     double der2;
+    bool fin;
 };
 
 struct nrvar
@@ -25,60 +29,76 @@ struct nrvar
     double max;
     double der1;
     double der2;
+    bool fin;
 };
 nrvar nrvarf(double x,function <fd2(double)> f)
 {
     fd2 resultf;
     nrvar result;
     resultf=f(x);
+    result.fin=resultf.fin;
     result.locmax=x;
-    result.max=resultf.value;
-    result.der1=resultf.der1;
-    result.der2=resultf.der2;
+    if (resultf.fin)
+    {
+        result.max=resultf.value;
+        result.der1=resultf.der1;
+        result.der2=resultf.der2;
+    }
     return result;
 }
 double davidon(double,double,double,double,double,double);
 double newton(double,double,double);
 double modit(double,double,double,double,double);
 void rebound(double,double,double &,double &);
-nrvar nr(const int maxit,const double tol,const double start,
+nrvar nrbs(const int maxit,const double tol,const double start,
          const double stepmax,const double b,
          function<fd2(double)> f)
 {
-    
-    
     double d,deltaf,lower,upper,x,y;
     int i;
     nrvar varx,vary;
+// lower is lower bound for location of maximum if only one maximum exists.
+    lower=-DBL_MAX;
+// upper is upper bound for location of maximum if only one maximum exists.
+    upper=DBL_MAX;
 // x is old value.
     x=start;
-// lower is lower bound for location of maximum.
-    lower=-DBL_MAX;
-// upper is upper bound for location of maximum.
-    upper=DBL_MAX;
-    
 // varx is current location, function, first derivative, and second derivative.
     varx=nrvarf(x,f);
+// Check for admissible starting value;
+    if(!varx.fin) return varx;
 // Stop if derivative is 0.
     if(varx.der1==0.0) return varx;
     rebound(x,varx.der1,lower,upper);
 // Up to maxit iterations.
     for(i=0;i<maxit;i++)
     {
-// The proposed step.  Keep within range.
-        y=newton(x,varx.der1,varx.der2);
-
+// The proposed new value.
+        if(varx.der2<0.0)
+        {
+            y=newton(x,varx.der1,varx.der2);
+        }
+        else
+        {
+            y=x-varx.der1;
+        }
+//Truncate if needed.
         y=modit(x,y,stepmax,lower,upper);
-// New bounds.
         
 
 
 // Get new function value, new derivative, and new second derivative.
-        vary=nrvarf(y,f);
-// Stop for 0 derivative.
-        if(vary.der1==0.0)return vary;
-        rebound(y,vary.der1,lower,upper);
 
+        
+        vary=nrvarf(y,f);
+        while(!vary.fin)
+        {
+            y=0.5*(x+y);
+            vary=nrvarf(y,f);
+        }
+// Stop for 0 derivative.
+        if(vary.der1==0.0) return vary;
+        rebound(y,vary.der1,lower,upper);
 // Look for adequate progress.
         d=y-x;
         deltaf=vary.max-varx.max;
@@ -90,21 +110,21 @@ nrvar nr(const int maxit,const double tol,const double start,
 // Treat inadequate progress.
         else
         {
-// See if sign of first derivative has changed.
             if(d*vary.der1<0.0)
             {
+                
 // Cubic interpolation.
                 y=davidon(x,y,varx.locmax,vary.locmax,varx.der1,vary.der1);
                 vary=nrvarf(y,f);
                 if(vary.der1==0.0)return vary;
                 rebound(y,vary.der1,lower,upper);
-
             }
         }
-       
+        
         x=y;
         varx=vary;
     }
     return vary;
 }
+
 

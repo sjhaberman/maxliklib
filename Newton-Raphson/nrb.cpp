@@ -1,4 +1,8 @@
-//Newton-Raphson algorithm for function maximization.
+//Newton-Raphson algorithm for function maximization on an open interval
+//for a strictly concave function that approaches negative infinity as
+//absolute value of argument goes to infinity or as value of argument goes to finite
+//upper bound or finite lower bound of interval.  The bool variable f.fin is true if the
+//argument is in the interval.  Otherwise f.fin is false.
 //Function and first two derivatives are f.value, f.der1, and f.der2<0,
 //Maximum number of iterations is maxit.
 //If change in approximation to maximum is less
@@ -17,6 +21,7 @@ struct fd2
     double value;
     double der1;
     double der2;
+    bool fin;
 };
 
 struct nrvar
@@ -25,23 +30,28 @@ struct nrvar
     double max;
     double der1;
     double der2;
+    bool fin;
 };
 nrvar nrvarf(double x,function <fd2(double)> f)
 {
     fd2 resultf;
     nrvar result;
     resultf=f(x);
+    result.fin=resultf.fin;
     result.locmax=x;
-    result.max=resultf.value;
-    result.der1=resultf.der1;
-    result.der2=resultf.der2;
+    if (resultf.fin)
+    {
+        result.max=resultf.value;
+        result.der1=resultf.der1;
+        result.der2=resultf.der2;
+    }
     return result;
 }
 double davidon(double,double,double,double,double,double);
 double newton(double,double,double);
 double modit(double,double,double,double,double);
 void rebound(double,double,double &,double &);
-nrvar nr(const int maxit,const double tol,const double start,
+nrvar nrb(const int maxit,const double tol,const double start,
          const double stepmax,const double b,
          function<fd2(double)> f)
 {
@@ -59,7 +69,8 @@ nrvar nr(const int maxit,const double tol,const double start,
     
 // varx is current location, function, first derivative, and second derivative.
     varx=nrvarf(x,f);
-// Stop if derivative is 0.
+// Stop if derivative is 0 or starting value is inadmissible.
+    if(!varx.fin) return varx;
     if(varx.der1==0.0) return varx;
     rebound(x,varx.der1,lower,upper);
 // Up to maxit iterations.
@@ -70,14 +81,16 @@ nrvar nr(const int maxit,const double tol,const double start,
 
         y=modit(x,y,stepmax,lower,upper);
 // New bounds.
-        
-
-
 // Get new function value, new derivative, and new second derivative.
         vary=nrvarf(y,f);
-// Stop for 0 derivative.
+        while(!vary.fin)
+        {
+            y=0.5*(x+y);
+            vary=nrvarf(y,f);
+        }
         if(vary.der1==0.0)return vary;
         rebound(y,vary.der1,lower,upper);
+        
 
 // Look for adequate progress.
         d=y-x;
