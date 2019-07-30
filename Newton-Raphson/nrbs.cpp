@@ -15,7 +15,7 @@
 #include<cmath>
 #include<float.h>
 using namespace std;
-struct fd2
+struct fd2b
 {
     double value;
     double der1;
@@ -23,7 +23,7 @@ struct fd2
     bool fin;
 };
 
-struct nrvar
+struct nrvarb
 {
     double locmax;
     double max;
@@ -31,10 +31,10 @@ struct nrvar
     double der2;
     bool fin;
 };
-nrvar nrvarf(double x,function <fd2(double)> f)
+nrvarb nrvarbf(double x,function <fd2b(double)> f)
 {
-    fd2 resultf;
-    nrvar result;
+    fd2b resultf;
+    nrvarb result;
     resultf=f(x);
     result.fin=resultf.fin;
     result.locmax=x;
@@ -50,13 +50,13 @@ double davidon(double,double,double,double,double,double);
 double newton(double,double,double);
 double modit(double,double,double,double,double);
 void rebound(double,double,double &,double &);
-nrvar nrbs(const int maxit,const double tol,const double start,
+nrvarb nrbs(const int maxit,const double tol,const double start,
          const double stepmax,const double b,
-         function<fd2(double)> f)
+         function<fd2b(double)> f)
 {
     double d,deltaf,lower,upper,x,y;
     int i;
-    nrvar varx,vary;
+    nrvarb varx,vary;
 // lower is lower bound for location of maximum if only one maximum exists.
     lower=-DBL_MAX;
 // upper is upper bound for location of maximum if only one maximum exists.
@@ -64,7 +64,7 @@ nrvar nrbs(const int maxit,const double tol,const double start,
 // x is old value.
     x=start;
 // varx is current location, function, first derivative, and second derivative.
-    varx=nrvarf(x,f);
+    varx=nrvarbf(x,f);
 // Check for admissible starting value;
     if(!varx.fin) return varx;
 // Stop if derivative is 0.
@@ -90,11 +90,11 @@ nrvar nrbs(const int maxit,const double tol,const double start,
 // Get new function value, new derivative, and new second derivative.
 
         
-        vary=nrvarf(y,f);
+        vary=nrvarbf(y,f);
         while(!vary.fin)
         {
             y=0.5*(x+y);
-            vary=nrvarf(y,f);
+            vary=nrvarbf(y,f);
         }
 // Stop for 0 derivative.
         if(vary.der1==0.0) return vary;
@@ -115,7 +115,7 @@ nrvar nrbs(const int maxit,const double tol,const double start,
                 
 // Cubic interpolation.
                 y=davidon(x,y,varx.locmax,vary.locmax,varx.der1,vary.der1);
-                vary=nrvarf(y,f);
+                vary=nrvarbf(y,f);
                 if(vary.der1==0.0)return vary;
                 rebound(y,vary.der1,lower,upper);
             }
