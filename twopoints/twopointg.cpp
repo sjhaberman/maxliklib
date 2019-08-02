@@ -17,7 +17,7 @@ double davidon(double,double,double,double,double,double);
 struct fd1v
 {
     double value;
-    double grad;
+    vec grad;
 };
     
 struct twopointgvar
@@ -26,7 +26,16 @@ struct twopointgvar
     double max;
     vec grad;
 };
-twopointgvar twopointgvarf(vec,function <fd1v(vec)>);
+twopointgvar twopointgvarf(vec x,function<fd1v(vec)> f)
+{
+    fd1v resultf;
+    twopointgvar result;
+    resultf=f(x);
+    result.locmax=x;
+    result.max=resultf.value;
+    result.grad=resultf.grad;
+    return result;
+};
 double davidon(double,double,double,double,double,double);
 double modit(double,double,double,double,double);
 void rebound(double,double,double &,double &);

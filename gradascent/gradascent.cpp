@@ -29,16 +29,7 @@ struct twopointgvar
     double max;
     vec grad;
 };
-twopointgvar twopointgvarf(vec x,function<fd1v(vec)> f)
-{
-    fd1v resultf;
-    twopointgvar result;
-    resultf=f(x);
-    result.locmax=x;
-    result.max=resultf.value;
-    result.grad=resultf.grad;
-    return result;
-};
+twopointgvar twopointgvarf(vec,function<fd1v(vec)>);
 
 twopointgvar twopointg(const int,
             vec,twopointgvar,const double,const double,
