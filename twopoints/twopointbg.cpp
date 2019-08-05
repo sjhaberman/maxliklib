@@ -1,7 +1,8 @@
-//Two-point algorithm for function maximization along line.
+//Two-point algorithm for function maximization along a nonempty
+//open line interval.
 //Function and continuous gradient are f.value and f.grad.
 //It is assumed that f.value approaches negative infinity
-//if the absolute value of the argument approaches infinity.
+//if the argument approaches the upper or lower bounds of the line interval.
 //It is also assumed that f.value has a unique critical point.
 //Maximum number of iterations is maxit.
 //The largest permitted step is stepmax>0.
@@ -12,41 +13,44 @@ using namespace arma;
 using namespace std;
 double davidon(double,double,double,double,double,double);
 
-struct fd1v
+struct fd1bv
 {
     double value;
     vec grad;
+    bool fin;
 };
     
-struct twopointgvar
+struct twopointgvarb
 {
     vec locmax;
     double max;
     vec grad;
+    bool fin;
 };
-twopointgvar twopointgvarf(vec x,function<fd1v(vec)> f)
+twopointgvarb twopointgvarbf(vec x,function <fd1bv(vec)>f)
 {
-    fd1v resultf;
-    twopointgvar result;
+    fd1bv resultf;
+    twopointgvarb result;
     resultf=f(x);
     result.locmax=x;
-    result.max=resultf.value;
-    result.grad=resultf.grad;
+    result.fin=resultf.fin;
+    if(result.fin)
+    {
+        result.max=resultf.value;
+        result.grad=resultf.grad;
+    }
     return result;
 };
 double davidon(double,double,double,double,double,double);
 double modit(double,double,double,double,double);
 void rebound(double,double,double &,double &);
-twopointgvar twopointg(const int maxits,vec v,
-                         twopointgvar varx,const double stepmax,const double b,
-                         function<fd1v(vec)> f)
+twopointgvarb twopointbg(const int maxits,vec v,
+                         twopointgvarb varx,const double stepmax,const double b,
+                         function<fd1bv(vec)> f)
 {
     double d,diru,dirx,diry,dirz,fu,fx,fy,fz,lower,upper,uu,xx,yy,zz;
     int i;
-    twopointgvar varu,vary,varz;
-// See if nothing to be done.
-    dirz=dot(v,varx.grad);
-    if(dirz==0.0) return varx;
+    twopointgvarb varu,vary,varz;
 // x is oldest value.  y is next value.
     zz=0.0;
     yy=1.0;
@@ -55,15 +59,28 @@ twopointgvar twopointg(const int maxits,vec v,
 // upper is upper bound for location of maximum.
     upper=DBL_MAX;
     
-// Need fx for f.value(x) and dirx for d.
-    fx=varx.max;
-// Current location.
-    varz=varx;
-   
-    fz=fx;
     
-    vary=twopointgvarf(varx.locmax+v,f);
+// Need fx for f.value(x) and dirx for d.
+    if(!varx.fin)return varx;
+    
+    
+    
+// Current location.
+    
+    dirz=dot(v,varx.grad);
+    if(dirz==0.0) return varx;
+    fx=varx.max;
+    varz=varx;
+    fz=fx;
+    vary=twopointgvarbf(varx.locmax+v,f);
+    
+    while(!vary.fin)
+    {
+        yy=0.5*yy;
+        vary=twopointgvarbf(varx.locmax+yy*v,f);
+    }
     fy=vary.max;
+    
     diry=dot(v,vary.grad);
     
     if(diry==0.0) return vary;
@@ -94,7 +111,12 @@ twopointgvar twopointg(const int maxits,vec v,
         uu=davidon(zz,yy,fz,fy,dirz,diry);
 // Truncate if needed.
         uu=modit(yy,uu,stepmax,lower,upper);
-        varu=twopointgvarf(varx.locmax+uu*v,f);
+        varu=twopointgvarbf(varx.locmax+uu*v,f);
+        while(!varu.fin)
+        {
+            uu=0.5*(uu+yy);
+            varu=twopointgvarbf(varx.locmax+uu*v,f);
+        }
 // Update limits.
         fu=varu.max;
         diru=dot(v,varu.grad);
