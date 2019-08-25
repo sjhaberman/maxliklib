@@ -23,7 +23,7 @@ struct fd2v
 extern vec global_w;
 extern ivec global_y;
 extern mat global_x;
-
+extern vec global_offset;
 fd2 quantal(int,double);
 fd2v quantallik(vec beta)
 {
@@ -38,7 +38,7 @@ fd2v quantallik(vec beta)
     results.hess=zeros(beta.n_elem,beta.n_elem);
     for (i=0;i<global_x.n_rows;i++)
     {
-        lambda=dot(beta,global_x.row(i));
+        lambda=global_offset(i)+dot(beta,global_x.row(i));
         obsresults=quantal(global_y(i),lambda);
         results.value=results.value+global_w(i)*obsresults.value;
         results.grad=results.grad+global_w(i)*obsresults.der1*trans(global_x.row(i));

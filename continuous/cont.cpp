@@ -10,7 +10,7 @@ struct fd2bv
     mat hess;
     bool fin;
 };
-
+fd2bv gumbel(double,vec);
 fd2bv logistic(double,vec);
 
 fd2bv normal(double,vec);
@@ -19,6 +19,7 @@ fd2bv cont(double y,vec beta)
 {
     switch (choice)
     {
+        case 'G': return gumbel(y,beta);
         case 'L': return logistic(y,beta);
         
         default: return normal(y,beta);

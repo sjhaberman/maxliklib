@@ -16,6 +16,7 @@ struct fd2v
 extern mat global_x [ ];
 extern ivec global_y;
 extern vec global_w;
+extern vec global_offset [];
 
 fd2v multquantal(int,vec);
 fd2v multquantallik(vec beta)
@@ -35,7 +36,7 @@ fd2v multquantallik(vec beta)
     
     for (i=0;i<global_w.n_elem;i++)
     {
-        lambda=global_x[i]*beta;
+        lambda=global_offset[i]+global_x[i]*beta;
         
         obsresults=multquantal(global_y(i),lambda);
         results.value=results.value+global_w(i)*obsresults.value;
