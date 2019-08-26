@@ -1,7 +1,8 @@
 //Log likelihood component and its gradient and hessian matrix
 //for location and scale model for base distribution with log-concave density with
 //negative second derivative of the logarithm f of the density.  Model has
-//response y = beta(1)*z+beta(0), where z has the standard version of the distribution.
+//density f(y) = g(beta(1)*y+beta(0))beta(1), where g is the density of the
+//standard version of the distribution.
 //The convention is used that beta(1)>0.
 
 #include<armadillo>
@@ -34,7 +35,7 @@ fd2bv locationscale(double y,vec beta,function <fd2(double)> f)
     }
     else
     {
-        z=beta(1)*y+beta(0);
+        z=beta(0)+beta(1)*y;
         result=f(z);
         
         results.fin=true;
