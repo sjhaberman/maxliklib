@@ -1,4 +1,4 @@
-//Log likelihood component, derivative, and second derivative
+//Log likelihood component, gradient, and Hessian
 //for cumulative complementary log-log model with response y and parameter
 //vector beta.
 #include<armadillo>

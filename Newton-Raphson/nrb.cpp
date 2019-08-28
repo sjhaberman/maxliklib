@@ -95,7 +95,7 @@ nrvarb nrb(const int maxit,const double tol,const double start,
 // Look for adequate progress.
         d=y-x;
         deltaf=vary.max-varx.max;
-        if(deltaf>=b*fabs(d*vary.der1))
+        if(d!=0.0&&deltaf>=b*fabs(d*vary.der1))
         {
 // Check for convergence.
             if(deltaf<tol) return vary;

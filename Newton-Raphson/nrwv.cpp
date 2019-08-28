@@ -84,7 +84,7 @@ nrvvar nrwv(const int maxit,
 // Look for adequate progress.
         
         
-        if(fy-fx>=b*yy*fabs(diry)) return vary;
+        if(yy!=0.0&&fy-fx>=b*yy*fabs(diry)) return vary;
         
 // Treat inadequate progress.
         

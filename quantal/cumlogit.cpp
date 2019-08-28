@@ -1,5 +1,5 @@
-//Log likelihood component, derivative, and second derivative
-//for logit model with response y and parameter beta.
+//Log likelihood component, gradient, and Hessian
+//for cumulative logit model with response y and parameter beta.
 #include<armadillo>
 using namespace arma;
 

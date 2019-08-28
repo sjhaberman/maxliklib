@@ -74,13 +74,14 @@ nrvvarb nrbwv(const int maxit,
     {
 // The proposed step.  Keep within range.
         yy=newton(zz,dirz,dir2z);
-
+        
         yy=modit(zz,yy,stepmax,lower,upper);
 // Get new function value, new derivative, and new second derivative.
         
         vary=nrvvarbf(varx.locmax+yy*v,f);
         while(!vary.fin)
         {
+            
             yy=0.5*yy;
             vary=nrvvarbf(varx.locmax+yy*v,f);
         }
@@ -90,11 +91,11 @@ nrvvarb nrbwv(const int maxit,
 // Stop for 0 derivative.
         if(diry==0.0)return vary;
         rebound(yy,diry,lower,upper);
-
+        
 // Look for adequate progress.
         
         
-        if(fy-fx>=b*yy*fabs(diry)) return vary;
+        if(yy!=0.0&&fy-fx>=b*yy*fabs(diry)) return vary;
         
 // Treat inadequate progress.
         
@@ -106,9 +107,10 @@ nrvvarb nrbwv(const int maxit,
             yy=davidon(zz,yy,fz,fy,dirz,diry);
             vary=nrvvarbf(varx.locmax+yy*v,f);
             diry=dot(v,vary.grad);
+            dir2y=dot(v,vary.hess*v);
             if(diry==0.0)return vary;
             rebound(yy,diry,lower,upper);
-
+            
         }
 //Update for next cycle.
        
