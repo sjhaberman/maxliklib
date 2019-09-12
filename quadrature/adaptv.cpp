@@ -17,7 +17,7 @@ pwv adaptv(vec loc,mat lt,pwv pws)
     int i;
     vec even;
     pwv results=pws;
-    if(min(diagvec(pws.lt))<=0.0)return results;
+    if(min(diagvec(lt))<=0.0)return results;
     scale=prod(diagvec(lt));
     for(i=0;i<results.points.n_cols;i++)
     {
