@@ -36,14 +36,14 @@ fd2v quantallik(vec beta)
     results.grad=zeros(beta.n_elem);
     
     results.hess=zeros(beta.n_elem,beta.n_elem);
-    for (i=0;i<global_x.n_rows;i++)
+    for (i=0;i<global_x.n_cols;i++)
     {
-        lambda=global_offset(i)+dot(beta,global_x.row(i));
+        lambda=global_offset(i)+dot(beta,global_x.col(i));
         obsresults=quantal(global_y(i),lambda);
         results.value=results.value+global_w(i)*obsresults.value;
-        results.grad=results.grad+global_w(i)*obsresults.der1*trans(global_x.row(i));
+        results.grad=results.grad+global_w(i)*obsresults.der1*global_x.col(i);
         results.hess=results.hess+
-            global_w(i)*obsresults.der2*trans(global_x.row(i))*global_x.row(i);
+            global_w(i)*obsresults.der2*global_x.col(i)*trans(global_x.col(i));
         
     }
     

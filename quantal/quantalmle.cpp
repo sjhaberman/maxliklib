@@ -1,4 +1,4 @@
-//
+
 //Find maximum likelihood estimates for quantal response model
 //based on one parameter for a response.
 //Maximum number of iterations is maxit.
