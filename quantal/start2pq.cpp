@@ -1,5 +1,5 @@
 //Find starting values for maximum likelilood for 2-parameter model
-//for binary responses with a latent
+//for binary or Poisson responses with a latent
 //variable with a standard normal distribution and no covariates.
 
 #include<armadillo>
