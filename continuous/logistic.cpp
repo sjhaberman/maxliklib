@@ -1,5 +1,5 @@
 //Log likelihood component and its gradient and hessian matrix
-//for normal model with response y and parameter vector beta
+//for logistic model with response y and parameter vector beta
 //with elements beta(1) and beta(2)>0.
 
 #include<armadillo>
