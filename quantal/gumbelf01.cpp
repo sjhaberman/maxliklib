@@ -10,7 +10,7 @@ struct fd1
 
 
 
-fd1 gumbelf011(double beta)
+fd1 gumbelf01(double beta)
 {
 
     double p;
