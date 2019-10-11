@@ -18,8 +18,8 @@ extern ivec global_y;
 extern vec global_w;
 extern vec global_offset [];
 
-fd1v multquantal(int,vec);
-fd1v multquantallik(vec beta)
+fd1v multquantal1(int,vec);
+fd1v multquantallik1(vec beta)
 {
     fd1v results;
     fd1v obsresults;
@@ -38,7 +38,7 @@ fd1v multquantallik(vec beta)
     {
         lambda=global_offset[i]+global_x[i]*beta;
         
-        obsresults=multquantal(global_y(i),lambda);
+        obsresults=multquantal1(global_y(i),lambda);
         results.value=results.value+global_w(i)*obsresults.value;
         results.grad=results.grad+global_w(i)*trans(global_x[i])*obsresults.grad;
         
