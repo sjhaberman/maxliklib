@@ -18,8 +18,8 @@ extern ivec global_y [ ];
 extern vec global_w;
 extern vec global_offset [ ];
 
-fd1v ranklogit(ivec,vec);
-fd1v ranklogitlik(vec beta)
+fd1v ranklogit1(ivec,vec);
+fd1v ranklogitlik1(vec beta)
 {
     fd1v results;
     fd1v obsresults;
@@ -37,7 +37,7 @@ fd1v ranklogitlik(vec beta)
     {
         lambda=global_offset[i]+global_x[i]*beta;
         
-        obsresults=ranklogit(global_y[i],lambda);
+        obsresults=ranklogit1(global_y[i],lambda);
         results.value=results.value+global_w(i)*obsresults.value;
         results.grad=results.grad+global_w(i)*trans(global_x[i])*obsresults.grad;
         

@@ -13,8 +13,8 @@ extern ivec global_y [ ];
 extern vec global_w;
 extern vec global_offset [ ];
 
-double ranklogit(ivec,vec);
-double ranklogitlik(vec beta)
+double ranklogit0(ivec,vec);
+double ranklogitlik0(vec beta)
 {
     double results;
     double obsresults;
@@ -30,7 +30,7 @@ double ranklogitlik(vec beta)
     {
         lambda=global_offset[i]+global_x[i]*beta;
         
-        obsresults=ranklogit(global_y[i],lambda);
+        obsresults=ranklogit0(global_y[i],lambda);
         results=results+global_w(i)*obsresults;
         
         
