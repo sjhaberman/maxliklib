@@ -19,7 +19,8 @@ struct fd2v
 };
 
 
-
+extern char choices[];
+extern char choice;
 extern vec global_w;
 extern ivec global_y;
 extern mat global_x;
@@ -39,6 +40,7 @@ fd2v quantallik(vec beta)
     for (i=0;i<global_x.n_cols;i++)
     {
         lambda=global_offset(i)+dot(beta,global_x.col(i));
+        choice=choices[i];
         obsresults=quantal(global_y(i),lambda);
         results.value=results.value+global_w(i)*obsresults.value;
         results.grad=results.grad+global_w(i)*obsresults.der1*global_x.col(i);
