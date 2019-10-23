@@ -6,7 +6,8 @@
 #include<armadillo>
 using namespace arma;
 
-
+extern char choices[];
+extern char choice;
 
 extern mat global_x [ ];
 extern ivec global_y;
@@ -32,7 +33,7 @@ double multquantallik0(vec beta)
     for (i=0;i<global_w.n_elem;i++)
     {
         lambda=global_offset[i]+global_x[i]*beta;
-        
+        choice=choices[i];
         obsresults=multquantal0(global_y(i),lambda);
         results=results+global_w(i)*obsresults;
         
