@@ -38,7 +38,7 @@ nrvar nrvarf(double x,function <fd2(double)> f)
     return result;
 }
 double davidon(double,double,double,double,double,double);
-double newton(double,double,double);
+double newtons(double,double,double);
 double modit(double,double,double,double,double);
 void rebound(double,double,double &,double &);
 nrvar nrs(const int maxit,const double tol,const double start,
@@ -63,14 +63,8 @@ nrvar nrs(const int maxit,const double tol,const double start,
     for(i=0;i<maxit;i++)
     {
 // The proposed new value.
-        if(varx.der2<0.0)
-        {
-            y=newton(x,varx.der1,varx.der2);
-        }
-        else
-        {
-            y=x-varx.der1;
-        }
+        y=newtons(x,varx.der1,varx.der2);
+        
 //Truncate if needed.
         y=modit(x,y,stepmax,lower,upper);
         

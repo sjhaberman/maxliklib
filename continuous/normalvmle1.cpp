@@ -11,34 +11,34 @@
 #include<armadillo>
 using namespace arma;
 using namespace std;
-struct nrvvarb
+struct twopointgvarb
 {
     vec locmax;
     double max;
     vec grad;
-    mat hess;
+    
     bool fin;
 };
-struct mlevarb
+struct mlevar1b
 {
     double maxloglik;
     vec mle;
-    mat hess;
+   
     bool fin;
 };
-struct fd2bv
+struct fd1bv
 {
     double value;
     vec grad;
-    mat hess;
+    
     bool fin;
 };
 
 
-fd2bv normalvlik(vec beta);
-nrvvarb nrbv(int,int,double,vec,double,double,function<fd2bv(vec)>);
+fd1bv normalvlik1(vec beta);
+twopointgvarb gradascentb(int,int,double,vec,double,double,function<fd1bv(vec)>);
 
-mlevarb normalvmle(const int maxit,
+mlevar1b normalvmle1(const int maxit,
                 const int maxits,
                 const double tol,
                 const vec start,
@@ -46,15 +46,15 @@ mlevarb normalvmle(const int maxit,
                 const double b
                 )
 {
-    nrvvarb varx;
-    mlevarb results;
-    varx=nrbv(maxit,maxits,tol,start,stepmax,b,normalvlik);
+    twopointgvarb varx;
+    mlevar1b results;
+    varx=gradascentb(maxit,maxits,tol,start,stepmax,b,normalvlik1);
     results.fin=varx.fin;
     if(varx.fin)
     {
         results.maxloglik=varx.max;
         results.mle=varx.locmax;
-        results.hess=varx.hess;
+        
     }
     return results;
 }
