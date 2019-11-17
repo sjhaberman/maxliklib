@@ -16,15 +16,15 @@ fd2 cloglog(int y,double beta)
 //Probability of response of 1.
     double p,q,r;
     fd2 results;
-    p=1.0-exp(-exp(beta));
-    q=1.0-p;
+    q=exp(-exp(beta));
+    p=1.0-q;
     
     if(y==1)
     {
         r=exp(beta)/p;
         results.value=log(p);
-        results.der1=q/p;
-        results.der2=q*r*(1.0-r);
+        results.der1=r*q;
+        results.der2=r*(q-r);
     }
     else
     {

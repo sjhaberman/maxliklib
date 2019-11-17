@@ -9,21 +9,21 @@
 double cloglog0(int y,double beta)
 {
 //Probability of response of 1.
-    double p,q,r;
+    double q;
     double results;
-    p=1.0-exp(-exp(beta));
+    q=exp(-exp(beta));
  
     
     if(y==1)
     {
         
-        results=log(p);
+        results=log(1.0-q);
         
        
     }
     else
     {
-        q=1.0-p;
+        
         results=log(q);
         
         
