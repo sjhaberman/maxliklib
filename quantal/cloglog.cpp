@@ -24,7 +24,7 @@ fd2 cloglog(int y,double beta)
         r=exp(beta)/p;
         results.value=log(p);
         results.der1=r*q;
-        results.der2=r*(q-r);
+        results.der2=r*q*(1.0-r);
     }
     else
     {

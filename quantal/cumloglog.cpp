@@ -32,7 +32,7 @@ fd2v cumloglog(int y,vec beta)
             r=exp(beta(i))/p;
             results.value=results.value+log(p);
             results.grad(i)=r*q;
-            results.hess(i,i)=r*(q-r);
+            results.hess(i,i)=r*q*(1.0-r);
         }
         else
         {
