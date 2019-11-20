@@ -2,6 +2,7 @@
 //for rank model of ranklogit.cpp with array of response vectors global_y and
 //predictor array of matrices global_x.
 //Weight vector global_w is used.
+//The offset vectors are in global_offset.
 
 #include<armadillo>
 using namespace arma;
