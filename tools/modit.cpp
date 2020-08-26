@@ -1,19 +1,23 @@
 //Truncate iteration
-//Old point is x0. New point is x1, stepmax is maximum step
+//Old point is alpha0. New point is alpha1, stepmax is maximum step
 //size. Lower bound is lower and upper bound is upper.
-#include<cmath>
-double modit(double x0,double x1,double stepmax,double lower,double upper)
+//eta<1 is used to limit changes.
+#include<armadillo>
+using namespace std;
+using namespace arma;
+double modit(const double &eta,const double &alpha0,const double &alpha1,
+             const double &stepmax,const double &lower,const double &upper)
 {
-    double y;
-    y=x1;
-    y=fmin(x0+stepmax,y);
-    y=fmin(upper,y);
-    y=fmax(x0-stepmax,y);
-    y=fmax(lower,y);
-    
-   
-    return y;
-    
+    double result;
+    if(alpha0<alpha1)
+    {
+        result=fmin(alpha0+stepmax,alpha1);
+        if(isfinite(upper))result=fmin(result,alpha0+eta*(upper-alpha0));
+    }
+    else
+    {
+        result=fmax(alpha0-stepmax,alpha1);
+        if(isfinite(lower))result=fmax(result,alpha0+eta*(lower-alpha0));
+    }
+    return result;
 }
-
-

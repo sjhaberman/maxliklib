@@ -1,81 +1,86 @@
-//Newton-Raphson algorithm for function maximization of a continuously
-//differentiable real function of real vectors of dimension p on a
+//Conjugate gradient algorithm for function maximization of a continuously
+//differentiable real function f.value of real vectors of dimension p on a
 //nonempty open convex set O of p-dimensional vectors.  The gradient of f.value
-//is f.grad.  The Hessian matrix is f.hess.
+//is f.grad.
 //The strict pseudoconcavity condition described in the document
 //convergence.pdf is assumed to apply for the real number a.  For the starting
 //vector start, it is assumed that the value of f.value at start exceeds a.
 //Parameters used are defined in gaparams.
 //The maximum number of main iterations is gaparams.maxit.
 //The maximum number of secondary iterations per main iteration
-//is gaparams.maxits.
+//is gaparams.maxits. The double function on O used for step sizes for
+//numerical differentiation is gaparams.c.
 //The maximum fraction of a step toward a boundary is
 //gaparams.eta.
 //For secondary iterations, the improvement check
 //is gaparams.gamma1<1.
-//The cosine check  is gaparams.gamma2.
+//The cosine check is gaparams.gamma2<1.
 //The largest permitted step length is gaparams.kappa>0.
 //If a main iteration leads to a change of the function f less
 //than gaparams.tol, then iterations cease.
 #include<armadillo>
 using namespace std;
 using namespace arma;
-struct f2v
+struct f1v
 {
     double value;
     vec grad;
-    mat hess;
 };
-struct maxf2v
+struct maxf1v
 {
     vec locmax;
     double max;
     vec grad;
-    mat hess;
 };
-struct paramnr
+struct paramga
 {
     int maxit;
     int maxits;
+    function<double(vec)> c;
     double eta;
     double gamma1;
     double gamma2;
     double kappa;
     double tol;
 };
-maxf2v maxf2vvar(const vec & y,const f2v &f2y);
-maxf2v maxlin2(const paramnr &nrparams,const vec & v,maxf2v & vary0,const function <f2v(vec)> f);
-maxf2v nrv(const paramnr&nrparams,const vec &start,function<f2v(vec)> f)
+maxf1v maxf1vvar(const vec &y,const f1v &fy);
+maxf1v maxlin(const paramga &gaparams,const vec & v,maxf1v & vary0,const function <f1v(vec)> f);
+maxf1v conjgrad(const paramga &gaparams,const vec &start,const function<f1v(vec)> f)
 {
-    f2v fy0;
+    double tau;
+    f1v fy0;
     int i;
-    maxf2v vary0,vary1;
-    vec v;
+    maxf1v vary0,vary1;
+    vec v,v1,v2;
 // Function settings at start.
     fy0=f(start);
-    vary0=maxf2vvar(start,fy0);
+    vary0=maxf1vvar(start,fy0);
 // Return if starting impossible.
     if(isnan(vary0.max)) return vary0;
 // Iterations.
-    for(i=0;i<nrparams.maxit;i++)
+    for(i=0;i<gaparams.maxit;i++)
     {
 // Stop if gradient of zero.
-        if(!any(vary0.grad)) return vary0;
-// Find Newton-Raphson step if possible.
-        if ((-vary0.hess).is_sympd())
+        v1=vary0.grad;
+        if(!any(v1)) return vary0;
+        if(i>0)
         {
-            v=solve(-vary0.hess,vary0.grad);
-            if(dot(v,vary0.grad)<nrparams.gamma1*norm(v,2)*norm(vary0.grad,2))v=vary0.grad;
+            tau=dot(v1-v2,v1)/dot(v1,v1);
+            v=v1+tau*v;
+// Check for acceptable direction.
+            if(dot(v,v1)<gaparams.gamma2*norm(v,2)*norm(v1,2))v=v1;
         }
         else
         {
-            v=vary0.grad;
+            v=v1;
         }
 // Line search.
-        vary1 = maxlin2(nrparams,v,vary0,f);
+        vary1 = maxlin(gaparams,v,vary0,f);
 //  Convergence check
-        if(vary1.max<vary0.max+nrparams.tol) return vary1;
+        if(vary1.max<vary0.max+gaparams.tol) return vary1;
         vary0=vary1;
+        v2=v1;
     }
     return vary1;
 }
+

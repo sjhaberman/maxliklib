@@ -1,61 +1,75 @@
 //Lord-Wingersky algorithm for compound binomial distribution.
-
-
-
-
+//c>0.0 is the tolerance.
+//p is the vector of probabilities of length n between 0 and 1.
+//The distribution of the sum S of X(i), i from 0 to n-1, is sought, where
+//the X(i) are mutuall independent Bernoulli random variables such that X(i)
+//is 1 with probability p(i).  The returned vector lw has elements from 0 to n,
+//and lw(i) is the probability that S=i for i from 0 to n.
 #include<armadillo>
-
 using namespace arma;
-vec lw(vec p)
+vec lw(double & c,vec & p)
 {
-    double small=1.0e-300;
-    double p1,p2,p3;
-    int bottom,i,it,n,top;
-   
-    
-   
-    vec dist(p.n_elem+1);
+    double d,sumd,xn;
+    int bottom,bottom1,i,it,n,top,top1;
+    vec dist(p.n_elem+1),pp(2);
     dist.zeros();
-    dist(0)=1.0;
+    dist(0)=1.0-p(0);
+    dist(1)=p(0);
     n=p.n_elem;
     bottom=0;
-    top=0;
-    for(it=0;it<n;it++)
+    top=1;
+    for(it=1;it<n;it++)
     {
-        if(dist(top)>0.0)
+        xn=(double) it;
+        d=xn*c/(2.0*xn+1.0);
+        bottom1=bottom;
+        top1=top+1;
+        pp(0)=1.0-p(it);
+        pp(1)=p(it);
+        dist.subvec(bottom1,top1)=conv(dist.subvec(bottom,top),pp);
+        sumd=0.0;
+        for(i=bottom1;i<top;i++)
         {
-            top=it+1;
-        }
-        for(i=bottom;i<=top;i++)
-        {
-            if(i>0)
+            sumd=sumd+dist(i);
+            if(i==bottom1&&sumd>d)
             {
-                p1=p2;
+                bottom=bottom1;
+                break;
             }
             else
             {
-                p1=0.0;
+                if(sumd>d)
+                {
+                    dist.subvec(bottom,i-1)=zeros(i-bottom);
+                    bottom=i;
+                    break;
+                }
             }
-            if(i<top)
+        }
+        sumd=0.0;
+        for(i=top1;i>bottom;i--)
+        {
+            sumd=sumd+dist(i);
+            if(i==top1&&sumd>d)
             {
-                p2=dist(i);
+                top=top1;
+                break;
             }
             else
             {
-                p2=0.0;
+                if(sumd>d)
+                {
+                    dist.subvec(i+1,top1)=zeros(top1-i);
+                    top=i;
+                    break;
+                }
             }
-            
-            p3=p2*(1-p(it))+p1*p(it);
-            if(p3<small)p3=0.0;
-            dist(i)=p3;
         }
-        while(dist(bottom)==0.0)
-        {
-            bottom=bottom+1;
-        }
+    }
+    if(bottom>0||top<n)
+    {
+        sumd=sum(dist.subvec(bottom,top));
+        dist.subvec(bottom,top)=dist.subvec(bottom,top)/sumd;
     }
     return dist;
 }
-            
-            
-            
