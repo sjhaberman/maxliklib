@@ -1,9 +1,8 @@
-//Compute Hermite polynomial of given order for specified point.
-//Order is n and point is x.
+//Compute Hermite polynomials up to order n for point x.
 #include<armadillo>
 using namespace std;
 using namespace arma;
-double hermpoly(int n,double x)
+vec hermpoly(int & n,double & x)
 {
     int i;
     double xn;
@@ -16,7 +15,7 @@ double hermpoly(int n,double x)
             xn=(double)i;
             h(i+1)=x*h(i)-xn*h(i-1);
         }
-    return h(n);
+    return h;
 }
             
             

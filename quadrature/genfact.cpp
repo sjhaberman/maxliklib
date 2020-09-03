@@ -2,10 +2,7 @@
 #include<armadillo>
 using namespace arma;
 using namespace std;
-
-
 imat genfact(ivec sizes)
-
 {
     int i,j,n;
     imat results;
@@ -28,9 +25,6 @@ imat genfact(ivec sizes)
            }
         }
     }
-    
-    
-    
     return results;
 }
 

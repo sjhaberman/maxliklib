@@ -3,7 +3,7 @@
 #include<armadillo>
 using namespace std;
 using namespace arma;
-vec hermcoeff(int n)
+vec hermcoeff(int & n)
 {
     double x;
     int i,k;    

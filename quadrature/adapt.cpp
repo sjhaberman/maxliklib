@@ -8,16 +8,11 @@ struct pw
     vec points;
     vec weights;
 };
-
-pw adapt(double loc,double scale,pw pws)
-
+pw adapt(double & loc,double & scale,pw & pws)
 {
-    
     pw results=pws;
     results.points=loc+scale*pws.points;
     results.weights=pws.weights/scale;
-    
-    
     return results;
 }
 
