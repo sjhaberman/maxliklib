@@ -117,7 +117,7 @@ maxf1v maxlin(const paramga & gaparams,const vec &v,maxf1v & vary0,function<f1v(
         y2=y0+alpha2*v;
         fy2=f(y2);
         result=maxf1vvar(y2,fy2);
-        if(isfinite(result.max))
+        if(isnan(result.max))
         {
             der2=dot(v,result.grad);
             if(der2==0.0)return result;
@@ -131,7 +131,7 @@ maxf1v maxlin(const paramga & gaparams,const vec &v,maxf1v & vary0,function<f1v(
             y2=y0+alpha2*v;
             fy2=f(y2);
             result=maxf1vvar(y2,fy2);
-            if(isfinite(result.max))
+            if(isnan(result.max))
             {
                 der2=dot(v,result.grad);
                 if(der2==0.0)return result;

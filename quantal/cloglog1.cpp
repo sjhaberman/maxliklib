@@ -1,36 +1,31 @@
 //Log likelihood component and derivative
 //for complementary log-log model with response y and parameter beta.
-#include<cmath>
-
-struct fd1
+#include<armadillo>
+using namespace arma;
+struct f1v
 {
     double value;
-    double der1;
-    
+    vec grad;
 };
-
-
-
-fd1 cloglog1(int y,double beta)
+f1v cloglog1(int y,vec beta)
 {
 //Probability of response of 1.
     double p,q,r;
-    fd1 results;
-    q=exp(-exp(beta));
+    f1v results;
+    results.grad.set_size(1);
+    q=exp(-exp(beta(0)));
     p=1.0-q;
     
     if(y==1)
     {
-        r=exp(beta)/p;
+        r=exp(beta(0))/p;
         results.value=log(p);
-        results.der1=r*q;
-       
+        results.grad(0)=r*q;
     }
     else
     {
         results.value=log(q);
-        results.der1=results.value;
-        
+        results.grad(0)=results.value;
     }
     return results;
 }

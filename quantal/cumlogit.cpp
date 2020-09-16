@@ -2,22 +2,17 @@
 //for cumulative logit model with response y and parameter beta.
 #include<armadillo>
 using namespace arma;
-
-struct fd2v
+struct f2v
 {
     double value;
     vec grad;
     mat hess;
 };
-
-
-fd2v cumlogit(int y,vec beta)
+f2v cumlogit(int y,vec beta)
 {
-
     double p,q;
     int i;
-    fd2v results;
-    
+    f2v results;
     results.value=0.0;
     results.grad=zeros(beta.n_elem);
     results.hess=zeros(beta.n_elem,beta.n_elem);
@@ -36,10 +31,8 @@ fd2v cumlogit(int y,vec beta)
         {
             results.value=results.value+log(q);
             results.grad(i)=-p;
-            
             break;
         }
-    }
-    
+    }    
     return results;
 }

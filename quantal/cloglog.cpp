@@ -1,36 +1,35 @@
-//Log likelihood component, derivative, and second derivative
-//for complementary log-log model with response y and parameter beta.
-#include<cmath>
-
-struct fd2
+//Log likelihood component, gradient, and Hessian matrix
+//for complementary log-log model with response y and one-dimensional
+//parameter beta.
+#include<armadillo>
+using namespace arma;
+struct f2v
 {
     double value;
-    double der1;
-    double der2;
+    vec grad;
+    mat hess;
 };
-
-
-
-fd2 cloglog(int y,double beta)
+f2v cloglog(int y,vec beta)
 {
 //Probability of response of 1.
     double p,q,r;
-    fd2 results;
-    q=exp(-exp(beta));
+    f2v results;
+    results.grad.set_size(1);
+    results.hess.set_size(1,1);
+    q=exp(-exp(beta(0)));
     p=1.0-q;
-    
     if(y==1)
     {
-        r=exp(beta)/p;
+        r=exp(beta(0))/p;
         results.value=log(p);
-        results.der1=r*q;
-        results.der2=r*q*(1.0-r);
+        results.grad(0)=r*q;
+        results.hess(0,0)=r*q*(1.0-r);
     }
     else
     {
         results.value=log(q);
-        results.der1=results.value;
-        results.der2=results.value;
+        results.grad(0)=results.value;
+        results.hess(0,0)=results.value;
     }
     return results;
 }
