@@ -3,22 +3,17 @@
 //parameter vector beta.
 #include<armadillo>
 using namespace arma;
-
-struct fd2v
+struct f2v
 {
     double value;
     vec grad;
     mat hess;
 };
-
-
-fd2v cumprobit(int y,vec beta)
+f2v cumprobit(int y,vec beta)
 {
-
     double p,q,r;
     int i;
-    fd2v results;
-    
+    f2v results;
     results.value=0.0;
     results.grad=zeros(beta.n_elem);
     results.hess=zeros(beta.n_elem,beta.n_elem);
@@ -27,8 +22,6 @@ fd2v cumprobit(int y,vec beta)
         p=normcdf(beta(i));
         q=1.0-p;
         r=normpdf(beta(i));
-       
-        
         if(i<y)
         {
             results.value=results.value+log(p);
@@ -43,6 +36,5 @@ fd2v cumprobit(int y,vec beta)
             break;
         }
     }
-    
     return results;
 }
