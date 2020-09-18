@@ -7,7 +7,7 @@ struct f1v
     double value;
     vec grad;
 };
-f1v cumlogit1(int y,vec beta)
+f1v cumlogit1(ivec & y,vec & beta)
 {
     double p,q;
     int i;
@@ -18,7 +18,7 @@ f1v cumlogit1(int y,vec beta)
     {
         p=1.0/(1.0+exp(-beta(i)));
         q=1.0-p;
-        if(i<y)
+        if(i<y(0))
         {
             results.value=results.value+log(p);
             results.grad(i)=q;

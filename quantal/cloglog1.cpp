@@ -7,7 +7,7 @@ struct f1v
     double value;
     vec grad;
 };
-f1v cloglog1(int y,vec beta)
+f1v cloglog1(ivec & y,vec & beta)
 {
 //Probability of response of 1.
     double p,q,r;
@@ -15,8 +15,8 @@ f1v cloglog1(int y,vec beta)
     results.grad.set_size(1);
     q=exp(-exp(beta(0)));
     p=1.0-q;
-    
-    if(y==1)
+
+    if(y(0)==1)
     {
         r=exp(beta(0))/p;
         results.value=log(p);

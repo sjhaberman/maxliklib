@@ -9,7 +9,7 @@ struct f2v
     vec grad;
     mat hess;
 };
-f2v cloglog(int y,vec beta)
+f2v cloglog(ivec & y,vec & beta)
 {
 //Probability of response of 1.
     double p,q,r;
@@ -18,7 +18,7 @@ f2v cloglog(int y,vec beta)
     results.hess.set_size(1,1);
     q=exp(-exp(beta(0)));
     p=1.0-q;
-    if(y==1)
+    if(y(0)==1)
     {
         r=exp(beta(0))/p;
         results.value=log(p);

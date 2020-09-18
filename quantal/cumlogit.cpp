@@ -8,7 +8,7 @@ struct f2v
     vec grad;
     mat hess;
 };
-f2v cumlogit(int y,vec beta)
+f2v cumlogit(ivec & y,vec & beta)
 {
     double p,q;
     int i;
@@ -21,11 +21,11 @@ f2v cumlogit(int y,vec beta)
         p=1.0/(1.0+exp(-beta(i)));
         q=1.0-p;
         results.hess(i,i)=-p*q;
-        if(i<y)
+        if(i<y(0))
         {
             results.value=results.value+log(p);
             results.grad(i)=q;
-            
+
         }
         else
         {
@@ -33,6 +33,6 @@ f2v cumlogit(int y,vec beta)
             results.grad(i)=-p;
             break;
         }
-    }    
+    }
     return results;
 }
