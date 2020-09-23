@@ -8,7 +8,7 @@ struct f1v
     double value;
     vec grad;
 };
-f1v cumprobit1(int y,vec beta)
+f1v cumprobit1(ivec & y,vec & beta)
 {
     double p,q,r;
     int i;
@@ -19,7 +19,7 @@ f1v cumprobit1(int y,vec beta)
     {
         p=normcdf(beta(i));
         r=normpdf(beta(i));
-        if(i<y)
+        if(i<y(0))
         {
             results.value=results.value+log(p);
             results.grad(i)=r/p;

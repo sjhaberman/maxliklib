@@ -9,7 +9,7 @@ struct f2v
     vec grad;
     mat hess;
 };
-f2v cumloglog(int y,vec beta)
+f2v cumloglog(ivec & y,vec & beta)
 {
     double p,q,r;
     int i;
@@ -21,7 +21,7 @@ f2v cumloglog(int y,vec beta)
     {
         q=exp(-exp(beta(i)));
         p=1.0-q;
-        if(i<y)
+        if(i<y(0))
         {
             r=exp(beta(i))/p;
             results.value=results.value+log(p);

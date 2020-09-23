@@ -8,7 +8,7 @@ struct f1v
     double value;
     vec grad;
 };
-f1v cumloglog1(int y,vec beta)
+f1v cumloglog1(ivec & y,vec & beta)
 {
     double p,q,r;
     int i;
@@ -19,7 +19,7 @@ f1v cumloglog1(int y,vec beta)
     {
         q=exp(-exp(beta(i)));
         p=1.0-q;
-        if(i<y)
+        if(i<y(0))
         {
             r=exp(beta(i))/p;
             results.value=results.value+log(p);

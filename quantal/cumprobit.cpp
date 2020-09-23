@@ -9,7 +9,7 @@ struct f2v
     vec grad;
     mat hess;
 };
-f2v cumprobit(int y,vec beta)
+f2v cumprobit(ivec & y,vec& beta)
 {
     double p,q,r;
     int i;
@@ -22,7 +22,7 @@ f2v cumprobit(int y,vec beta)
         p=normcdf(beta(i));
         q=1.0-p;
         r=normpdf(beta(i));
-        if(i<y)
+        if(i<y(0))
         {
             results.value=results.value+log(p);
             results.grad(i)=r/p;
