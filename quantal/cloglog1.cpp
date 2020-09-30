@@ -13,19 +13,19 @@ f1v cloglog1(ivec & y,vec & beta)
     double p,q,r;
     f1v results;
     results.grad.set_size(1);
-    q=exp(-exp(beta(0)));
-    p=1.0-q;
-
+    r=exp(beta(0));
     if(y(0)==1)
     {
-        r=exp(beta(0))/p;
+
+        q=exp(-r);
+        p=1.0-q;
         results.value=log(p);
-        results.grad(0)=r*q;
+        results.grad(0)=q*r/p;
     }
     else
     {
-        results.value=log(q);
-        results.grad(0)=results.value;
+        results.value=-r;
+        results.grad(0)=-r;
     }
     return results;
 }

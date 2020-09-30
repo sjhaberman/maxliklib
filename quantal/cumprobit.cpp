@@ -20,7 +20,6 @@ f2v cumprobit(ivec & y,vec& beta)
     for(i=0;i<beta.n_elem;i++)
     {
         p=normcdf(beta(i));
-        q=1.0-p;
         r=normpdf(beta(i));
         if(i<y(0))
         {
@@ -30,6 +29,7 @@ f2v cumprobit(ivec & y,vec& beta)
         }
         else
         {
+            q=1.0-p;
             results.value=results.value+log(q);
             results.grad(i)=-r/q;
             results.hess(i,i)=-(beta(i)+results.grad(i))*results.grad(i);

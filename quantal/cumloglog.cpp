@@ -19,21 +19,20 @@ f2v cumloglog(ivec & y,vec & beta)
     results.hess=zeros(beta.n_elem,beta.n_elem);
     for(i=0;i<beta.n_elem;i++)
     {
-        q=exp(-exp(beta(i)));
-        p=1.0-q;
+        r=exp(beta(i));
         if(i<y(0))
         {
-            r=exp(beta(i))/p;
-            results.value=results.value+log(p);
-            results.grad(i)=r*q;
-            results.hess(i,i)=r*q*(1.0-r);
+            results.value=results.value-r;
+            results.grad(i)=-r;
+            results.hess(i,i)=-r;
         }
         else
         {
-            r=log(q);
-            results.value=results.value+r;
-            results.grad(i)=r;
-            results.hess(i,i)=r;
+            q=exp(-r);
+            p=1.0-q;
+            results.value=results.value+log(p);
+            results.grad(i)=q*r/p;
+            results.hess(i,i)=(1.0-r-results.grad(i))*results.grad(i);
             break;
         }
     }
