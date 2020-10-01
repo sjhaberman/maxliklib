@@ -1,24 +1,23 @@
-//Log likelihood component, derivative, and second derivative
-//for logit model with response y and parameter beta.
-#include<cmath>
-
-struct fd2
+//Log likelihood component, gradient, and Hessian matrix
+//for logit model with response y and one-dimensional parameter beta.
+#include<armadillo>
+using namespace arma;
+struct f2v
 {
     double value;
-    double der1;
-    double der2;
+    vec grad;
+    mat hess;
 };
-
-
-
-fd2 logit(int y,double beta)
+f2v logit(ivec & y,vec & beta)
 {
 //Probability of response of 1.
     double p,q;
-    fd2 results;
-    p=1.0/(1.0+exp(-beta));
+    f2v results;
+    results.grad.set_size(1);
+    results.hess.set_size(1,1);
+    p=1.0/(1.0+exp(-beta(0)));
     q=1.0-p;
-    if(y==1)
+    if(y(0)==1)
     {
         results.value=log(p);
     }
@@ -26,7 +25,7 @@ fd2 logit(int y,double beta)
     {
         results.value=log(q);
     }
-    results.der1=double(y)-p;
-    results.der2=-p*q;
+    results.grad(0)=double(y(0))-p;
+    results.hess(0,0)=-p*q;
     return results;
 }

@@ -1,24 +1,24 @@
-//Log likelihood component and its first and second derivative
-//for Poisson log-linear model with response y and parameter beta.
-
+//Log likelihood component and its gradient and Hessian
+//for Poisson log-linear model with response y and parameter
+//vector beta.
 #include<armadillo>
 using namespace arma;
-struct fd2
+struct f2v
 {
     double value;
-    double der1;
-    double der2;
+    vec grad;
+    mat hess;
 };
-
-
-fd2 logmean(int y,double beta)
+f2v logmean(ivec & y,vec & beta)
 {
     double fy,mu;
-    fd2 results;
-    fy=double(y);
-    mu=exp(beta);
-    results.value=fy*beta-mu;
-    results.der1=fy-mu;
-    results.der2=-mu;
+    f2v results;
+    results.grad.set_size(1);
+    results.hess.set_size(1,1);
+    fy=double(y(0));
+    mu=exp(beta(0));
+    results.value=fy*beta(0)-mu;
+    results.grad(0)=fy-mu;
+    results.hess(0,0)=-mu;
     return results;
 }
