@@ -1,29 +1,28 @@
 //Log likelihood component and its gradient
 //for logistic model with response y and parameter vector beta
 //with elements beta(1) and beta(2)>0.
-
 #include<armadillo>
 using namespace arma;
-using namespace std;
-struct fd1bv
+struct f1v
 {
     double value;
     vec grad;
-   
-    bool fin;
 };
-struct fd1
+f1v logistic1(vec & y,vec & beta)
 {
-    double value;
-    double der1;
-    
-};
-fd1bv locationscale1(double,vec,function <fd1(double)>);
-fd1 logistic01(double);
-fd1bv logistic1(double y,vec beta)
-{
-    
-    fd1bv results;
-    results=locationscale1(y,beta,logistic01);
+    double z,zz;
+    f1v results;
+    results.grad.set_size(2);
+    if(beta(1)<0.0)
+    {
+      results.value=datum::nan;
+      results.grad.fill(datum::nan);
+      return results;
+    }
+    z=beta(0)+beta(1)*y(0);
+    zz=1.0/(1.0+exp(-z));
+    results.value=-z+2.0*log(zz)+log(beta(1));
+    results.grad(0)=1.0-2.0*zz;
+    results.grad(1)=y(0)*results.grad(0)+1.0/beta(1);
     return results;
 }

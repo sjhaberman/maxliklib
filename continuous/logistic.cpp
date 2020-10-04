@@ -1,29 +1,35 @@
 //Log likelihood component and its gradient and hessian matrix
 //for logistic model with response y and parameter vector beta
 //with elements beta(1) and beta(2)>0.
-
 #include<armadillo>
 using namespace arma;
-using namespace std;
-struct fd2bv
+struct f2v
 {
     double value;
     vec grad;
     mat hess;
-    bool fin;
 };
-struct fd2
+f2v logistic(vec & y,vec & beta)
 {
-    double value;
-    double der1;
-    double der2;
-};
-fd2bv locationscale(double,vec,function <fd2(double)>);
-fd2 logistic012(double);
-fd2bv logistic(double y,vec beta)
-{
-    
-    fd2bv results;
-    results=locationscale(y,beta,logistic012);
+    double z,zz;
+    f2v results;
+    results.grad.set_size(2);
+    results.hess.set_size(2,2);
+    if(beta(1)<0.0)
+    {
+      results.value=datum::nan;
+      results.grad.fill(datum::nan);
+      results.hess.fill(datum::nan);
+      return results;
+    }
+    z=beta(0)+beta(1)*y(0);
+    zz=1.0/(1.0+exp(-z));
+    results.value=-z+2.0*log(zz)+log(beta(1));
+    results.grad(0)=1.0-2.0*zz;
+    results.grad(1)=y(0)*results.grad(0)+1.0/beta(1);
+    results.hess(0,0)=-2.0*zz*(1.0-zz);
+    results.hess(0,1)=y(0)*results.hess(0,0);
+    results.hess(1,0)=results.hess(0,1);
+    results.hess(1,1)=y(0)*results.hess(0,1)-1.0/(beta(1)*beta(1));
     return results;
 }

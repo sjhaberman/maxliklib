@@ -1,29 +1,34 @@
 //Log likelihood component and its gradient and hessian matrix
-//for normal model with response y and parameter vector beta
+//for noraml model with response y and parameter vector beta
 //with elements beta(1) and beta(2)>0.
-
 #include<armadillo>
 using namespace arma;
-using namespace std;
-struct fd2bv
+struct f2v
 {
     double value;
     vec grad;
     mat hess;
-    bool fin;
 };
-struct fd2
+f2v normal(vec & y,vec & beta)
 {
-    double value;
-    double der1;
-    double der2;
-};
-fd2bv locationscale(double,vec,function <fd2(double)>);
-fd2 normal012(double);
-fd2bv normal(double y,vec beta)
-{
-    
-    fd2bv results;
-    results=locationscale(y,beta,normal012);
+    double z,zz;
+    f2v results;
+    results.grad.set_size(2);
+    results.hess.set_size(2,2);
+    if(beta(1)<0.0)
+    {
+      results.value=datum::nan;
+      results.grad.fill(datum::nan);
+      results.hess.fill(datum::nan);
+      return results;
+    }
+    z=beta(0)+beta(1)*y(0);
+    results.value=log(beta(1))-0.5*z*z;
+    results.grad(0)=-z;
+    results.grad(1)=-y(0)*z+1.0/beta(1);
+    results.hess(0,0)=-1.0;
+    results.hess(0,1)=-y(0);
+    results.hess(1,0)=results.hess(0,1);
+    results.hess(1,1)=y(0)*results.hess(0,1)-1.0/(beta(1)*beta(1));
     return results;
 }
