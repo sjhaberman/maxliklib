@@ -1,46 +1,50 @@
 //Log likelihood component, gradient, and hessian matrix
-//for model for ranks based on latent extreme value distributions.  There are r objects to be
+//for model for ranks based on latent Gumbel distributions.
+//There are r objects to be
 //ranked and parameter
-//vector beta has dimension r.  The vector y provides the ranking.
+//vector beta has dimension r-1.  The analysis
+//considers the k largest objects for a
+//positive integer k no greater than r-1.
+//The vector y provides the ranking.
 #include<armadillo>
 using namespace arma;
-
-struct fd2v
+struct f2v
 {
     double value;
     vec grad;
     mat hess;
 };
-
-
-
-fd2v ranklogit(ivec y,vec beta)
+f2v ranklogit(ivec & y,vec & beta)
 {
-
-    double r;
-    int i;
-    vec e,f;
-    fd2v results;
-    e=zeros(beta.n_elem);
-    e(y(0))=exp(beta(y(0)));
-    r=e(y(0));
-    
-    
+    double s;
+    int i,k,rr;
+    vec f;
+    f2v results;
+    rr=beta.n_elem;
+    k=y.n_elem;
     results.value=0.0;
-   
-    results.grad=zeros(beta.n_elem);
-    
-   
-    results.hess=zeros(beta.n_elem,beta.n_elem);
-    for(i=1;i<beta.n_elem;i++)
+    results.grad.set_size(rr);
+    results.hess.set_size(rr,rr);
+    results.grad.zeros();
+    results.hess.zeros();
+    f=exp(beta);
+    s=1.0+sum(f);
+    for(i=0;i<k;i++)
     {
-        e(y(i))=exp(beta(y(i)));
-        r=r+e(y(i));
-        results.value=results.value+(beta(y(i))-log(r));
-        f=-e/r;
-        results.grad=results.grad+f;
-        results.hess=results.hess+diagmat(f)+f*trans(f);
-        results.grad(y(i))=1.0+results.grad(y(i));
+        results.value=results.value-log(s);
+        results.grad=results.grad-f/s;
+        results.hess=results.hess-diagmat(f)/s+f*trans(f)/(s*s);
+        if(y(i)>0)
+        {
+            results.value=results.value+beta(y(i)-1);
+            results.grad(y(i)-1)=results.grad(y(i)-1)+1.0;
+            s=s-f(y(i)-1);
+            f(y(i)-1)=0.0;
+        }
+        else
+        {
+            s=s-1.0;
+        }
     }
     return results;
 }
