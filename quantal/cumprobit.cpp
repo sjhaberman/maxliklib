@@ -9,15 +9,18 @@ struct f2v
     vec grad;
     mat hess;
 };
-f2v cumprobit(ivec & y,vec& beta)
+f2v cumprobit(ivec & y,vec & beta)
 {
     double p,q,r;
-    int i;
+    int i,n;
     f2v results;
+    n=beta.n_elem;
     results.value=0.0;
-    results.grad=zeros(beta.n_elem);
-    results.hess=zeros(beta.n_elem,beta.n_elem);
-    for(i=0;i<beta.n_elem;i++)
+    results.grad.set_size(n);
+    results.grad.zeros();
+    results.hess.set_size(n,n);
+    results.hess.zeros();
+    for(i=0;i<n;i++)
     {
         p=normcdf(beta(i));
         r=normpdf(beta(i));

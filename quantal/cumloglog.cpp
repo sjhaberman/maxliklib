@@ -1,5 +1,5 @@
 //Log likelihood component, gradient, and Hessian
-//for cumulative complementary log-log model with response y and parameter
+//for cumulative log-log model with response y and parameter
 //vector beta.
 #include<armadillo>
 using namespace arma;
@@ -12,27 +12,30 @@ struct f2v
 f2v cumloglog(ivec & y,vec & beta)
 {
     double p,q,r;
-    int i;
+    int i,n;
     f2v results;
+    n=beta.n_elem;
     results.value=0.0;
-    results.grad=zeros(beta.n_elem);
-    results.hess=zeros(beta.n_elem,beta.n_elem);
-    for(i=0;i<beta.n_elem;i++)
+    results.grad.set_size(n);
+    results.grad.zeros();
+    results.hess.set_size(n,n);
+    results.hess.zeros();
+    for(i=0;i<n;i++)
     {
-        r=exp(beta(i));
+        r=exp(-beta(i));
         if(i<y(0))
         {
             results.value=results.value-r;
-            results.grad(i)=-r;
+            results.grad(i)=r;
             results.hess(i,i)=-r;
         }
         else
         {
-            q=exp(-r);
-            p=1.0-q;
-            results.value=results.value+log(p);
-            results.grad(i)=q*r/p;
-            results.hess(i,i)=(1.0-r-results.grad(i))*results.grad(i);
+            p=exp(-r);
+            q=1.0-p;
+            results.value=results.value+log(q);
+            results.grad(i)=-p*r/q;
+            results.hess(i,i)=(r-1.0-results.grad(i))*results.grad(i);
             break;
         }
     }

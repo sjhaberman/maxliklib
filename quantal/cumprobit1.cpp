@@ -11,7 +11,7 @@ struct f1v
 f1v cumprobit1(ivec & y,vec & beta)
 {
     double p,q,r;
-    int i;
+    int i,n;
     f1v results;
     results.value=0.0;
     results.grad=zeros(beta.n_elem);

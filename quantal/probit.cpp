@@ -1,35 +1,32 @@
-//Log likelihood component and its first and second derivative
+//Log likelihood component and its gradient and hessian
 //for probit model with response y and parameter beta.
-
 #include<armadillo>
 using namespace arma;
-struct fd2
+struct f2v
 {
     double value;
-    double der1;
-    double der2;
+    vec grad;
+    mat hess;
 };
-
-
-fd2 probit(int y,double beta)
+f2v probit(ivec & y,vec & beta)
 {
     double p,q,r;
-    fd2 results;
-    
-    p=normcdf(beta);
+    f2v results;
+    results.grad.set_size(1);
+    results.hess.set_size(1,1);
+    p=normcdf(beta(0));
     q=1.0-p;
-    r=normpdf(beta);
-    if(y==1)
+    r=normpdf(beta(0));
+    if(y(0)==1)
     {
         results.value=log(p);
-        results.der1=r/p;
-        results.der2=-(beta+results.der1)*results.der1;
+        results.grad(0)=r/p;
     }
     else
     {
         results.value=log(q);
-        results.der1=-r/q;
-        results.der2=-(beta+results.der1)*results.der1;
+        results.grad(0)=-r/q;
     }
+    results.hess(0,0)=-(beta(0)+results.grad(0))*results.grad(0);
     return results;
 }

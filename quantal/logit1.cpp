@@ -1,24 +1,21 @@
-//Log likelihood component and derivative
-//for logit model with response y and parameter beta.
-#include<cmath>
-
-struct fd1
+//Log likelihood component and gradient
+//for logit model with response y and one-dimensional parameter beta.
+#include<armadillo>
+using namespace arma;
+struct f1v
 {
     double value;
-    double der1;
-   
+    vec grad;
 };
-
-
-
-fd1 logit1(int y,double beta)
+f1v logit1(ivec & y,vec & beta)
 {
 //Probability of response of 1.
     double p,q;
-    fd1 results;
-    p=1.0/(1.0+exp(-beta));
+    f1v results;
+    results.grad.set_size(1);
+    p=1.0/(1.0+exp(-beta(0)));
     q=1.0-p;
-    if(y==1)
+    if(y(0)==1)
     {
         results.value=log(p);
     }
@@ -26,7 +23,6 @@ fd1 logit1(int y,double beta)
     {
         results.value=log(q);
     }
-    results.der1=double(y)-p;
-    
+    results.grad(0)=double(y(0))-p;
     return results;
 }

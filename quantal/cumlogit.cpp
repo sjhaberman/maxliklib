@@ -11,21 +11,23 @@ struct f2v
 f2v cumlogit(ivec & y,vec & beta)
 {
     double p,q;
-    int i;
+    int i,n;
     f2v results;
+    n=beta.n_elem;
     results.value=0.0;
-    results.grad=zeros(beta.n_elem);
-    results.hess=zeros(beta.n_elem,beta.n_elem);
-    for(i=0;i<beta.n_elem;i++)
+    results.grad.set_size(n);
+    results.grad.zeros();
+    results.hess.set_size(n,n);
+    results.hess.zeros();
+    for(i=0;i<n;i++)
     {
         p=1.0/(1.0+exp(-beta(i)));
         q=1.0-p;
         results.hess(i,i)=-p*q;
         if(i<y(0))
         {
-            results.value=results.value+log(p);
-            results.grad(i)=q;
-
+          results.value=results.value+log(p);
+          results.grad(i)=q;
         }
         else
         {

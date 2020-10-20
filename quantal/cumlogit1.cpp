@@ -10,11 +10,13 @@ struct f1v
 f1v cumlogit1(ivec & y,vec & beta)
 {
     double p,q;
-    int i;
+    int i,n;
     f1v results;
+    n=beta.n_elem;
     results.value=0.0;
-    results.grad=zeros(beta.n_elem);
-    for(i=0;i<beta.n_elem;i++)
+    results.grad.set_size(n);
+    results.grad.zeros();
+    for(i=0;i<n;i++)
     {
         p=1.0/(1.0+exp(-beta(i)));
         q=1.0-p;

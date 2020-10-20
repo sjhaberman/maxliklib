@@ -1,38 +1,29 @@
-//Log likelihood component and its first derivative
+//Log likelihood component and its gradient
 //for probit model with response y and parameter beta.
-
 #include<armadillo>
 using namespace arma;
-struct fd1
+struct f1v
 {
     double value;
-    double der1;
-   
+    vec grad;
 };
-
-
-fd1 probit1(int y,double beta)
+f1v probit1(ivec & y,vec & beta)
 {
     double p,q,r;
-    fd1 results;
-    
-    p=normcdf(beta);
-    
-    r=normpdf(beta);
-    if(y==1)
+    f1v results;
+    results.grad.set_size(1);
+    p=normcdf(beta(0));
+    q=1.0-p;
+    r=normpdf(beta(0));
+    if(y(0)==1)
     {
         results.value=log(p);
-        results.der1=r/p;
-        
+        results.grad(0)=r/p;
     }
     else
     {
-        
-        q=1.0-p;
         results.value=log(q);
-        results.der1=-r/q;
-        
+        results.grad(0)=-r/q;
     }
-   
     return results;
 }
