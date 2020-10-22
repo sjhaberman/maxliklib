@@ -1,53 +1,51 @@
 //Log likelihood and its gradient and Hessian
-//for quantal response model with response vector global_y and
-//predictor matrix global_x.
-//Weight global_w is used.
+//for quantal response model with response vector y and
+//predictor matrix x.
+//Weight w is used.
 //Model codes are found in quantal.cpp.
+//Sparseness is not exploited.
 #include<armadillo>
 using namespace arma;
-struct fd2
-{
-    double value;
-    double der1;
-    double der2;
-};
-struct fd2v
+struct f2v
 {
     double value;
     vec grad;
     mat hess;
 };
-
-
-extern char choices[];
-extern char choice;
-extern vec global_w;
-extern ivec global_y;
-extern mat global_x;
-extern vec global_offset;
-fd2 quantal(int,double);
-fd2v quantallik(vec beta)
+struct model
 {
-    double lambda;
-    
-    fd2 obsresults;
-    fd2v results;
-    int i;
+  char type;
+  char transform;
+};
+extern model choices[];
+extern model choice;
+extern vec w;
+extern ivec y[];
+extern mat x[];
+extern mat offset[];
+f2v quantal(model &,ivec &,vec &);
+f2v quantallik(vec & beta)
+{
+    vec lambda;
+    f2v obsresults;
+    f2v results;
+    int i,p,n;
     results.value=0.0;
-    results.grad=zeros(beta.n_elem);
-    
-    results.hess=zeros(beta.n_elem,beta.n_elem);
-    for (i=0;i<global_x.n_cols;i++)
+    p=beta.n_elem;
+    n=w.n_elem;
+    results.grad.set_size(p);
+    results.grad.zeros();
+    results.hess.set_size(p,p);
+    results.hess.zeros();
+    for (i=0;i<n;i++)
     {
-        lambda=global_offset(i)+dot(beta,global_x.col(i));
+        lambda=offset[i]+x[i]*beta;
         choice=choices[i];
-        obsresults=quantal(global_y(i),lambda);
-        results.value=results.value+global_w(i)*obsresults.value;
-        results.grad=results.grad+global_w(i)*obsresults.der1*global_x.col(i);
+        obsresults=quantal(choice,y[i],lambda);
+        results.value=results.value+w(i)*obsresults.value;
+        results.grad=results.grad+w(i)*trans(x[i])*obsresults.grad;
         results.hess=results.hess+
-            global_w(i)*obsresults.der2*global_x.col(i)*trans(global_x.col(i));
-        
+            w(i)*trans(x[i])*obsresults.hess*x[i];
     }
-    
     return results;
 }

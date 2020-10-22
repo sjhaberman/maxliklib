@@ -1,52 +1,46 @@
 //Log likelihood and its gradient
-//for quantal response model with response vector global_y and
-//predictor matrix global_x.
-//Weight global_w is used.
-//Model codes are found in quantal.cpp.
+//for quantal response model with response vector y and
+//predictor matrix x.
+//Weight w is used.
+//Model codes are found in quantal1.cpp.
+//Sparseness is not exploited.
 #include<armadillo>
 using namespace arma;
-struct fd1
-{
-    double value;
-    double der1;
-    
-};
-struct fd1v
+struct f1v
 {
     double value;
     vec grad;
-    
 };
-
-
-extern char choices[];
-extern char choice;
-extern vec global_w;
-extern ivec global_y;
-extern mat global_x;
-extern vec global_offset;
-fd1 quantal1(int,double);
-fd1v quantallik1(vec beta)
+struct model
 {
-    double lambda;
-    
-    fd1 obsresults;
-    fd1v results;
-    int i;
+  char type;
+  char transform;
+};
+extern model choices[];
+extern vec w;
+extern ivec y[];
+extern mat x[];
+extern mat offset[];
+f1v quantal1(model &,ivec &,vec &);
+f1v quantallik1(vec & beta)
+{
+    vec lambda;
+    f1v obsresults;
+    f1v results;
+    int i,p,n;
+    model choice;
     results.value=0.0;
-    results.grad=zeros(beta.n_elem);
-    
-   
-    for (i=0;i<global_x.n_cols;i++)
+    p=beta.n_elem;
+    n=w.n_elem;
+    results.grad.set_size(p);
+    results.grad.zeros();
+    for (i=0;i<n;i++)
     {
-        lambda=global_offset(i)+dot(beta,global_x.col(i));
+        lambda=offset[i]+x[i]*beta;
         choice=choices[i];
-        obsresults=quantal1(global_y(i),lambda);
-        results.value=results.value+global_w(i)*obsresults.value;
-        results.grad=results.grad+global_w(i)*obsresults.der1*global_x.col(i);
-        
-        
+        obsresults=quantal1(choice,y[i],lambda);
+        results.value=results.value+w(i)*obsresults.value;
+        results.grad=results.grad+w(i)*trans(x[i])*obsresults.grad;
     }
-    
     return results;
 }
