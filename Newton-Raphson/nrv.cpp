@@ -43,16 +43,26 @@ struct paramnr
     double kappa;
     double tol;
 };
-maxf2v maxf2vvar(const vec & y,const f2v &f2y);
-maxf2v maxlin2(const paramnr &nrparams,const vec & v,maxf2v & vary0,const function <f2v(vec)> f);
-maxf2v nrv(const paramnr&nrparams,const vec &start,function<f2v(vec)> f)
+maxf2v maxf2vvar(const vec & y,const f2v & f2y);
+maxf2v maxlin2(const paramnr &,const vec & ,maxf2v & , const function <f2v(vec &)> );
+maxf2v nrv(const paramnr&nrparams,const vec & start, const function<f2v(vec &)> f)
 {
     f2v fy0;
-    int i;
+    int i,p;
+    p=start.n_elem;
+    fy0.grad.set_size(p);
+    fy0.hess.set_size(p,p);
     maxf2v vary0,vary1;
+    vary0.grad.set_size(p);
+    vary0.locmax.set_size(p);
+    vary0.hess.set_size(p,p);
+    vary1.grad.set_size(p);
+    vary1.locmax.set_size(p);
+    vary1.hess.set_size(p,p);
     vec v;
 // Function settings at start.
-    fy0=f(start);
+    vary0.locmax=start;
+    fy0=f(vary0.locmax);
     vary0=maxf2vvar(start,fy0);
 // Return if starting impossible.
     if(isnan(vary0.max)) return vary0;

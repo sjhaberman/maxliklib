@@ -2,45 +2,43 @@
 //based on one parameter for a response.
 //Maximum number of iterations is maxit.
 //Tolerance is tol.
-//Responses are global_y.
-//Predictors are global_x.
-//Weights are global_w.
+//Responses are y.
+//Predictors are x.
+//Weights are w.  Use gradient ascent.
 #include<armadillo>
 using namespace arma;
 using namespace std;
-struct f2v
+struct f1v
 {
     double value;
     vec grad;
-    mat hess;
 };
-struct maxf2v
+struct maxf1v
 {
     vec locmax;
     double max;
     vec grad;
-    mat hess;
 };
-struct paramnr
+struct paramga
 {
     int maxit;
     int maxits;
+    function<double(vec)> c;
     double eta;
     double gamma1;
     double gamma2;
     double kappa;
     double tol;
 };
-maxf2v nrv(const paramnr&,const vec &,const function<f2v(vec &)>);
-f2v quantallik(vec &);
-maxf2v quantalmle(const paramnr & nrparams,const vec & start)
+maxf1v gradascent(const paramga&,const vec &,const function<f1v(vec &)>);
+f1v quantallik1(vec &);
+maxf1v quantalmleg(const paramga & gaparams,const vec & start)
 {
-    maxf2v results;
+    maxf1v results;
     int p;
     p=start.n_elem;
     results.locmax.set_size(p);
     results.grad.set_size(p);
-    results.hess.set_size(p,p);
-    results=nrv(nrparams,start,quantallik);
+    results=gradascent(gaparams,start,quantallik1);
     return results;
 }

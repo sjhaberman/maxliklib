@@ -13,8 +13,10 @@ f1v cumprobit1(ivec & y,vec & beta)
     double p,q,r;
     int i,n;
     f1v results;
+    n=beta.n_elem;
     results.value=0.0;
-    results.grad=zeros(beta.n_elem);
+    results.grad.set_size(n);
+    results.grad.zeros();
     for(i=0;i<beta.n_elem;i++)
     {
         p=normcdf(beta(i));

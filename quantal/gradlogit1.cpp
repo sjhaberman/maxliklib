@@ -26,12 +26,12 @@ f1v gradlogit1(ivec & y,vec & beta)
       }
     }
     results.value=0.0;
-    results.grad.fill(0.0);
+    results.grad.zeros();
     if(y(0)==n)
     {
         d=1.0/(1.0+exp(-beta(nn)));
         results.value=log(d);
-        results.grad(nn)=d;
+        results.grad(nn)=1.0-d;
         return results;
     }
     if(y(0)==0)

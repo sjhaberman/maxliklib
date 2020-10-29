@@ -44,16 +44,26 @@ struct paramga
     double tol;
 };
 maxf1v maxf1vvar(const vec &y,const f1v &fy);
-maxf1v maxlin(const paramga &gaparams,const vec & v,maxf1v & vary0,const function <f1v(vec)> f);
-maxf1v conjgrad(const paramga &gaparams,const vec &start,const function<f1v(vec)> f)
+maxf1v maxlin(const paramga &gaparams,const vec & v,maxf1v & vary0,const function <f1v(vec &)> f);
+maxf1v conjgrad(const paramga &gaparams,const vec &start,const function<f1v(vec &)> f)
 {
     double tau;
     f1v fy0;
-    int i;
+    int i,p;
     maxf1v vary0,vary1;
     vec v,v1,v2;
+    p=start.n_elem;
+    fy0.grad.set_size(p);
+    vary0.grad.set_size(p);
+    vary0.locmax.set_size(p);
+    vary1.grad.set_size(p);
+    vary1.locmax.set_size(p);
+    v.set_size(p);
+    v1.set_size(p);
+    v2.set_size(p);
+    vary0.locmax=start;
+    fy0=f(vary0.locmax);
 // Function settings at start.
-    fy0=f(start);
     vary0=maxf1vvar(start,fy0);
 // Return if starting impossible.
     if(isnan(vary0.max)) return vary0;
@@ -83,4 +93,3 @@ maxf1v conjgrad(const paramga &gaparams,const vec &start,const function<f1v(vec)
     }
     return vary1;
 }
-

@@ -18,7 +18,6 @@ struct model
   char transform;
 };
 extern model choices[];
-extern model choice;
 extern vec w;
 extern ivec y[];
 extern mat x[];
@@ -29,7 +28,7 @@ f2v quantallik(vec & beta)
     vec lambda;
     f2v obsresults;
     f2v results;
-    int i,p,n;
+    int i,p,r,n;
     results.value=0.0;
     p=beta.n_elem;
     n=w.n_elem;
@@ -39,9 +38,12 @@ f2v quantallik(vec & beta)
     results.hess.zeros();
     for (i=0;i<n;i++)
     {
+        r=offset[i].n_elem;
+        lambda.set_size(r);
+        obsresults.grad.set_size(r);
+        obsresults.hess.set_size(r,r);
         lambda=offset[i]+x[i]*beta;
-        choice=choices[i];
-        obsresults=quantal(choice,y[i],lambda);
+        obsresults=quantal(choices[i],y[i],lambda);
         results.value=results.value+w(i)*obsresults.value;
         results.grad=results.grad+w(i)*trans(x[i])*obsresults.grad;
         results.hess=results.hess+

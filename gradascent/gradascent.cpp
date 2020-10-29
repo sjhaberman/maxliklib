@@ -44,15 +44,23 @@ struct paramga
     double tol;
 };
 maxf1v maxf1vvar(const vec &y,const f1v &fy);
-maxf1v maxlin(const paramga &gaparams,const vec & v,maxf1v & vary0,const function <f1v(vec)> f);
-maxf1v gradascent(const paramga &gaparams,const vec &start,const function<f1v(vec)> f)
+maxf1v maxlin(const paramga &gaparams,const vec & v,maxf1v & vary0,const function <f1v(vec &)> f);
+maxf1v gradascent(const paramga &gaparams,const vec &start,const function<f1v(vec &)> f)
 {
     f1v fy0;
-    int i;
+    int i,p;
     maxf1v vary0,vary1;
     vec v;
+    p=start.n_elem;
+    fy0.grad.set_size(p);
+    vary0.grad.set_size(p);
+    vary0.locmax.set_size(p);
+    vary1.grad.set_size(p);
+    vary1.locmax.set_size(p);
+    v.set_size(p);
+    vary0.locmax=start;
 // Function settings at start.
-    fy0=f(start);
+    fy0=f(vary0.locmax);
     vary0=maxf1vvar(start,fy0);
 // Return if starting impossible.
     if(isnan(vary0.max)) return vary0;
@@ -66,8 +74,7 @@ maxf1v gradascent(const paramga &gaparams,const vec &start,const function<f1v(ve
         vary1 = maxlin(gaparams,v,vary0,f);
 //  Convergence check
         if(vary1.max<vary0.max+gaparams.tol) return vary1;
-        vary0=vary1;        
+        vary0=vary1;
     }
     return vary1;
 }
-

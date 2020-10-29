@@ -29,8 +29,8 @@ f2v gradprobit(ivec & y,vec & beta)
       }
     }
     results.value=0.0;
-    results.grad.fill(0.0);
-    results.hess.fill(0.0);
+    results.grad.zeros();
+    results.hess.zeros();
     if(y(0)==n)
     {
         d=normcdf(beta(nn));

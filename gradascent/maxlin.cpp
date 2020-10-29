@@ -46,7 +46,7 @@ maxf1v maxf1vvar(const vec &y,const f1v &fy);
 double modit(const double &eta,const double &alpha0,const double &alpha1,
              const double &stepmax,const double &lower,const double &upper);
 void rebound(const double &y,const double &der,double &lower,double &upper);
-maxf1v maxlin(const paramga & gaparams,const vec &v,maxf1v & vary0,function<f1v(vec)>f)
+maxf1v maxlin(const paramga & gaparams,const vec &v,maxf1v & vary0,function<f1v(vec &)>f)
 {
 // Old value alpha1 corresponds to vector y1.  New value alpha1 corresponds
 // to vector y2. alphaw is used for numerical differentiation and corresponds
@@ -64,7 +64,17 @@ maxf1v maxlin(const paramga & gaparams,const vec &v,maxf1v & vary0,function<f1v(
     vec y0,y1,y2,yw;
     maxf1v  result,vary1;
 //  i counts secondary iterations.
-    int i;
+    int i,p;
+    p=v.n_elem;
+    y0.set_size(p);
+    y1.set_size(p);
+    y2.set_size(p);
+    yw.set_size(p);
+    result.locmax.set_size(p);
+    result.grad.set_size(p);
+    fy1.grad.set_size(p);
+    fy2.grad.set_size(p);
+    fyw.grad.set_size(p);
     result=vary0;
 // Stuck if starting value out of domain.
     if(isnan(result.max)) return result;
@@ -160,4 +170,3 @@ maxf1v maxlin(const paramga & gaparams,const vec &v,maxf1v & vary0,function<f1v(
     }
     return result;
 }
-

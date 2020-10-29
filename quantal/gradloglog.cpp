@@ -28,8 +28,8 @@ f2v gradloglog(ivec & y,vec & beta)
       }
     }
     results.value=0.0;
-    results.grad.fill(0.0);
-    results.hess.fill(0.0);
+    results.grad.zeros();
+    results.hess.zeros();
     if(y(0)==n)
     {
         p=-exp(-beta(nn));
