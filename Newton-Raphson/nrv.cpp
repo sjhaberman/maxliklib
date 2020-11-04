@@ -65,7 +65,7 @@ maxf2v nrv(const paramnr&nrparams,const vec & start, const function<f2v(vec &)> 
     fy0=f(vary0.locmax);
     vary0=maxf2vvar(start,fy0);
 // Return if starting impossible.
-    if(isnan(vary0.max)) return vary0;
+    if(isnan(vary0.max)||nrparams.maxit<=0) return vary0;
 // Iterations.
     for(i=0;i<nrparams.maxit;i++)
     {
@@ -82,6 +82,7 @@ maxf2v nrv(const paramnr&nrparams,const vec & start, const function<f2v(vec &)> 
             v=vary0.grad;
         }
 // Line search.
+        if(norm(v,2)>nrparams.kappa)v=(nrparams.kappa/norm(v,2))*v;
         vary1 = maxlin2(nrparams,v,vary0,f);
 //  Convergence check
         if(vary1.max<vary0.max+nrparams.tol) return vary1;

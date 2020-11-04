@@ -28,9 +28,6 @@ f2v gradlogit(ivec & y,vec & beta)
         return results;
       }
     }
-    results.value=0.0;
-    results.grad.zeros();
-    results.hess.zeros();
     if(y(0)==n)
     {
         d=1.0/(1.0+exp(-beta(nn)));

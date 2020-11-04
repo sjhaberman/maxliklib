@@ -55,7 +55,7 @@ maxf2v maxlin2(const paramnr & nrparams,const vec &v,maxf2v & vary0,const functi
 // alpha2 is der2.  The second derivative at alpha1 is sder2. deltaf is a
 // change in f.value.
     double alpha1,alpha2,deltaf,der1,der2,lower,normv,
-    sder1,stepmax,upper;
+    sder1,stepmax=1.0,upper;
 // vy1 gives value, gradient, and Hessian of f at y1,
 // and vy2 is correponding information at y2.
     f2v fy1,fy2;
@@ -112,7 +112,7 @@ maxf2v maxlin2(const paramnr & nrparams,const vec &v,maxf2v & vary0,const functi
         else
         {
 // Just take a large step.
-            alpha2=alpha1+stepmax;
+            alpha2=alpha1+der1;
         }
 // Truncate if needed.
         alpha2=modit(nrparams.eta,alpha1,alpha2,stepmax,lower,upper);

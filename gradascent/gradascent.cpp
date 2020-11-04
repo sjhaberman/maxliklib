@@ -70,6 +70,7 @@ maxf1v gradascent(const paramga &gaparams,const vec &start,const function<f1v(ve
 // Stop if gradient of zero.
         v=vary0.grad;
         if(!any(v)) return vary0;
+        if(norm(v,2)>gaparams.kappa)v=(gaparams.kappa/norm(v,2))*v;
 // Line search.
         vary1 = maxlin(gaparams,v,vary0,f);
 //  Convergence check

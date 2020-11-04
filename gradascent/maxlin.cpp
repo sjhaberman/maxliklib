@@ -87,7 +87,7 @@ maxf1v maxlin(const paramga & gaparams,const vec &v,maxf1v & vary0,function<f1v(
     upper=INFINITY;
 // Find maximum step size stepmax for line.
     normv=norm(v,2);
-    stepmax=gaparams.kappa/normv;
+    stepmax=1.0;
 // Up to maxit iterations.
     for(i=0;i<gaparams.maxits;i++)
     {
@@ -119,7 +119,7 @@ maxf1v maxlin(const paramga & gaparams,const vec &v,maxf1v & vary0,function<f1v(
         else
         {
 // Just take a large step.
-            alpha2=alpha1+stepmax;
+            alpha2=alpha1+der1;
         }
 // Truncate if needed.
         alpha2=modit(gaparams.eta,alpha1,alpha2,stepmax,lower,upper);

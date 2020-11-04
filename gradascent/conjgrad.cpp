@@ -84,6 +84,7 @@ maxf1v conjgrad(const paramga &gaparams,const vec &start,const function<f1v(vec 
         {
             v=v1;
         }
+        if(norm(v,2)>gaparams.kappa)v=(gaparams.kappa/norm(v,2))*v;
 // Line search.
         vary1 = maxlin(gaparams,v,vary0,f);
 //  Convergence check

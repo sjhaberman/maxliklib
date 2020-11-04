@@ -4,7 +4,7 @@
 //Tolerance is tol.
 //Responses are y.
 //Predictors are x.
-//Weights are w.
+//Weights are w.  The Louis method is used.
 #include<armadillo>
 using namespace arma;
 using namespace std;
@@ -32,8 +32,8 @@ struct paramnr
     double tol;
 };
 maxf2v nrv(const paramnr&,const vec &,const function<f2v(vec &)>);
-f2v quantallik(vec &);
-maxf2v quantalmle(const paramnr & nrparams,const vec & start)
+f2v quantallikl(vec &);
+maxf2v quantalmlel(const paramnr & nrparams,const vec & start)
 {
     maxf2v results;
     int p;
@@ -41,6 +41,6 @@ maxf2v quantalmle(const paramnr & nrparams,const vec & start)
     results.locmax.set_size(p);
     results.grad.set_size(p);
     results.hess.set_size(p,p);
-    results=nrv(nrparams,start,quantallik);
+    results=nrv(nrparams,start,quantallikl);
     return results;
 }
