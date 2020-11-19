@@ -1,9 +1,9 @@
 //Log likelihood and its gradient
-//for quantal response model with response vector y and
+//for response model with response y and
 //predictor matrix x.
 //Weight w is used.
-//Model codes are found in quantal1.cpp.
-//Sparseness is not exploited.
+//Model codes are found in genresp1.cpp.
+//xselect indicates which predictors apply to which responses.
 #include<armadillo>
 using namespace arma;
 struct f1v
@@ -16,6 +16,11 @@ struct model
   char type;
   char transform;
 };
+struct resp
+{
+  ivec iresp;
+  vec dresp;
+};
 struct xsel
 {
   bool all;
@@ -23,17 +28,17 @@ struct xsel
 };
 extern model choices[];
 extern vec w;
-extern ivec y[];
+extern resp y[];
 extern mat x[];
 extern xsel xselect [];
 extern vec offset[];
-f1v quantal1(model &,ivec &,vec &);
-f1v quantallik1(vec & beta)
+f1v genresp1(model &,resp &,vec &);
+f1v genresplik1(vec & beta)
 {
     vec lambda;
     f1v obsresults;
     f1v results;
-    int i,j,jj,p,q,r,n;
+    int i,j,k,p,q,r,n;
     results.value=0.0;
     p=beta.n_elem;
     n=w.n_elem;
@@ -43,8 +48,8 @@ f1v quantallik1(vec & beta)
     {
         r=offset[i].n_elem;
         lambda.set_size(r);
-        obsresults.grad.set_size(r);
         lambda=offset[i];
+        obsresults.grad.set_size(r);
         if(xselect[i].all)
         {
           lambda=lambda+x[i]*beta;
@@ -56,12 +61,12 @@ f1v quantallik1(vec & beta)
           {
             for(j=0;j<q;j++)
             {
-              jj=xselect[i].list(j);
-              lambda=lambda+beta(jj)*x[i].col(jj);
+              k=xselect[i].list(j);
+              lambda=lambda+beta(k)*x[i].col(k);
             }
           }
         }
-        obsresults=quantal1(choices[i],y[i],lambda);
+        obsresults=genresp1(choices[i],y[i],lambda);
         results.value=results.value+w(i)*obsresults.value;
         if(xselect[i].all)
         {
@@ -73,8 +78,8 @@ f1v quantallik1(vec & beta)
           {
             for(j=0;j<q;j++)
             {
-              jj=xselect[i].list(j);
-              results.grad(jj)=results.grad(jj)+w(i)*dot(obsresults.grad,x[i].col(jj));
+              k=xselect[i].list(j);
+              results.grad(k)=results.grad(k)+w(i)*dot(obsresults.grad,x[i].col(k));
             }
           }
         }

@@ -5,7 +5,7 @@
 //The strict pseudoconcavity condition described in the document
 //convergence.pdf is assumed to apply for the real number a.  For the starting
 //vector start, it is assumed that the value of f.value at start exceeds a.
-//Parameters used are defined in gaparams.
+//Parameters used are defined in mparams.
 //The maximum number of main iterations is gaparams.maxit.
 //The maximum number of secondary iterations per main iteration
 //is gaparams.maxits.
@@ -13,10 +13,10 @@
 //gaparams.eta.
 //For secondary iterations, the improvement check
 //is gaparams.gamma1<1.
-//The cosine check  is gaparams.gamma2.
-//The largest permitted step length is gaparams.kappa>0.
+//The cosine check  is mparams.gamma2.
+//The largest permitted step length is mparams.kappa>0.
 //If a main iteration leads to a change of the function f less
-//than gaparams.tol, then iterations cease.
+//than mparams.tol, then iterations cease.
 #include<armadillo>
 using namespace std;
 using namespace arma;
@@ -33,7 +33,7 @@ struct maxf2v
     vec grad;
     mat hess;
 };
-struct paramnr
+struct params
 {
     int maxit;
     int maxits;
@@ -43,9 +43,9 @@ struct paramnr
     double kappa;
     double tol;
 };
-maxf2v maxf2vvar(const vec & y,const f2v & f2y);
-maxf2v maxlin2(const paramnr &,const vec & ,maxf2v & , const function <f2v(vec &)> );
-maxf2v nrv(const paramnr&nrparams,const vec & start, const function<f2v(vec &)> f)
+maxf2v maxf2vvar(const vec & ,const f2v & );
+maxf2v maxlinq2(const params &,const vec & ,maxf2v & , function <f2v(vec &)> F);
+maxf2v nrv(const params&mparams,const vec & start, function<f2v(vec &)> f)
 {
     f2v fy0;
     int i,p;
@@ -60,14 +60,15 @@ maxf2v nrv(const paramnr&nrparams,const vec & start, const function<f2v(vec &)> 
     vary1.locmax.set_size(p);
     vary1.hess.set_size(p,p);
     vec v;
+    v.set_size(p);
 // Function settings at start.
-    vary0.locmax=start;
-    fy0=f(vary0.locmax);
-    vary0=maxf2vvar(start,fy0);
+    v=start;
+    fy0=f(v);
+    vary0=maxf2vvar(v,fy0);
 // Return if starting impossible.
-    if(isnan(vary0.max)||nrparams.maxit<=0) return vary0;
+    if(isnan(vary0.max)||mparams.maxit<=0) return vary0;
 // Iterations.
-    for(i=0;i<nrparams.maxit;i++)
+    for(i=0;i<mparams.maxit;i++)
     {
 // Stop if gradient of zero.
         if(!any(vary0.grad)) return vary0;
@@ -75,17 +76,17 @@ maxf2v nrv(const paramnr&nrparams,const vec & start, const function<f2v(vec &)> 
         if ((-vary0.hess).is_sympd())
         {
             v=solve(-vary0.hess,vary0.grad);
-            if(dot(v,vary0.grad)<nrparams.gamma1*norm(v,2)*norm(vary0.grad,2))v=vary0.grad;
+            if(dot(v,vary0.grad)<mparams.gamma1*norm(v,2)*norm(vary0.grad,2))v=vary0.grad;
         }
         else
         {
             v=vary0.grad;
         }
 // Line search.
-        if(norm(v,2)>nrparams.kappa)v=(nrparams.kappa/norm(v,2))*v;
-        vary1 = maxlin2(nrparams,v,vary0,f);
+        if(norm(v,2)>mparams.kappa)v=(mparams.kappa/norm(v,2))*v;
+        vary1 = maxlinq2(mparams,v,vary0,f);
 //  Convergence check
-        if(vary1.max<vary0.max+nrparams.tol) return vary1;
+        if(vary1.max<vary0.max+mparams.tol) return vary1;
         vary0=vary1;
     }
     return vary1;

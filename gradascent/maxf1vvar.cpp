@@ -16,6 +16,10 @@ struct maxf1v
 maxf1v maxf1vvar(const vec &y,const f1v & fy)
 {
     maxf1v result;
+    int p;
+    p=y.n_elem;
+    result.locmax.set_size(p);
+    result.grad.set_size(p);
     result.locmax=y;
     result.max=fy.value;
     result.grad=fy.grad;

@@ -5,19 +5,18 @@
 //The strict pseudoconcavity condition described in the document
 //convergence.pdf is assumed to apply for the real number a.  For the starting
 //vector start, it is assumed that the value of f.value at start exceeds a.
-//Parameters used are defined in gaparams.
-//The maximum number of main iterations is gaparams.maxit.
+//Parameters used are defined in mparams.
+//The maximum number of main iterations is mparams.maxit.
 //The maximum number of secondary iterations per main iteration
-//is gaparams.maxits. The double function on O used for step sizes for
-//numerical differentiation is gaparams.c.
+//is mparams.maxits. 
 //The maximum fraction of a step toward a boundary is
-//gaparams.eta.
+//mparams.eta.
 //For secondary iterations, the improvement check
-//is gaparams.gamma1<1.
-//The cosine check  gaparams.gamma2 is not used.
-//The largest permitted step length is gaparams.kappa>0.
+//is mparams.gamma1<1.
+//The cosine check  mparams.gamma2 is not used.
+//The largest permitted step length is mparams.kappa>0.
 //If a main iteration leads to a change of the function f less
-//than gaparams.tol, then iterations cease.
+//than mparams.tol, then iterations cease.
 #include<armadillo>
 using namespace std;
 using namespace arma;
@@ -32,11 +31,10 @@ struct maxf1v
     double max;
     vec grad;
 };
-struct paramga
+struct params
 {
     int maxit;
     int maxits;
-    function<double(vec)> c;
     double eta;
     double gamma1;
     double gamma2;
@@ -44,8 +42,8 @@ struct paramga
     double tol;
 };
 maxf1v maxf1vvar(const vec &y,const f1v &fy);
-maxf1v maxlin(const paramga &gaparams,const vec & v,maxf1v & vary0,const function <f1v(vec &)> f);
-maxf1v gradascent(const paramga &gaparams,const vec &start,const function<f1v(vec &)> f)
+maxf1v maxlinq(const params &mparams,const vec & v,maxf1v & vary0, function <f1v(vec &)> f);
+maxf1v gradascent(const params & mparams,const vec & start, function<f1v(vec &)> f)
 {
     f1v fy0;
     int i,p;
@@ -58,23 +56,23 @@ maxf1v gradascent(const paramga &gaparams,const vec &start,const function<f1v(ve
     vary1.grad.set_size(p);
     vary1.locmax.set_size(p);
     v.set_size(p);
-    vary0.locmax=start;
+    v=start;
 // Function settings at start.
-    fy0=f(vary0.locmax);
+    fy0=f(v);
     vary0=maxf1vvar(start,fy0);
 // Return if starting impossible.
     if(isnan(vary0.max)) return vary0;
 // Iterations.
-    for(i=0;i<gaparams.maxit;i++)
+    for(i=0;i<mparams.maxit;i++)
     {
 // Stop if gradient of zero.
         v=vary0.grad;
         if(!any(v)) return vary0;
-        if(norm(v,2)>gaparams.kappa)v=(gaparams.kappa/norm(v,2))*v;
+        if(norm(v,2)>mparams.kappa)v=(mparams.kappa/norm(v,2))*v;
 // Line search.
-        vary1 = maxlin(gaparams,v,vary0,f);
+        vary1 = maxlinq(mparams,v,vary0,f);
 //  Convergence check
-        if(vary1.max<vary0.max+gaparams.tol) return vary1;
+        if(vary1.max<vary0.max+mparams.tol) return vary1;
         vary0=vary1;
     }
     return vary1;

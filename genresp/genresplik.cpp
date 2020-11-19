@@ -1,8 +1,8 @@
 //Log likelihood and its gradient and Hessian
-//for quantal response model with response vector y and
+//for response model with response y and
 //predictor matrix x.
 //Weight w is used.
-//Model codes are found in quantal.cpp.
+//Model codes are found in genresp.cpp.
 //xselect indicates which predictors apply to which responses.
 #include<armadillo>
 using namespace arma;
@@ -17,6 +17,11 @@ struct model
   char type;
   char transform;
 };
+struct resp
+{
+  ivec iresp;
+  vec dresp;
+};
 struct xsel
 {
   bool all;
@@ -24,12 +29,12 @@ struct xsel
 };
 extern model choices[];
 extern vec w;
-extern ivec y[];
+extern resp y[];
 extern mat x[];
 extern xsel xselect [];
 extern vec offset[];
-f2v quantal(model &,ivec &,vec &);
-f2v quantallik(vec & beta)
+f2v genresp(model &,resp &,vec &);
+f2v genresplik(vec & beta)
 {
     vec lambda;
     f2v obsresults;
@@ -65,7 +70,7 @@ f2v quantallik(vec & beta)
             }
           }
         }
-        obsresults=quantal(choices[i],y[i],lambda);
+        obsresults=genresp(choices[i],y[i],lambda);
         results.value=results.value+w(i)*obsresults.value;
         if(xselect[i].all)
         {

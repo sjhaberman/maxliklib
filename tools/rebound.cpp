@@ -7,5 +7,3 @@ void rebound(const double &y,const double &der,double &lower,double &upper)
     if(der<0.0) upper=y;
     return;
 }
-
-

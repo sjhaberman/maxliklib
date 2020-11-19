@@ -1,10 +1,8 @@
-//Find maximum likelihood estimates for quantal response model
-//based on one parameter for a response.
-//Maximum number of iterations is maxit.
-//Tolerance is tol.
+//Find maximum likelihood estimates for response model
 //Responses are y.
 //Predictors are x.
-//Weights are w.  Use gradient ascent.
+//Weights are w.
+//Gradient ascent method is used.
 #include<armadillo>
 using namespace arma;
 using namespace std;
@@ -19,26 +17,25 @@ struct maxf1v
     double max;
     vec grad;
 };
-struct paramga
+struct params
 {
     int maxit;
     int maxits;
-    function<double(vec)> c;
     double eta;
     double gamma1;
     double gamma2;
     double kappa;
     double tol;
 };
-maxf1v gradascent(const paramga&,const vec &,const function<f1v(vec &)>);
-f1v quantallik1(vec &);
-maxf1v quantalmleg(const paramga & gaparams,const vec & start)
+maxf1v gradascent(const params &,const vec &, function<f1v(vec &)>);
+f1v genresplik1(vec &);
+maxf1v genrespmleg(const params & mparams,const vec & start)
 {
     maxf1v results;
     int p;
     p=start.n_elem;
     results.locmax.set_size(p);
     results.grad.set_size(p);
-    results=gradascent(gaparams,start,quantallik1);
+    results=gradascent(mparams,start,genresplik1);
     return results;
 }

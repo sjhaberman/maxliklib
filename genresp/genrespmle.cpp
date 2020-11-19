@@ -1,10 +1,7 @@
-//Find maximum likelihood estimates for quantal response model
-//based on one parameter for a response.
-//Maximum number of iterations is maxit.
-//Tolerance is tol.
+//Find maximum likelihood estimates for response model
 //Responses are y.
 //Predictors are x.
-//Weights are w.  The Louis method is used.
+//Weights are w.
 #include<armadillo>
 using namespace arma;
 using namespace std;
@@ -21,7 +18,7 @@ struct maxf2v
     vec grad;
     mat hess;
 };
-struct paramnr
+struct params
 {
     int maxit;
     int maxits;
@@ -31,9 +28,9 @@ struct paramnr
     double kappa;
     double tol;
 };
-maxf2v nrv(const paramnr&,const vec &,const function<f2v(vec &)>);
-f2v quantallikl(vec &);
-maxf2v quantalmlel(const paramnr & nrparams,const vec & start)
+maxf2v nrv(const params&,const vec &, function<f2v(vec &)>);
+f2v genresplik(vec &);
+maxf2v genrespmle(const params & mparams,const vec & start)
 {
     maxf2v results;
     int p;
@@ -41,6 +38,6 @@ maxf2v quantalmlel(const paramnr & nrparams,const vec & start)
     results.locmax.set_size(p);
     results.grad.set_size(p);
     results.hess.set_size(p,p);
-    results=nrv(nrparams,start,quantallikl);
+    results=nrv(mparams,start,genresplik);
     return results;
 }
