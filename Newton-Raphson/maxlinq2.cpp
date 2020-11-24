@@ -46,7 +46,7 @@ maxf2v maxf2vvar(const vec &y,const f2v &fy);
 double modit(const double &eta,const double &alpha0,const double &alpha1,
              const double &stepmax,const double &lower,const double &upper);
 void rebound(const double &y,const double &der,double &lower,double &upper);
-double maxquad(double & ,double & ,double & ,double & ,double & );
+double maxquad(double & ,double & ,double & ,double & ,double & ,double & );
 maxf2v maxlinq2(const params & mparams,const vec &v,maxf2v & vary0,function<f2v(vec &)>f)
 {
 // Values alpha1 and alpha2 correspond respectively to vectors y1 and y2.
@@ -84,8 +84,8 @@ maxf2v maxlinq2(const params & mparams,const vec &v,maxf2v & vary0,function<f2v(
 //  Start at 0 and 1.
     alpha1=0.0;
 // Find maximum step size stepmax for line.
-    stepmax=1.0/norm(v,2);
-    alpha2=min(1.0,stepmax);
+    stepmax=mparams.kappa/norm(v,2);
+    alpha2=1.0;
     y0=vary0.locmax;
     y1=y0;
     der1=dot(v,vary1.grad);
@@ -132,7 +132,7 @@ maxf2v maxlinq2(const params & mparams,const vec &v,maxf2v & vary0,function<f2v(
       if(der1==0.0)return vary1;
 // Revise bounds.
       if(alpha1>0.0) rebound(alpha1,der1,lower,upper);
-      alpha2=maxquad(alpha1,alpha2,vary1.max,vary2.max,der1);
+      alpha2=maxquad(alpha1,alpha2,vary1.max,vary2.max,der1,stepmax);
       alpha2=modit(mparams.eta,alpha1,alpha2,stepmax,lower,upper);
       y2=y0+alpha2*v;
       fy2=f(y2);
