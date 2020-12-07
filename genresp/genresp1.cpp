@@ -5,8 +5,9 @@
 //yields a continuous model, choice.type='G' yields
 //a graded model, choice.type='M' yields a multinomial logit model,
 //choice.type='P' yields a Poisson model with a logarithmic transformation,
-//choice.type='R' yields a rank-logit model, and choice.type='S'
-//yields a model for Bernoulli data.
+//choice.type='R' yields a rank-logit model, choice.type='S'
+//yields a model for Bernoulli data, and choice.type='T' yields a
+//censored continuous model. 
 //For cumulative, graded, and Bernoulli cases, choice.transform='G'
 //yields a log-log transform, choice.transform='L' yields a logit
 //transformation, and choice.transform='P' yields a probit transformation.
@@ -30,6 +31,9 @@ struct resp
   ivec iresp;
   vec dresp;
 };
+f1v cgumbel1(resp &, vec &);
+f1v clogistic1(resp &, vec &);
+f1v cnormal1(resp &, vec &);
 f1v cumloglog1(ivec &,vec &);
 f1v cumlogit1(ivec &,vec &);
 f1v cumprobit1(ivec &,vec &);
@@ -80,11 +84,17 @@ f1v genresp1(model & choice,resp & y,vec & beta)
         case 'M': return multlogit1(y.iresp,beta);
         case 'P': return logmean1(y.iresp,beta);
         case 'R': return ranklogit1(y.iresp,beta);
-        default: switch(choice.transform)
+        case 'S': switch(choice.transform)
         {
           case 'G': return loglog1(y.iresp,beta);
           case 'L': return logit1(y.iresp,beta);
           default: return probit1(y.iresp,beta);
+        }
+	default: switch(choice.transform)
+        {
+          case 'G': return cgumbel1(y,beta);
+          case 'L': return clogistic1(y,beta);
+          default:  return cnormal1(y,beta);
         }
     }
 }
