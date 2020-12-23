@@ -41,9 +41,9 @@ struct params
     double kappa;
     double tol;
 };
-maxf1v maxf1vvar(const vec &y,const f1v &fy);
-maxf1v maxlinq(const params & mparams,const vec & v,maxf1v & vary0, function <f1v(vec &)> f);
-maxf1v conjgrad(const params & mparams,const vec & start, function<f1v(vec &)> f)
+maxf1v maxf1vvar(const vec & ,const f1v & );
+maxf1v maxlinq(const params & ,const vec & , const maxf1v & , const function <f1v(vec &)> );
+maxf1v conjgrad(const params & mparams, const vec & start, const function<f1v(vec &)> f)
 {
     double tau;
     f1v fy0;

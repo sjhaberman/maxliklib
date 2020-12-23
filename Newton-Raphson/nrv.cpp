@@ -6,13 +6,13 @@
 //convergence.pdf is assumed to apply for the real number a.  For the starting
 //vector start, it is assumed that the value of f.value at start exceeds a.
 //Parameters used are defined in mparams.
-//The maximum number of main iterations is gaparams.maxit.
+//The maximum number of main iterations is mparams.maxit.
 //The maximum number of secondary iterations per main iteration
-//is gaparams.maxits.
+//is mparams.maxits.
 //The maximum fraction of a step toward a boundary is
-//gaparams.eta.
+//mparams.eta.
 //For secondary iterations, the improvement check
-//is gaparams.gamma1<1.
+//is mparams.gamma1<1.
 //The cosine check  is mparams.gamma2.
 //The largest permitted step length is mparams.kappa>0.
 //If a main iteration leads to a change of the function f less
@@ -43,9 +43,9 @@ struct params
     double kappa;
     double tol;
 };
-maxf2v maxf2vvar(const vec & ,const f2v & );
-maxf2v maxlinq2(const params &,const vec & ,maxf2v & , function <f2v(vec &)> F);
-maxf2v nrv(const params&mparams,const vec & start, function<f2v(vec &)> f)
+maxf2v maxf2vvar(const vec & , const f2v & );
+maxf2v maxlinq2(const params &,const vec & , const maxf2v & , const function <f2v(vec &)> F);
+maxf2v nrv(const params&mparams, const vec & start, const function<f2v(vec &)> f)
 {
     f2v fy0;
     int i,p;

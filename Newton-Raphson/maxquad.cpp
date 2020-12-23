@@ -3,8 +3,8 @@
 //Stepmax controls step size.
 #include <cmath>
 using namespace std;
-double maxquad(double & x0,double & x1,double & f0,double & f1,
-  double & g0,double & stepmax)
+double maxquad(const double & x0, const double & x1, const double & f0, const double & f1,
+  const double & g0, const double & stepmax)
 {
     double c,d,diff;
     diff=x1-x0;
