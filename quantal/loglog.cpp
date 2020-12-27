@@ -9,7 +9,7 @@ struct f2v
     vec grad;
     mat hess;
 };
-f2v loglog(ivec & y,vec & beta)
+f2v loglog(const ivec & y, const vec & beta)
 {
 //Probability of response of 1.
     double p,q,r;

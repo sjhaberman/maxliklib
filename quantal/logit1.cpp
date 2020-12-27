@@ -7,7 +7,7 @@ struct f1v
     double value;
     vec grad;
 };
-f1v logit1(ivec & y,vec & beta)
+f1v logit1(const ivec & y, const vec & beta)
 {
 //Probability of response of 1.
     double p,q;
