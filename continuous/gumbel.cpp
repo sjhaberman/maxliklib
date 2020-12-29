@@ -9,7 +9,7 @@ struct f2v
     vec grad;
     mat hess;
 };
-f2v gumbel(vec & y,vec & beta)
+f2v gumbel(const vec & y, const vec & beta)
 {
     double z,zz;
     f2v results;

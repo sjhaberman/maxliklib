@@ -8,7 +8,7 @@ struct f1v
     double value;
     vec grad;
 };
-f1v gumbel1(vec & y,vec & beta)
+f1v gumbel1(const vec & y, const vec & beta)
 {
     double z,zz;
     f1v results;
