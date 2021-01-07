@@ -3,11 +3,13 @@
 //vector beta. The struct variable choice governs the model selection.
 //choice.type='C' yields a cumulative model, choice.type='D'
 //yields a continuous model, choice.type='G' yields
-//a graded model, choice.type='M' yields a multinomial logit model,
+//a graded model, choice.type='L' yields a multinomial logit model,
+//choice.type='M' yields a model for the maximum of two independent Bernoulli
+//random variables.
 //choice.type='P' yields a Poisson model with a logarithmic transformation,
 //choice.type='R' yields a rank-logit model, choice.type='S'
 //yields a model for Bernoulli data, and choice.type='T' yields a
-//censored continuous model. 
+//censored continuous model.
 //For cumulative, graded, and Bernoulli cases, choice.transform='G'
 //yields a log-log transform, choice.transform='L' yields a logit
 //transformation, and choice.transform='P' yields a probit transformation.
@@ -31,70 +33,28 @@ struct resp
   ivec iresp;
   vec dresp;
 };
-f1v cgumbel1(resp &, vec &);
-f1v clogistic1(resp &, vec &);
-f1v cnormal1(resp &, vec &);
-f1v cumloglog1(ivec &,vec &);
-f1v cumlogit1(ivec &,vec &);
-f1v cumprobit1(ivec &,vec &);
-f1v gradlogit1(ivec &,vec &);
-f1v gradloglog1(ivec &,vec &);
-f1v gradprobit1(ivec &,vec &);
-f1v gumbel1(vec &,vec &);
-f1v logistic1(vec &,vec &);
-f1v logit1(ivec &,vec &);
-f1v loglog1(ivec &,vec &);
-f1v logmean1(ivec &,vec &);
-f1v multlogit1(ivec &,vec &);
-f1v normal1(vec &,vec &);
-f1v normalv1(vec &,vec &);
-f1v probit1(ivec &,vec &);
-f1v ranklogit1(ivec &,vec &);
-f1v genresp1(model & choice,resp & y,vec & beta)
+f1v berresp1(const char &, const ivec &, const vec & );
+f1v contresp1(const char & , const vec & , const vec & );
+f1v cumresp1(const char &, const ivec &, const vec &) ;
+f1v gradresp1(const char &, const ivec &, const vec & );                                                              
+f1v maxberresp1(const char &, const ivec &, const vec & );
+f1v logmean1(const ivec &, const vec & );
+f1v maxberresp1(const char & , const ivec &, const vec & );
+f1v multlogit1(const ivec &, const vec & );
+f1v ranklogit1(const ivec &, const vec & );
+f1v truncresp1(const char &, const resp & , const vec & );
+f1v genresp1(const model & choice, const resp & y, const vec & beta)
 {
     switch(choice.type)
-    {
-        case 'C': switch(choice.transform)
-        {
-          case 'G': return cumloglog1(y.iresp,beta);
-          case 'L': return cumlogit1(y.iresp,beta);
-          default: return cumprobit1(y.iresp,beta);
-        }
-        case 'D':switch(choice.transform)
-        {
-          case 'G': return gumbel1(y.dresp,beta);
-          case 'L': return logistic1(y.dresp,beta);
-          default:
-          if(y.dresp.n_elem>1)
-          {
-            return normalv1(y.dresp,beta);
-          }
-          else
-          {
-            return normal1(y.dresp,beta);
-          }
-        }
-        case 'G': switch(choice.transform)
-        {
-          case 'G': return gradloglog1(y.iresp,beta);
-          case 'L': return gradlogit1(y.iresp,beta);
-          default: return gradprobit1(y.iresp,beta);
-
-        }
-        case 'M': return multlogit1(y.iresp,beta);
+    {  
+        case 'C': return cumresp1(choice.transform,y.iresp,beta);
+        case 'D': return contresp1(choice.transform,y.dresp,beta);
+        case 'G': return gradresp1(choice.transform,y.iresp,beta); 
+        case 'L': return multlogit1(y.iresp,beta);
+        case 'M': return maxberresp1(choice.transform,y.iresp,beta);
         case 'P': return logmean1(y.iresp,beta);
         case 'R': return ranklogit1(y.iresp,beta);
-        case 'S': switch(choice.transform)
-        {
-          case 'G': return loglog1(y.iresp,beta);
-          case 'L': return logit1(y.iresp,beta);
-          default: return probit1(y.iresp,beta);
-        }
-	default: switch(choice.transform)
-        {
-          case 'G': return cgumbel1(y,beta);
-          case 'L': return clogistic1(y,beta);
-          default:  return cnormal1(y,beta);
-        }
+        case 'S': return berresp1(choice.transform,y.iresp,beta);
+        default: return truncresp1(choice.transform,y,beta);
     }
 }
