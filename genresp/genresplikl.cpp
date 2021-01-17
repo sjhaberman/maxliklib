@@ -6,6 +6,7 @@
 //xselect indicates which predictors apply to which responses.
 #include<armadillo>
 using namespace arma;
+using namespace std;
 struct f1v
 {
     double value;
@@ -32,14 +33,17 @@ struct xsel
   bool all;
   ivec list;
 };
-extern model choices[];
-extern vec w;
-extern resp y[];
-extern mat x[];
-extern xsel xselect [];
-extern vec offset[];
-f1v genresp1(model &,resp &,vec &);
-f2v genresplikl(vec & beta)
+struct dat
+{
+     model choice;
+     double weight;
+     resp dep;
+     vec offset;
+     mat indep;
+     xsel xselect;
+};
+f1v genresp1(const model &, const resp &, const vec &);
+f2v genresplikl(const vector<dat> & data, const vec & beta)
 {
     vec lambda,u;
     f1v obsresults;
@@ -47,45 +51,45 @@ f2v genresplikl(vec & beta)
     int i,j,jj,k,kk,p,q,r,n;
     results.value=0.0;
     p=beta.n_elem;
-    n=w.n_elem;
+    n=data.size();
     results.grad.set_size(p);
     results.grad.zeros();
     results.hess.set_size(p,p);
     results.hess.zeros();
     for (i=0;i<n;i++)
     {
-        r=offset[i].n_elem;
+        r=data[i].offset.n_elem;
         lambda.set_size(r);
-        lambda=offset[i];
+        lambda=data[i].offset;
         obsresults.grad.set_size(r);
-        if(xselect[i].all)
+        if(data[i].xselect.all)
         {
-          lambda=lambda+x[i]*beta;
+          lambda=lambda+data[i].indep*beta;
         }
         else
         {
-          q=xselect[i].list.n_elem;
+          q=data[i].xselect.list.n_elem;
           if(q>0)
           {
             for(j=0;j<q;j++)
             {
-              jj=xselect[i].list(j);
-              lambda=lambda+beta(jj)*x[i].col(jj);
+              jj=data[i].xselect.list(j);
+              lambda=lambda+beta(jj)*data[i].indep.col(jj);
             }
           }
         }
-        obsresults=genresp1(choices[i],y[i],lambda);
-        results.value=results.value+w(i)*obsresults.value;
-        if(xselect[i].all)
+        obsresults=genresp1(data[i].choice,data[i].dep,lambda);
+        results.value=results.value+data[i].weight*obsresults.value;
+        if(data[i].xselect.all)
         {
           u.set_size(p);
-          u=trans(x[i])*obsresults.grad;
-          results.grad=results.grad+w(i)*u;
+          u=trans(data[i].indep)*obsresults.grad;
+          results.grad=results.grad+data[i].weight*u;
           for(j=0;j<p;j++)
           {
             for(k=0;k<=j;k++)
             {
-              results.hess(j,k)=results.hess(j,k)-w(i)*u(j)*u(k);
+              results.hess(j,k)=results.hess(j,k)-data[i].weight*u(j)*u(k);
             }
           }
         }
@@ -96,13 +100,13 @@ f2v genresplikl(vec & beta)
             for(j=0;j<q;j++)
             {
               u.set_size(q);
-              jj=xselect[i].list(j);
-              u(j)=dot(obsresults.grad,x[i].col(jj));
-              results.grad(jj)=results.grad(jj)+w(i)*u(j);
+              jj=data[i].xselect.list(j);
+              u(j)=dot(obsresults.grad,data[i].indep.col(jj));
+              results.grad(jj)=results.grad(jj)+data[i].weight*u(j);
               for(k=0;k<=j;k++)
               {
-                kk=xselect[i].list(k);
-                results.hess(jj,kk)=results.hess(jj,kk)-w(i)*u(j)*u(k);
+                kk=data[i].xselect.list(k);
+                results.hess(jj,kk)=results.hess(jj,kk)-data[i].weight*u(j)*u(k);
               }
             }
           }

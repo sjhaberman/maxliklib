@@ -6,6 +6,7 @@
 #include<armadillo>
 using namespace arma;
 using namespace std;
+using namespace std::placeholders;
 struct f1v
 {
     double value;
@@ -27,15 +28,40 @@ struct params
     double kappa;
     double tol;
 };
+struct model
+{
+  char type;
+  char transform;
+};
+struct resp
+{
+  ivec iresp;
+  vec dresp;
+};
+struct xsel
+{
+  bool all;
+  ivec list;
+};
+struct dat
+{
+     model choice;
+     double weight;
+     resp dep;
+     vec offset;
+     mat indep;
+     xsel xselect;
+};
 maxf1v gradascent(const params &,const vec &, function<f1v(vec &)>);
-f1v genresplik1(vec &);
-maxf1v genrespmleg(const params & mparams,const vec & start)
+f1v genresplik1(const vector<dat> & , const vec &);
+maxf1v genrespmleg(const params & mparams, const vector<dat> & data, const vec & start)
 {
     maxf1v results;
     int p;
     p=start.n_elem;
     results.locmax.set_size(p);
     results.grad.set_size(p);
-    results=gradascent(mparams,start,genresplik1);
+    auto f=std::bind(genresplik1,data,_1);
+    results=gradascent(mparams,start,f);
     return results;
 }

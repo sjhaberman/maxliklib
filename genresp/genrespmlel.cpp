@@ -5,6 +5,7 @@
 #include<armadillo>
 using namespace arma;
 using namespace std;
+using namespace std::placeholders;
 struct f2v
 {
     double value;
@@ -33,9 +34,33 @@ struct params
     double kappa;
     double tol;
 };
+struct model
+{
+  char type;
+  char transform;
+};
+struct resp
+{
+  ivec iresp;
+  vec dresp;
+};
+struct xsel
+{
+  bool all;
+  ivec list;
+};
+struct dat
+{
+     model choice;
+     double weight;
+     resp dep;
+     vec offset;
+     mat indep;
+     xsel xselect;
+};
 maxf2v nrv(const params&,const vec &,function<f2v(vec &)>);
-f2v genresplikl(vec &);
-maxf2v genrespmlel(const params & mparams,const vec & start)
+f2v genresplikl(const vector<dat> & , const vec &);
+maxf2v genrespmlel(const params & mparams, const vector<dat> & data, const vec & start)
 {
     maxf2v results;
     int p;
@@ -43,6 +68,7 @@ maxf2v genrespmlel(const params & mparams,const vec & start)
     results.locmax.set_size(p);
     results.grad.set_size(p);
     results.hess.set_size(p,p);
-    results=nrv(mparams,start,genresplikl);
+    auto f=std::bind(genresplikl,data,_1);
+    results=nrv(mparams,start,f);
     return results;
 }
