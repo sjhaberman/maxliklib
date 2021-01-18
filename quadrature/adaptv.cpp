@@ -10,11 +10,15 @@ struct pwv
     mat points;
     vec weights;
 };
-pwv adaptv(vec & loc,mat & lt,pwv & pws)
-{
+pwv adaptv(const vec & loc, const mat & lt, const pwv & pws)
+{ 
     double scale;
-    int i;
-    pwv results=pws;
+    int i,p,n;
+    pwv results;
+    n=pws.weights.n_elem;
+    p=pws.points.n_rows;
+    results.points.set_size(p,n);
+    results.weights.set_size(n);
     if(min(diagvec(lt))<=0.0)return results;
     scale=prod(diagvec(lt));
     for(i=0;i<results.points.n_cols;i++)

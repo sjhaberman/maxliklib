@@ -2,7 +2,7 @@
 #include<armadillo>
 using namespace std;
 using namespace arma;
-vec hermpoly(int & n,double & x)
+vec hermpoly(const int & n, const double & x)
 {
     int i;
     double xn;

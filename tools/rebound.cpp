@@ -1,9 +1,16 @@
 //Reset upper and lower bounds.
-//Old point is y. Derivative at y is der, Lower bound is lower,
-//and upper bound is upper.
-void rebound(const double &y,const double &der,double &lower,double &upper)
+//Old point is y. Derivative at y is der, Lower bound is b.lower,
+//and upper bound is b.upper.
+struct bounds
 {
-    if(der>0.0) lower=y;
-    if(der<0.0) upper=y;
-    return;
+     double lower;
+     double upper;
+};
+bounds  rebound(const double &y, const double & der, const bounds & b)
+{
+    bounds bb;
+    bb = b;
+    if(der>0.0) bb.lower=y;
+    if(der<0.0) bb.upper=y;
+    return bb;
 }

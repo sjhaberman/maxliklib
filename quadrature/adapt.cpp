@@ -8,9 +8,13 @@ struct pw
     vec points;
     vec weights;
 };
-pw adapt(double & loc,double & scale,pw & pws)
+pw adapt(const double & loc, const double & scale, const pw & pws)
 {
-    pw results=pws;
+    int n;
+    pw results;
+    n=pws.points.n_elem;
+    results.points.set_size(n);
+    results.weights.set_size(n);
     results.points=loc+scale*pws.points;
     results.weights=pws.weights/scale;
     return results;

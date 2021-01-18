@@ -7,7 +7,7 @@
 //and lw(i) is the probability that S=i for i from 0 to n.
 #include<armadillo>
 using namespace arma;
-vec lw(double & c,vec & p)
+vec lw(const double & c, const vec & p)
 {
     double d,sumd,xn;
     int bottom,bottom1,i,it,n,top,top1;

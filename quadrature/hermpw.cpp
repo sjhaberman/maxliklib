@@ -8,13 +8,15 @@ struct pw
     vec points;
     vec weights;
 };
-pw hermpw(int & n)
+pw hermpw(const int & n)
 {
     double x;
     int i;
     vec p(n),w(n);
     mat J(n,n,fill::zeros),K(n,n);
     pw pws;
+    pws.points.set_size(n);
+    pws.weights.set_size(n);
 //Set up matrix for eigenvalue computation.
     if(n>1)
     {

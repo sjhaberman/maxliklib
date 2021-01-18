@@ -13,7 +13,7 @@ struct pwv
     mat points;
     vec weights;
 };
-pwv genprods(imat & indices,pw  pws [ ])
+pwv genprods(const imat & indices, const vector<pw> & pws)
 {
     double w;
     int i,j;
