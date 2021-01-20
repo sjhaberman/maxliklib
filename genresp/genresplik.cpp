@@ -6,7 +6,6 @@
 //xselect indicates which predictors apply to which responses.
 #include<armadillo>
 using namespace arma;
-using namespace std;
 struct f2v
 {
     double value;
@@ -37,9 +36,8 @@ struct dat
      mat indep;
      xsel xselect;
 };
- 
 f2v genresp(const model &, const resp &, const vec &);
-f2v genresplik(const vector<dat> & data, const vec & beta)
+f2v genresplik(const std::vector<dat> & data, const vec & beta)
 {
     vec lambda;
     f2v obsresults;
@@ -54,60 +52,60 @@ f2v genresplik(const vector<dat> & data, const vec & beta)
     results.hess.zeros();
     for (i=0;i<n;i++)
     {
-        r=data[i].offset.n_elem;
+        r=data[i].indep.n_rows;
+        q=data[i].indep.n_cols;
         lambda.set_size(r);
         lambda=data[i].offset;
-        obsresults.grad.set_size(r);
-        obsresults.hess.set_size(r,r);
-        if(data[i].xselect.all)
+        obsresults.grad.set_size(q);
+        obsresults.hess.set_size(q,q);
+        if(q>0)
         {
-          lambda=lambda+data[i].indep*beta;
-        }
-        else
-        {
-          q=data[i].xselect.list.n_elem;
-          if(q>0)
-          {
-            for(j=0;j<q;j++)
+            if(data[i].xselect.all)
             {
-              k=data[i].xselect.list(j);
-              lambda=lambda+beta(k)*data[i].indep.col(k);
+                lambda=lambda+data[i].indep*beta;
             }
-          }
+            else
+            {
+                for(j=0;j<q;j++)
+                {
+                    k=data[i].xselect.list(j);
+                    lambda=lambda+beta(k)*data[i].indep.col(j);
+                }
+            }
         }
         obsresults=genresp(data[i].choice,data[i].dep,lambda);
         results.value=results.value+data[i].weight*obsresults.value;
-        if(data[i].xselect.all)
+        if(q>0)
         {
-          results.grad=results.grad
-             +data[i].weight*trans(data[i].indep)*obsresults.grad;
-          for(j=0;j<p;j++)
-          {
-            for(k=0;k<=j;k++)
+            if(data[i].xselect.all)
             {
-              results.hess(j,k)=results.hess(j,k)
-                 +data[i].weight*dot(data[i].indep.col(j),obsresults.hess*data[i].indep.col(k));
+                results.grad=results.grad
+                    +data[i].weight*trans(data[i].indep)*obsresults.grad;
+                for(j=0;j<p;j++)
+                {
+                    for(k=0;k<=j;k++)
+                    {
+                        results.hess(j,k)=results.hess(j,k)
+                            +data[i].weight*dot(data[i].indep.col(j),obsresults.hess*data[i].indep.col(k));
+                    }
+                }
             }
-          }
-        }
-        else
-        {
-          if(q>0)
-          {
-            for(j=0;j<q;j++)
+            else
             {
-              jj=data[i].xselect.list(j);
-              results.grad(jj)=results.grad(jj)
-                 +data[i].weight*dot(obsresults.grad,data[i].indep.col(jj));
-              for(k=0;k<=j;k++)
-              {
-                kk=data[i].xselect.list(k);
-                results.hess(jj,kk)=results.hess(jj,kk)
-                   +data[i].weight*
-                   dot(data[i].indep.col(jj),obsresults.hess*data[i].indep.col(kk));
-              }
+                for(j=0;j<q;j++)
+                {
+                    jj=data[i].xselect.list(j);
+                    results.grad(jj)=results.grad(jj)
+                        +data[i].weight*dot(obsresults.grad,data[i].indep.col(j));
+                    for(k=0;k<=j;k++)
+                    {
+                        kk=data[i].xselect.list(k);
+                        results.hess(jj,kk)=results.hess(jj,kk)
+                            +data[i].weight*
+                            dot(data[i].indep.col(j),obsresults.hess*data[i].indep.col(k));
+                    }
+                }
             }
-          }
         }
     }
     if(p>1)results.hess=symmatl(results.hess);

@@ -6,7 +6,6 @@
 //xselect indicates which predictors apply to which responses.
 #include<armadillo>
 using namespace arma;
-using namespace std;
 struct f1v
 {
     double value;
@@ -36,14 +35,13 @@ struct dat
      mat indep;
      xsel xselect;
 };
- 
 f1v genresp1(const model &, const resp &, const vec &);
-f1v genresplik1(const vector<dat> & data, const vec & beta)
+f1v genresplik1(const std::vector<dat> & data, const vec & beta)
 {
     vec lambda;
     f1v obsresults;
     f1v results;
-    int i,j,jj,p,q,r,n;
+    int i,j,k,p,q,r,n;
     results.value=0.0;
     p=beta.n_elem;
     n=data.size();
@@ -51,44 +49,44 @@ f1v genresplik1(const vector<dat> & data, const vec & beta)
     results.grad.zeros();
     for (i=0;i<n;i++)
     {
-        r=data[i].offset.n_elem;
+        r=data[i].indep.n_rows;
+        q=data[i].indep.n_cols;
         lambda.set_size(r);
         lambda=data[i].offset;
-        obsresults.grad.set_size(r);
-        if(data[i].xselect.all)
+        obsresults.grad.set_size(q);
+        if(q>0)
         {
-          lambda=lambda+data[i].indep*beta;
-        }
-        else
-        {
-          q=data[i].xselect.list.n_elem;
-          if(q>0)
-          {
-            for(j=0;j<q;j++)
+            if(data[i].xselect.all)
             {
-              jj=data[i].xselect.list(j);
-              lambda=lambda+beta(jj)*data[i].indep.col(jj);
+                lambda=lambda+data[i].indep*beta;
+            }
+            else
+            {
+                for(j=0;j<q;j++)
+                {
+                    k=data[i].xselect.list(j);
+                    lambda=lambda+beta(k)*data[i].indep.col(j);
             }
           }
         }
         obsresults=genresp1(data[i].choice,data[i].dep,lambda);
         results.value=results.value+data[i].weight*obsresults.value;
-        if(data[i].xselect.all)
+        if(q>0)
         {
-          results.grad=results.grad
-             +data[i].weight*trans(data[i].indep)*obsresults.grad;
-        }
-        else
-        {
-          if(q>0)
-          {
-            for(j=0;j<q;j++)
+            if(data[i].xselect.all)
             {
-              jj=data[i].xselect.list(j);
-              results.grad(jj)=results.grad(jj)
-                 +data[i].weight*dot(obsresults.grad,data[i].indep.col(jj));
+                results.grad=results.grad
+                    +data[i].weight*trans(data[i].indep)*obsresults.grad;
             }
-          }
+            else
+            {
+                for(j=0;j<q;j++)
+                {
+                    k=data[i].xselect.list(j);
+                    results.grad(k)=results.grad(k)
+                        +data[i].weight*dot(obsresults.grad,data[i].indep.col(j));
+                }
+            }
         }
     }
     return results;

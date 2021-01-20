@@ -53,7 +53,7 @@ struct dat
      xsel xselect;
 };
 maxf1v conjgrad(const params &,const vec &, function<f1v(vec &)>);
-f1v genresplik1(const vector<dat> & , const vec &);
+f1v genresplik1(const std::vector<dat> & , const vec &);
 maxf1v genrespmle1(const params & mparams, const vector<dat> & data, const vec & start)
 {
     maxf1v results;

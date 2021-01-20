@@ -54,7 +54,7 @@ struct dat
      xsel xselect;
 };
 maxf2v nrv(const params & ,const vec & , function<f2v(vec &)>);
-f2v genresplik(const vector<dat> & , const vec &);
+f2v genresplik(const std::vector<dat> & , const vec &);
 maxf2v genrespmle(const params & mparams, const vector<dat> & data, const vec & start)
 {
     maxf2v results;

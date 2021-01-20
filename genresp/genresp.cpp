@@ -37,7 +37,7 @@ struct resp
 f2v berresp(const char &, const ivec &, const vec & );
 f2v contresp(const char & , const vec & , const vec & );
 f2v cumresp(const char &, const ivec &, const vec &) ;
-f2v gradresp(const char &, const ivec &, const vec & );                                                              
+f2v gradresp(const char &, const ivec &, const vec & );
 f2v maxberresp(const char &, const ivec &, const vec & );
 f2v logmean(const ivec &, const vec & );
 f2v maxberresp(const char & , const ivec &, const vec & );
