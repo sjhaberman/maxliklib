@@ -8,8 +8,7 @@
 //1+maxsum elements, where maxsum is the sum of the (cc(i)-1) for 0<=i<n.
 #include<armadillo>
 using namespace arma;
-using namespace std;
-vec lwm(const double & c, const vector<vec> & p )
+vec lwm(const double & c, const std::vector<vec> & p )
 {
     double d,sumd,xn;
     int bottom,bottom1,i,it,maxsum,n, top,top1;

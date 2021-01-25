@@ -2,7 +2,6 @@
 //indices gives the products to use.  pw gives the univariate points and weights.
 #include<armadillo>
 using namespace arma;
-using namespace std;
 struct pw
 {
     vec points;
@@ -13,7 +12,7 @@ struct pwv
     mat points;
     vec weights;
 };
-pwv genprods(const imat & indices, const vector<pw> & pws)
+pwv genprods(const imat & indices, const std::vector<pw> & pws)
 {
     double w;
     int i,j;

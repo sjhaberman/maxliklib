@@ -1,7 +1,6 @@
 //Generate all cartesian products of finite sets of integers.  Set sizes are in sizes.
 #include<armadillo>
 using namespace arma;
-using namespace std;
 imat genfact(const ivec & sizes)
 {
     int i,j,n;

@@ -18,7 +18,6 @@
 //The largest permitted step length is mparams.kappa>0.
 #include<armadillo>
 using namespace arma;
-using namespace std;
 struct bounds
 {
      double lower;
@@ -51,7 +50,7 @@ double modit(const double &, const double & ,const double &,
 bounds rebound(const double &, const double &, const bounds & );
 double maxquad(const double & , const double & , const double & , const double & ,
   const double & , const double & );
-maxf1v maxlinq(const params & mparams, const vec & v, const maxf1v & vary0, const function<f1v(vec &)>f)
+maxf1v maxlinq(const params & mparams, const vec & v, const maxf1v & vary0, const std::function<f1v(vec &)>f)
 {
 // Values alpha1 and alpha2 correspond respectively to vectors y1 and y2.
 // Bounds on optimal line position are b.lower and b.upper.

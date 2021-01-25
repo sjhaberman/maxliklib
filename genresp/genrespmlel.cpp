@@ -4,7 +4,6 @@
 //Weights are w.  The Louis approximation is used.
 #include<armadillo>
 using namespace arma;
-using namespace std;
 using namespace std::placeholders;
 struct f2v
 {
@@ -58,9 +57,9 @@ struct dat
      mat indep;
      xsel xselect;
 };
-maxf2v nrv(const params&,const vec &,function<f2v(vec &)>);
-f2v genresplikl(const vector<dat> & , const vec &);
-maxf2v genrespmlel(const params & mparams, const vector<dat> & data, const vec & start)
+maxf2v nrv(const params &,const vec & , const std::function<f2v(vec &)>);
+f2v genresplikl(const std::vector<dat> & , const vec &);
+maxf2v genrespmlel(const params & mparams, const std::vector<dat> & data, const vec & start)
 {
     maxf2v results;
     int p;

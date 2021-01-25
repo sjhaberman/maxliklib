@@ -4,7 +4,6 @@
 //'L' for logistic, and 'N' for normal.
 #include<armadillo>
 using namespace arma;
-extern char choice;
 struct f2v
 {
     double value;

@@ -1,7 +1,6 @@
 //Compute coefficients for Hermite polynomial of given order.
 //Order is n.
 #include<armadillo>
-using namespace std;
 using namespace arma;
 vec hermcoeff(const int & n)
 {

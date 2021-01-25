@@ -2,7 +2,6 @@
 //and dividing integration weights by scale.
 #include<armadillo>
 using namespace arma;
-using namespace std;
 struct pw
 {
     vec points;

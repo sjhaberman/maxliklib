@@ -10,16 +10,19 @@ struct f2v
     vec grad;
     mat hess;
 };
-f2v multlogit(ivec & y,vec & beta)
+f2v multlogit(const ivec & y, const vec & beta)
 {
-    double r;
-    int z;
+    double s;
+    int r,z;
     vec e;
+    r=beta.n_elem;
     f2v results;
+    results.grad.set_size(r);
+    results.hess.set_size(r,r);
     e=exp(beta);
-    r=1.0+sum(e);
-    results.value=-log(r);
-    results.grad=-e/r;
+    s=1.0+sum(e);
+    results.value=-log(s);
+    results.grad=-e/s;
     results.hess=diagmat(results.grad)+results.grad*trans(results.grad);
     if(y(0)>0)
     {

@@ -1,6 +1,5 @@
 //Compute Hermite polynomials up to order n for point x.
 #include<armadillo>
-using namespace std;
 using namespace arma;
 vec hermpoly(const int & n, const double & x)
 {

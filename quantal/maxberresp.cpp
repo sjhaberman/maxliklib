@@ -13,7 +13,7 @@ struct f2v
     vec grad;
     mat hess;
 };
-f2v berresp(const char & transform, const ivec &, const vec &);
+f2v berresp(const char & , const ivec &, const vec &);
 f2v maxberresp(const char  & transform, const ivec & y, const vec & beta)
 {
     double p, p1, p2, r, r1, r2;

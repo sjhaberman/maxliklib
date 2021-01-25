@@ -4,7 +4,6 @@
 //matrix lt.  Weight are multiplied by the determinant of lt.
 #include<armadillo>
 using namespace arma;
-using namespace std;
 struct pwv
 {
     mat points;

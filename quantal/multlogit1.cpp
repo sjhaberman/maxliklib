@@ -9,16 +9,18 @@ struct f1v
     double value;
     vec grad;
 };
-f1v multlogit1(ivec & y,vec & beta)
+f1v multlogit1(const ivec & y, const vec & beta)
 {
-    double r;
-    int z;
+    double s;
+    int r,z;
     vec e;
     f1v results;
+    r=beta.n_elem;
+    results.grad.set_size(r);
     e=exp(beta);
-    r=1.0+sum(e);
-    results.value=-log(r);
-    results.grad=-e/r;
+    s=1.0+sum(e);
+    results.value=-log(s);
+    results.grad=-e/s;
     if(y(0)>0)
     {
         z=y(0)-1;

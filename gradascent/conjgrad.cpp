@@ -18,7 +18,6 @@
 //If a main iteration leads to a change of the function f less
 //than mparams.tol, then iterations cease.
 #include<armadillo>
-using namespace std;
 using namespace arma;
 struct f1v
 {
@@ -42,8 +41,8 @@ struct params
     double tol;
 };
 maxf1v maxf1vvar(const vec & ,const f1v & );
-maxf1v maxlinq(const params & ,const vec & , const maxf1v & , const function <f1v(vec &)> );
-maxf1v conjgrad(const params & mparams, const vec & start, const function<f1v(vec &)> f)
+maxf1v maxlinq(const params & ,const vec & , const maxf1v & , const std::function <f1v(vec &)> );
+maxf1v conjgrad(const params & mparams, const vec & start, const std::function<f1v(vec &)> f)
 {
     double tau;
     f1v fy0;

@@ -5,7 +5,6 @@
 //Gradient ascent method is used.
 #include<armadillo>
 using namespace arma;
-using namespace std;
 using namespace std::placeholders;
 struct f1v
 {
@@ -52,9 +51,9 @@ struct dat
      mat indep;
      xsel xselect;
 };
-maxf1v gradascent(const params &,const vec &, function<f1v(vec &)>);
-f1v genresplik1(const vector<dat> & , const vec &);
-maxf1v genrespmleg(const params & mparams, const vector<dat> & data, const vec & start)
+maxf1v gradascent(const params &,const vec &, const std::function<f1v(vec &)>);
+f1v genresplik1(const std::vector<dat> & , const vec &);
+maxf1v genrespmleg(const params & mparams, const std::vector<dat> & data, const vec & start)
 {
     maxf1v results;
     int p;

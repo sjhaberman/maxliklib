@@ -1,7 +1,6 @@
 //Compute points and weights for Gauss-Hermite quadrature of given order.
 //Order is n.
 #include<armadillo>
-using namespace std;
 using namespace arma;
 struct pw
 {
