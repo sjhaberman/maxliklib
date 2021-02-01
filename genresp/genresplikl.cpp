@@ -64,7 +64,7 @@ f2v genresplikl(const std::vector<dat> & data, const vec & beta)
         obsresults.grad.set_size(q);
         if(q>0)
         {
-            if(data[i].xselect.all)
+            if(data[i].xselect.all&&p==q)
             {
                 lambda=lambda+data[i].indep*beta;
             }
@@ -81,7 +81,7 @@ f2v genresplikl(const std::vector<dat> & data, const vec & beta)
         results.value=results.value+data[i].weight*obsresults.value;
         if(q>0)
         {
-            if(data[i].xselect.all)
+            if(data[i].xselect.all&&p==q)
             {
                 u.set_size(p);
                 u=trans(data[i].indep)*obsresults.grad;
@@ -92,6 +92,7 @@ f2v genresplikl(const std::vector<dat> & data, const vec & beta)
                     {
                         results.hess(j,k)=results.hess(j,k)
                             -data[i].weight*u(j)*u(k);
+                        if(j!=k)results.hess(k,j)=results.hess(j,k);
                     }
                 }
             }
@@ -107,11 +108,11 @@ f2v genresplikl(const std::vector<dat> & data, const vec & beta)
               {
                 kk=data[i].xselect.list(k);
                 results.hess(jj,kk)=results.hess(jj,kk)-data[i].weight*u(j)*u(k);
+                  if(jj!=kk)results.hess(kk,jj)=results.hess(jj,kk);
               }
             }
           }
         }
     }
-    if(p>1)results.hess=symmatl(results.hess);
     return results;
 }

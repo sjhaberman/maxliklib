@@ -56,7 +56,7 @@ f1v genresplik1(const std::vector<dat> & data, const vec & beta)
         obsresults.grad.set_size(q);
         if(q>0)
         {
-            if(data[i].xselect.all)
+            if(data[i].xselect.all&&p==q)
             {
                 lambda=lambda+data[i].indep*beta;
             }
@@ -73,7 +73,7 @@ f1v genresplik1(const std::vector<dat> & data, const vec & beta)
         results.value=results.value+data[i].weight*obsresults.value;
         if(q>0)
         {
-            if(data[i].xselect.all)
+            if(data[i].xselect.all&&p==q)
             {
                 results.grad=results.grad
                     +data[i].weight*trans(data[i].indep)*obsresults.grad;
