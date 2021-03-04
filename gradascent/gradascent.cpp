@@ -1,7 +1,8 @@
-//Gradient ascent algorithm for function maximization of a continuously
+//Gradient ascent algorithm for function maximization of a twice continuously
 //differentiable real function f.value of real vectors of dimension p on a
 //nonempty open convex set O of p-dimensional vectors.  The gradient of f.value
-//is f.grad.
+//is f.grad.  The integer order must be 1 or 2.  If order is 2, then the
+//Hessian f.hess of f.value is found even though it is not used.
 //The strict pseudoconcavity condition described in the document
 //convergence.pdf is assumed to apply for the real number a.  For the starting
 //vector start, it is assumed that the value of f.value at start exceeds a.
@@ -19,16 +20,18 @@
 //than mparams.tol, then iterations cease.
 #include<armadillo>
 using namespace arma;
-struct f1v
+struct f2v
 {
     double value;
     vec grad;
+    mat hess;
 };
-struct maxf1v
+struct maxf2v
 {
     vec locmax;
     double max;
     vec grad;
+    mat hess;
 };
 struct params
 {
@@ -40,14 +43,15 @@ struct params
     double kappa;
     double tol;
 };
-maxf1v maxf1vvar(const vec & , const f1v & );
-maxf1v maxlinq(const params & ,const vec & , const maxf1v & ,
-    const std::function <f1v(vec &)> );
-maxf1v gradascent(const params & mparams, const vec & start, const std::function<f1v(vec &)> f)
+maxf2v maxf2vvar(const int & , const vec & , const f2v & );
+maxf2v maxlinq2(const int & , const params & , const vec & , const maxf2v & ,
+    const std::function <f2v(const int &, const vec &)> );
+maxf2v gradascent(const int & order, const params & mparams, const vec & start,
+    const std::function<f2v(const int &, const vec &)> f)
 {
-    f1v fy0;
-    int i,p;
-    maxf1v vary0,vary1;
+    f2v fy0;
+    int i, p;
+    maxf2v vary0, vary1;
     vec v;
     p=start.n_elem;
     fy0.grad.set_size(p);
@@ -55,11 +59,17 @@ maxf1v gradascent(const params & mparams, const vec & start, const std::function
     vary0.locmax.set_size(p);
     vary1.grad.set_size(p);
     vary1.locmax.set_size(p);
+    if(order>1)
+    {
+        fy0.hess.set_size(p,p);
+        vary0.hess.set_size(p,p);
+        vary1.hess.set_size(p,p);
+    }
     v.set_size(p);
     v=start;
 // Function settings at start.
-    fy0=f(v);
-    vary0=maxf1vvar(start,fy0);
+    fy0=f(order, v);
+    vary0=maxf2vvar(order, start, fy0);
 // Return if starting impossible.
     if(isnan(vary0.max)) return vary0;
 // Iterations.
@@ -70,7 +80,7 @@ maxf1v gradascent(const params & mparams, const vec & start, const std::function
         if(!any(v)) return vary0;
         if(norm(v,2)>mparams.kappa)v=(mparams.kappa/norm(v,2))*v;
 // Line search.
-        vary1 = maxlinq(mparams,v,vary0,f);
+        vary1 = maxlinq2(order, mparams, v, vary0, f);
 //  Convergence check
         if(vary1.max<vary0.max+mparams.tol) return vary1;
         vary0=vary1;

@@ -18,7 +18,6 @@
 //If a main iteration leads to a change of the function f less
 //than mparams.tol, then iterations cease.
 #include<armadillo>
-using namespace std;
 using namespace arma;
 struct f2v
 {
@@ -43,12 +42,13 @@ struct params
     double kappa;
     double tol;
 };
-maxf2v maxf2vvar(const vec & , const f2v & );
-maxf2v maxlinq2(const params &,const vec & , const maxf2v & , const function <f2v(vec &)> F);
-maxf2v nrv(const params&mparams, const vec & start, const function<f2v(vec &)> f)
+maxf2v maxf2vvar(const int & , const vec & , const f2v & );
+maxf2v maxlinq2(const int & , const params &, const vec & , const maxf2v & ,
+    const std::function <f2v(const int &, const vec & )> f);
+maxf2v nrv(const int & order, const params & mparams, const vec & start, const std::function<f2v(const int &, const vec &)> f)
 {
     f2v fy0;
-    int i,p;
+    int i, p;
     p=start.n_elem;
     fy0.grad.set_size(p);
     fy0.hess.set_size(p,p);
@@ -63,8 +63,8 @@ maxf2v nrv(const params&mparams, const vec & start, const function<f2v(vec &)> f
     v.set_size(p);
 // Function settings at start.
     v=start;
-    fy0=f(v);
-    vary0=maxf2vvar(v,fy0);
+    fy0=f(order, v);
+    vary0=maxf2vvar(order, v, fy0);
 // Return if starting impossible.
     if(isnan(vary0.max)||mparams.maxit<=0) return vary0;
 // Iterations.
@@ -84,7 +84,7 @@ maxf2v nrv(const params&mparams, const vec & start, const function<f2v(vec &)> f
         }
 // Line search.
         if(norm(v,2)>mparams.kappa)v=(mparams.kappa/norm(v,2))*v;
-        vary1 = maxlinq2(mparams,v,vary0,f);
+        vary1 = maxlinq2(order, mparams,v,vary0,f);
 //  Convergence check
         if(vary1.max<vary0.max+mparams.tol) return vary1;
         vary0=vary1;

@@ -18,75 +18,93 @@ struct vecmat
     vec v;
     mat m;
 };
-vec pack(vecmat & u);
-vecmat unpack(int &,vec &);
-f2v normalv(vec & y,vec & beta)
+struct resp
+{
+  ivec iresp;
+  vec dresp;
+};
+vec pack(const vecmat & u);
+vecmat unpack(const int &, const vec &);
+f2v normalv(const int & order, const resp & y, const vec & beta)
 {
     double d;
     int i,i1,j,j1,k,k1,n;
     vec a,z;
     vecmat b,dec;
     f2v results;
-    results.grad.set_size(beta.n_elem);
-    results.hess.set_size(beta.n_elem,beta.n_elem);
-    n=y.n_elem;
+    if(order>0) results.grad.set_size(beta.n_elem);
+    if(order>1) results.hess.set_size(beta.n_elem,beta.n_elem);
+    n=y.dresp.n_elem;
+    a.set_size(n);
+    z.set_size(n);
+    dec.v.set_size(n);
     dec=unpack(n,beta);
-    z=dec.v+dec.m*y;
+    z=dec.v+dec.m*y.dresp;
     a=diagvec(dec.m);
     if(min(a)<=0.0)
     {
         results.value=datum::nan;
-        results.grad.fill(datum::nan);
-        results.hess.fill(datum::nan);
+        if(order>0) results.grad.fill(datum::nan);
+        if(order>1) results.hess.fill(datum::nan);
         return results;
     }
-    results.value=-0.5*dot(z,z)+sum(log(a));
-    b.v=-z;
-    b.m.set_size(n,n);
+    results.value=0.0;
     for(i=0;i<n;i++)
     {
-        b.m(i,i)=1.0/a(i)-z(i)*y(i);
-        if(i>0)
+        results.value=results.value+log(a(i)*normpdf(z(i)));
+    }
+    if(order>0)
+    {
+        b.v.set_size(n);
+        b.m.set_size(n,n);
+        b.v=-z;
+        for(i=0;i<n;i++)
         {
-            for(j=0;j<i;j++)
+            b.m(i,i)=1.0/a(i)-z(i)*y.dresp(i);
+            if(i>0)
             {
-                b.m(i,j)=-z(i)*y(j);
+                for(j=0;j<i;j++)
+                {
+                    b.m(i,j)=-z(i)*y.dresp(j);
+                }
             }
         }
+        results.grad=pack(b);
     }
-    results.grad=pack(b);
-    results.hess.set_size(beta.n_elem,beta.n_elem);
-    k=n;
-    for(i=0;i<y.n_elem;i++)
+    if(order>1)
     {
-        results.hess(i,i)=-1.0;
-        for(j=0;j<=i;j++)
+        k=n;
+        for(i=0;i<n;i++)
         {
-            results.hess(i,k)=-y(j);
-            results.hess(k,i)=results.hess(i,k);
-            k=k+1;
-        }
-    }
-    for(i=0;i<n;i++)
-    {
-        for(j=0;j<=i;j++)
-        {
-            k=n+j+(i+1)*i/2;
-            for(j1=0;j1<=j;j1++)
+            results.hess(i,i)=-1.0;
+            for(j=0;j<=i;j++)
             {
-                k1=n+j1+i*(i+1)/2;
-                results.hess(k,k1)=-y(j)*y(j1);
-                if(j1<j)
-                {
-                    results.hess(k1,k)=results.hess(k,k1);
-                }
-                if(i==j&&j1==i)
-                {
-                    results.hess(k,k)=results.hess(k,k)-1.0/(a(i)*a(i));
-                }
-                k1=k1+1;
+                results.hess(i,k)=-y.dresp(j);
+                results.hess(k,i)=results.hess(i,k);
+                k=k+1;
             }
-            k=k+1;
+        }
+        for(i=0;i<n;i++)
+        {
+            for(j=0;j<=i;j++)
+            {
+                k=n+j+(i+1)*i/2;
+                for(j1=0;j1<=j;j1++)
+                {
+                    k1=n+j1+i*(i+1)/2;
+                    results.hess(k,k1)=-y.dresp(j)*y.dresp(j1);
+                    if(j1<j)
+                    {
+                        results.hess(k1,k)=results.hess(k,k1);
+                    }
+                    if(i==j&&j1==i)
+                    {
+                        results.hess(k,k)=results.hess(k,k)-1.0/(a(i)*a(i));
+                    }
+                    k1=k1+1;
+                }
+                k=k+1;
+            }
         }
     }
     return results;

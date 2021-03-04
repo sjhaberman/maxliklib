@@ -2,6 +2,10 @@
 //for multinomial logit model with response vector y with integer values
 //from 0 to r-1 and parameter
 //vector beta of dimension r-1.
+//If order is 0, only the function is
+//found, if order is 1, then the function and gradient are found.
+//If order is 2,
+//then the function, gradient, and Hessian are returned.
 #include<armadillo>
 using namespace arma;
 struct f2v
@@ -10,25 +14,35 @@ struct f2v
     vec grad;
     mat hess;
 };
-f2v multlogit(const ivec & y, const vec & beta)
+struct resp
+{
+  ivec iresp;
+  vec dresp;
+};
+f2v multlogit(const int & order, const resp & y, const vec & beta)
 {
     double s;
-    int r,z;
+    int i, r,z;
     vec e;
     r=beta.n_elem;
     f2v results;
-    results.grad.set_size(r);
-    results.hess.set_size(r,r);
-    e=exp(beta);
+    if(order>0) results.grad.set_size(r);
+    if(order>1) results.hess.set_size(r,r);
+    e.set_size(r);
+    for(i=0;i<r;i++)
+    {
+        e(i)=exp(beta(i));
+    }
     s=1.0+sum(e);
     results.value=-log(s);
-    results.grad=-e/s;
-    results.hess=diagmat(results.grad)+results.grad*trans(results.grad);
-    if(y(0)>0)
+    if(order>0) results.grad=-e/s;
+    if(order>1) results.hess
+        =diagmat(results.grad)+results.grad*trans(results.grad);
+    if(y.iresp(0)>0)
     {
-        z=y(0)-1;
+        z=y.iresp(0)-1;
         results.value=beta(z)+results.value;
-        results.grad(z)=1.0+results.grad(z);
+        if(order>0) results.grad(z)=1.0+results.grad(z);
     }
     return results;
 }
