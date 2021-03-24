@@ -30,7 +30,7 @@ struct resp
 struct xsel
 {
   bool all;
-  ivec list;
+  uvec list;
 };
 struct dat
 {
@@ -42,9 +42,10 @@ struct dat
      xsel xselect;
 };
 f2v genresp(const int & , const model &, const resp &, const vec &);
+vec vecsel(const xsel & , const vec & );
 f2v genresplik(const int & order, const std::vector<dat> & data, const vec & beta)
 {
-    vec lambda, u;
+    vec beta1, lambda, u, v;
     f2v obsresults;
     f2v results;
     int i,j,jj,k,kk,order0=0,order1, p,q,r,n;
@@ -73,83 +74,61 @@ f2v genresplik(const int & order, const std::vector<dat> & data, const vec & bet
         if(order>1&&q>0)obsresults.hess.set_size(q,q);
         if(q>0)
         {
-            if(data[i].xselect.all&&p==q)
-            {
-                lambda=lambda+data[i].indep*beta;
-            }
-            else
-            {
-                for(j=0;j<q;j++)
-                {
-                    k=data[i].xselect.list(j);
-                    lambda=lambda+beta(k)*data[i].indep.col(j);
-                }
-            }
+            beta1.set_size(q);
+            beta1=vecsel(data[i].xselect,beta);
+            lambda=lambda+data[i].indep*beta1;
             obsresults=genresp(order1, data[i].choice, data[i].dep, lambda);
         }
         else
         {
             obsresults=genresp(order0, data[i].choice, data[i].dep, lambda);
         }
+        if(isnan(obsresults.value))
+        {
+            results.value=datum::nan;
+            if(order>0)results.grad.fill(datum::nan);
+            if(order>1)results.hess.fill(datum::nan);
+            return results;
+        }
         results.value=results.value+data[i].weight*obsresults.value;
         if(q>0&&order>0)
         {
-            u.set_size(q);
-            if(data[i].xselect.all&&p==q)
+            u.set_size(r);
+            u=obsresults.grad;
+            v.set_size(q);
+            v=data[i].indep.t()*u;
+            if(data[i].xselect.all)
             {
-                u=data[i].indep.t()*obsresults.grad;
-                results.grad=results.grad+data[i].weight*u;
-                if(order==2)
-                {
-                    for(j=0;j<p;j++)
-                    {
-                        for(k=0;k<=j;k++)
-                        {
-                            results.hess(j,k)=results.hess(j,k)
-                                +data[i].weight*dot(data[i].indep.col(j),obsresults.hess*data[i].indep.col(k));
-                            if(j!=k)results.hess(k,j)=results.hess(j,k);
-                        }
-                    }
-                }
-                if(order==3)
-                {
-                    for(j=0;j<p;j++)
-                    {
-                        for(k=0;k<=j;k++)
-                        {
-                            results.hess(j,k)=results.hess(j,k)-data[i].weight*u(j)*u(k);
-                            if(j!=k)results.hess(k,j)=results.hess(j,k);
-                        }
-                    }
-                }
+                results.grad=results.grad+data[i].weight*v;
             }
             else
             {
-                for(j=0;j<q;j++)
+                results.grad.elem(data[i].xselect.list)=results.grad.elem(data[i].xselect.list)
+                    +data[i].weight*v;
+            }
+            if(order==2)
+            {
+                if(data[i].xselect.all)
                 {
-                    jj=data[i].xselect.list(j);
-                    u(j)=dot(obsresults.grad,data[i].indep.col(jj));
-                    results.grad(jj)=results.grad(jj)+data[i].weight*u(j);
-                    if(order==2)
-                    {
-                        for(k=0;k<=j;k++)
-                        {
-                            kk=data[i].xselect.list(k);
-                            results.hess(jj,kk)=results.hess(jj,kk)
-                                +data[i].weight*
-                                dot(data[i].indep.col(j),obsresults.hess*data[i].indep.col(k));
-                            if(jj!=kk)results.hess(kk,jj)=results.hess(jj,kk);
-                        }
-                    }
-                    if(order==3)
-                    {
-                        for(k=0;k<=j;k++)
-                        {
-                            kk=data[i].xselect.list(k);
-                            results.hess(jj,kk)=results.hess(jj,kk)-data[i].weight*u(j)*u(k);
-                            if(jj!=kk)results.hess(kk,jj)=results.hess(jj,kk);
-                        }
-                    }
+                    results.hess=results.hess+data[i].weight*data[i].indep.t()*obsresults.hess*data[i].indep;
+                }
+                else
+                {
+                    results.hess(data[i].xselect.list,data[i].xselect.list)=
+                        results.hess(data[i].xselect.list,data[i].xselect.list)
+                            +data[i].weight*data[i].indep.t()*obsresults.hess*data[i].indep;
+                }
+            }
+            if(order==3)
+            {
+                if(data[i].xselect.all)
+                {
+                    results.hess=results.hess-data[i].weight*v*v.t();
+                }
+                else
+                {
+                    results.hess(data[i].xselect.list,data[i].xselect.list)=
+                        results.hess(data[i].xselect.list,data[i].xselect.list)-data[i].weight*v*v.t();
                 }
             }
         }
