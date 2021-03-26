@@ -27,7 +27,7 @@ struct resp
 struct xsel
 {
     bool all;
-    ivec list;
+    uvec list;
 };
 struct dat
 {
@@ -38,7 +38,11 @@ struct dat
     mat indep;
     xsel xselect;
 };
-//dep indicates if the dependent response is theta.
+//dep indicates if the dependent response is obtained
+//from theta. drespcols gives the members of
+//theta.drespcols used for the response.
+//irespcols gives the members of theta.iresp
+//used for the response.
 //respno is response number.
 //indcols are predictor matrix column numbers.
 //thetas are latent variable numbers associated with
@@ -47,9 +51,13 @@ struct thetamap
 {
     bool dep;
     int respno;
-    ivec indcols;
-    ivec thetas;
+    xsel drespcols;
+    xsel irespcols;;
+    uvec indcols;
+    uvec thetas;
 };
+ivec ivecsel(const xsel & , const ivec & y);
+vec vecsel(const xsel & , const vec & y);
 f2v genresplik(const int & , const std::vector<dat> & , const vec & );
 f2v irtc (const int & order, const std::vector<dat> & data,
     const std::vector<thetamap> & thetamaps, const resp & theta,
@@ -106,12 +114,10 @@ f2v irtc (const int & order, const std::vector<dat> & data,
             }
             if(thetamaps[j].dep)
             {
-                h=theta.dresp.size();
-                irtdata[p].dep.dresp.set_size(h);
-                irtdata[p].dep.dresp=theta.dresp;
-                h=theta.iresp.size();
-                irtdata[p].dep.iresp.set_size(h);
-                irtdata[p].dep.iresp=theta.iresp;
+                h=irtdata[p].dep.dresp.size();
+                if(h>0)irtdata[p].dep.dresp=vecsel(thetamaps[j].drespcols,theta.dresp);
+                h=irtdata[p].dep.iresp.size();
+                if(h>0)irtdata[p].dep.iresp=ivecsel(thetamaps[j].irespcols,theta.iresp);
             }
         }
     }

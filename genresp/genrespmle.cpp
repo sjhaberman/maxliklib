@@ -44,7 +44,7 @@ struct resp
 struct xsel
 {
   bool all;
-  ivec list;
+  uvec list;
 };
 struct dat
 {
