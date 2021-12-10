@@ -40,19 +40,23 @@ struct dat
     mat indep;
     xsel xselect;
 };
-//dep indicates if the dependent response is theta.
-//respno is response number.
-//indcols are predictor matrix column numbers.
-//thetas are latent variable numbers associated with
-//matrix columns in indcols.
+//dep indicates if the dependent response is obtained
+//from theta. drespcols gives the members of
+//theta.dresp used for the response, and
+//irespcols gives the members of
+//theta.dresp used for the response.
+//respno is response number.  If dep is false,
+//offsets are for effect of theta.dresp on model parameter
+//without consideration of beta and
+//indeps is the cube for interaction of beta and theta.dresp.
 struct thetamap
 {
     bool dep;
     int respno;
     xsel drespcols;
     xsel irespcols;
-    uvec indcols;
-    uvec thetas;
+    mat offsets;
+    cube indeps;
 };
 struct pwr
 {

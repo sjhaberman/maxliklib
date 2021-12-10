@@ -60,8 +60,8 @@ struct thetamap
     int respno;
     xsel drespcols;
     xsel irespcols;
-    uvec indcols;
-    uvec thetas;
+    mat offsets;
+    cube indeps;
 };
 struct pwr
 {
