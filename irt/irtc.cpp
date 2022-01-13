@@ -43,14 +43,13 @@ struct dat
 //theta.dresp used for the response, and
 //irespcols gives the members of
 //theta.dresp used for the response.
-//respno is response number.  If dep is false,
+//If dep is false,
 //offsets are for effect of theta.dresp on model parameter
 //without consideration of beta and
 //indeps is the cube for interaction of beta and theta.dresp.
 struct thetamap
 {
     bool dep;
-    int respno;
     xsel drespcols;
     xsel irespcols;
     mat offsets;
@@ -65,10 +64,9 @@ f2v irtc (const int & order, const std::vector<dat> & data,
 {
     f2v results;
     vec thetasel;
-    int g,gg,h,i,j,k,m,n,p,q,r,s,t;
+    int g,h,i,m,n,p,q,r,s,t;
     n=data.size();
     m=beta.n_elem;
-    k=thetamaps.size();
     if(m>0)
     {
         if(order>0) results.grad.set_size(m);
@@ -96,48 +94,37 @@ f2v irtc (const int & order, const std::vector<dat> & data,
         t=data[i].xselect.list.n_elem;
         irtdata[i].xselect.list.set_size(t);
         irtdata[i].xselect.list=data[i].xselect.list;
-    }
-    if(k>0)
-    {
-        for(j=0;j<k;j++)
+        if(thetamaps[i].drespcols.all)
         {
-            g=thetamaps[j].respno;
-            if(thetamaps[j].drespcols.all)
+            h=theta.dresp.size();
+        }
+        else
+        {
+            h=thetamaps[i].drespcols.list.size();
+        }
+        if(h>0)
+        {
+            thetasel.set_size(h);
+            thetasel=vecsel(thetamaps[i].drespcols,theta.dresp);
+            if(thetamaps[i].dep)
             {
-                h=theta.dresp.size();
+                irtdata[i].dep.dresp=thetasel;
             }
             else
             {
-                h=thetamaps[j].drespcols.list.size();
-            }
-            if(h>0)
-            {
-                thetasel.set_size(h);
-                thetasel=vecsel(thetamaps[j].drespcols,theta.dresp);
-                if(thetamaps[j].dep)
-                {
-                    irtdata[g].dep.dresp=thetasel;
-                }
-                else
-                {
-                    irtdata[g].offset=irtdata[g].offset+thetamaps[j].offsets*thetasel;
-                    for(gg=0;gg<h;gg++)irtdata[g].indep=irtdata[g].indep+thetamaps[j].indeps.slice(gg)*thetasel(gg);
-                }
-            }
-            if(thetamaps[j].irespcols.all)
-            {
-                h=theta.iresp.size();
-            }
-            else
-            {
-                h=thetamaps[j].irespcols.list.size();
-            }
-            if(h>0&&thetamaps[j].dep)
-            {
-                irtdata[g].dep.iresp=ivecsel(thetamaps[j].irespcols,theta.iresp);
-                
+                irtdata[i].offset=irtdata[i].offset+thetamaps[i].offsets*thetasel;
+                for(g=0;g<h;g++)irtdata[i].indep=irtdata[i].indep+thetasel(g)*thetamaps[i].indeps.slice(g);
             }
         }
+        if(thetamaps[i].irespcols.all)
+        {
+            h=theta.iresp.size();
+        }
+        else
+        {
+            h=thetamaps[i].irespcols.list.size();
+        }
+        if(h>0&&thetamaps[i].dep)irtdata[i].dep.iresp=ivecsel(thetamaps[i].irespcols,theta.iresp);
     }
     results=genresplik(order,irtdata,beta);
     return results;

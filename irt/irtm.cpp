@@ -41,14 +41,13 @@ struct dat
 //theta.dresp used for the response, and
 //irespcols gives the members of
 //theta.dresp used for the response.
-//respno is response number.  If dep is false,
+//If dep is false,
 //offsets are for effect of theta.dresp on model parameter
 //without consideration of beta and
 //indeps is the cube for interaction of beta and theta.dresp.
 struct thetamap
 {
     bool dep;
-    int respno;
     xsel drespcols;
     xsel irespcols;
     mat offsets;
