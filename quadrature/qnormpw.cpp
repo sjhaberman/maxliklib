@@ -4,7 +4,6 @@
 #define STATS_ENABLE_ARMA_WRAPPERS
 #include "stats.hpp"
 using namespace arma;
-using namespace arma;
 struct pw
 {
     vec points;
