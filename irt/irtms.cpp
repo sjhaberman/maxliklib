@@ -2,9 +2,10 @@
 //and corresponding gradient and Hessian for
 //generalized IRT model.  The component involves
 //the response variables specified in obsdata,
-//the prior distribution specified in thetamaps, the
+//the prior distribution specified in obsthetamaps, the
 //the weights from obsweight, and the
-//sampling procedure specified in obsthetas.
+//sampling procedure specified in obsthetas.  Adaptive
+//quadrature information is in obsscale.
 //The log likelihood is always given.  If order>0, the
 //gradient is found.  If order=2, the Hessian is computed.
 //If order=3, then the approximate Hessian is found.
@@ -29,7 +30,7 @@ struct resp
 struct xsel
 {
   bool all;
-  ivec list;
+  uvec list;
 };
 struct dat
 {
@@ -57,6 +58,21 @@ struct thetamap
     mat offsets;
     cube indeps;
 };
+// Combination of vector and lower triangular matrix for use in transformations.
+struct vecmat
+{
+    vec v;
+    mat m;
+};
+// Adaptive quadrature specifications.
+// The choice to use is indicated by adapt, xselect shows the elements involved, tran shows the
+// transformation.
+struct adq
+{
+    bool adapt;
+    xsel xselect;
+    vecmat tran;
+};
 struct pwr
 {
     double weight;
@@ -74,38 +90,52 @@ struct obstheta
 {
     std::vector<pwr> thetas;
 };
+void addsel(const int & , const xsel & , const f2v & , f2v & , const double & );
 f2v irtm (const int & , const std::vector<dat> & ,
-    const std::vector<thetamap> & ,const std::vector<pwr> & , const vec & );
+    const std::vector<thetamap> & ,adq & , const std::vector<pwr> & , const vec & );
 f2v irtms (const int & order, const vec & obsweight,
     const std::vector<obs> & obsdata,
-    const std::vector<obsthetamap> & obsthetamaps,
-    const std::vector<obstheta> & obsthetas, const vec & beta)
+    const std::vector<obsthetamap> & obsthetamaps, std::vector<adq> & obsscale,
+    const std::vector<obstheta> & obsthetas, const std::vector<xsel> & betasel, const vec & beta)
 {
     f2v cresults, results;
-    int i, p, n;
+    int i, p, q, n;
+    vec gamma;
     p=beta.n_elem;
     n=obsdata.size();
     results.value=0.0;
     if(order>0)
     {
         results.grad.set_size(p);
-        cresults.grad.set_size(p);
+        
         results.grad.zeros();
     }
     if(order>1)
     {
         results.hess.set_size(p,p);
-        cresults.hess.set_size(p,p);
+        
         results.hess.zeros();
     }
 //Enter individual observations and add.
     for(i=0;i<n;i++)
     {
-        cresults=irtm(order,obsdata[i].data,obsthetamaps[i].thetamaps,
-            obsthetas[i].thetas,beta);
-        results.value=results.value+obsweight(i)*cresults.value;
-        if(order>0)results.grad=results.grad+obsweight(i)*cresults.grad;
-        if(order>1)results.hess=results.hess+obsweight(i)*cresults.hess;
+        if(betasel[i].all)
+        {
+             q=p;
+             gamma.resize(p);
+             gamma=beta;
+        }
+        else
+        {
+             q=betasel[i].list.n_elem;
+             gamma.resize(q);
+             gamma=beta.elem(betasel[i].list);
+        }      
+        if(order>0)cresults.grad.set_size(q);
+        if(order>1)cresults.hess.set_size(q,q);
+        cresults=irtm(order,obsdata[i].data,obsthetamaps[i].thetamaps, obsscale[i],
+            obsthetas[i].thetas,gamma);
+        addsel(order,betasel[i],cresults,results,obsweight(i));
     }
     return results;
 }

@@ -1,9 +1,15 @@
 //Find maximum likelihood estimates for latent response model.
 //The components involve
-//the response variables specified in irtdata,
-//the prior distribution specified in thetamaps, and the
-//sampling procedure specified in pws. This version does
-//not use adaptive quadrature.
+//the response variables specified in obsdata,
+//the prior distribution specified in obsthetamaps, and the
+//sampling procedure specified in obsthetas.  Adaptive quadrature
+//information is in obsscale.
+//The initial parameter estimate is start.
+//Algorithm parameters are in mparams.  The algorithm is specified in 
+//algorithm, with G for steepest ascent, C for conjugate gradient, N for
+//Newton-Raphson, and L for Louis.    If order>0, the
+//gradient is found.  If order=2, the Hessian is computed.
+//If order=3, then the approximate Hessian is found.
 #include<armadillo>
 using namespace arma;
 using namespace std::placeholders;
@@ -43,7 +49,7 @@ struct resp
 struct xsel
 {
   bool all;
-  ivec list;
+  uvec list;
 };
 struct dat
 {
@@ -71,6 +77,21 @@ struct thetamap
     mat offsets;
     cube indeps;
 };
+// Combination of vector and lower triangular matrix for use in transformations.
+struct vecmat
+{
+    vec v;
+    mat m;
+};
+// Adaptive quadrature specifications.
+// The choice to use is indicated by adapt, xselect shows the elements involved, tran shows the
+// transformation.
+struct adq
+{
+    bool adapt;
+    xsel xselect;
+    vecmat tran;
+};
 struct pwr
 {
     double weight;
@@ -94,12 +115,15 @@ maxf2v gradascent(const int &, const params & , const vec & ,
            const std::function<f2v(const int & , const vec & )> f);
 maxf2v nrv(const int &, const params & , const vec & ,
            const std::function<f2v(const int & , const vec & )> f);
-f2v irtms (const int & , const vec & , const std::vector<obs> & , const std::vector<obsthetamap> & , const std::vector<obstheta> & , const vec & );
+f2v irtms (const int & , const vec & , const std::vector<obs> & , const std::vector<obsthetamap> & ,
+           std::vector<adq> &, const std::vector<obstheta> & ,
+           const std::vector<xsel> & ,const vec & );
 maxf2v irtmle(const int & order, const params & mparams,
     const char & algorithm, const vec & obsweight,
     const std::vector<obs> & obsdata,
     const std::vector<obsthetamap> & obsthetamaps,
-    const std::vector<obstheta> & obsthetas, const vec & start)
+    std::vector<adq> & obsscale,
+    const std::vector<obstheta> & obsthetas, const std::vector<xsel> & betasel, const vec & start)
 {
     maxf2v results;
     int p;
@@ -107,7 +131,7 @@ maxf2v irtmle(const int & order, const params & mparams,
     results.locmax.set_size(p);
     results.grad.set_size(p);
     if(algorithm=='N'||algorithm=='L')results.hess.set_size(p,p);
-    auto f=std::bind(irtms,_1,obsweight,obsdata,obsthetamaps,obsthetas,_2);
+    auto f=std::bind(irtms,_1,obsweight,obsdata,obsthetamaps,obsscale,obsthetas,betasel,_2);
     if(algorithm=='N'||algorithm=='L')results=nrv(order, mparams, start, f);
     if(algorithm=='C')results=conjgrad(order, mparams, start, f);
     if(algorithm=='G')results=gradascent(order, mparams, start, f);

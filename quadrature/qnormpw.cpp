@@ -21,8 +21,9 @@ pw qnormpw(const int & n)
     {
         x=((double)i+0.5)/xn;
         pws.points(i)=stats::qnorm(x,0.0,1.0);
-        pws.weights(i)=1.0/(xn*normpdf(pws.points(i)));
+        pws.weights(i)=1.0/xn;
     }
+    pws.points=pws.points/stddev(pws.points,1);
     return pws;
 }
             

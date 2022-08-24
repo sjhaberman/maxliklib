@@ -32,7 +32,7 @@ pw hermpw(const int & n)
     for(i=0;i<n;i++)
     {
         x=K(0,i);
-        w(i)=x*x/normpdf(p(i));
+        w(i)=x*x;
     }
     pws.points=p;
     pws.weights=w;

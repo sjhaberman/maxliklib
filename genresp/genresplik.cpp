@@ -42,11 +42,13 @@ struct dat
      xsel xselect;
 };
 f2v genresp(const int & , const model &, const resp &, const vec &);
+void addsel(const int & , const xsel & , const f2v & , f2v & , const double & );
+f2v linsel(const int & , const f2v & , const mat & );
 vec vecsel(const xsel & , const vec & );
 f2v genresplik(const int & order, const std::vector<dat> & data, const vec & beta)
 {
     vec beta1, lambda, u, v;
-    f2v obsresults;
+    f2v obsresults,linresults;
     f2v results;
     int i,j,jj,k,kk,order0=0,order1, p,q,r,n;
     results.value=0.0;
@@ -70,8 +72,8 @@ f2v genresplik(const int & order, const std::vector<dat> & data, const vec & bet
         q=data[i].indep.n_cols;
         lambda.set_size(r);
         lambda=data[i].offset;
-        if(order>0&&q>0)obsresults.grad.set_size(q);
-        if(order>1&&q>0)obsresults.hess.set_size(q,q);
+        if(order>0&&q>0)obsresults.grad.set_size(r);
+        if(order>1&&q>0)obsresults.hess.set_size(r,r);
         if(q>0)
         {
             beta1.set_size(q);
@@ -89,48 +91,18 @@ f2v genresplik(const int & order, const std::vector<dat> & data, const vec & bet
             if(order>0)results.grad.fill(datum::nan);
             if(order>1)results.hess.fill(datum::nan);
             return results;
-        }
-        results.value=results.value+data[i].weight*obsresults.value;
-        if(q>0&&order>0)
+        }    
+        if(q==0||order==0)
         {
-            u.set_size(r);
-            u=obsresults.grad;
-            v.set_size(q);
-            v=data[i].indep.t()*u;
-            if(data[i].xselect.all)
-            {
-                results.grad=results.grad+data[i].weight*v;
-            }
-            else
-            {
-                results.grad.elem(data[i].xselect.list)=results.grad.elem(data[i].xselect.list)
-                    +data[i].weight*v;
-            }
-            if(order==2)
-            {
-                if(data[i].xselect.all)
-                {
-                    results.hess=results.hess+data[i].weight*data[i].indep.t()*obsresults.hess*data[i].indep;
-                }
-                else
-                {
-                    results.hess(data[i].xselect.list,data[i].xselect.list)=
-                        results.hess(data[i].xselect.list,data[i].xselect.list)
-                            +data[i].weight*data[i].indep.t()*obsresults.hess*data[i].indep;
-                }
-            }
-            if(order==3)
-            {
-                if(data[i].xselect.all)
-                {
-                    results.hess=results.hess-data[i].weight*v*v.t();
-                }
-                else
-                {
-                    results.hess(data[i].xselect.list,data[i].xselect.list)=
-                        results.hess(data[i].xselect.list,data[i].xselect.list)-data[i].weight*v*v.t();
-                }
-            }
+            addsel(order0,data[i].xselect,obsresults,results,data[i].weight);
+        }
+        else 
+        {
+            if(order>2)obsresults.hess=-obsresults.grad*obsresults.grad.t();
+            linresults.grad.set_size(q);
+            if(order>1) linresults.hess.set_size(q,q);
+            linresults=linsel(order,obsresults,data[i].indep);
+            addsel(order,data[i].xselect,linresults,results,data[i].weight);  
         }
     }
     return results;

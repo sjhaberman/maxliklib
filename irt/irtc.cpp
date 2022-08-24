@@ -1,7 +1,7 @@
 //Find log likelihood component given latent response theta
 //and corresponding gradient(if order>0) and Hessian (if order>1) for a
 //generalized IRT model.  The component involves
-//the response variables specified in irtdata,
+//the response variables specified in data,
 //the correspondence specified by thetamaps
 //of the latent response and the predictors and of the latent response
 //and the latent distribution.  The model parameter is beta.
