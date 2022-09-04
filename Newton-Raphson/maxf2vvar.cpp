@@ -1,4 +1,4 @@
-//Combine argument y and corresponding function, gradient, and definition
+//Combine argument y and corresponding function, gradient, hessian, and definition
 //function in vary into a single entity maxf1vvar.
 #include<armadillo>
 using namespace arma;

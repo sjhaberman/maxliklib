@@ -85,6 +85,7 @@ struct adq
 };
 pwr adaptpwr(const pwr &, const adq &);
 adq rescale(const adq & , const std::vector<maxf2v> & );
+maxf2v maxf2vvar(const int & order , const vec & y, const f2v & fy);
 f2v irtc (const int & , const std::vector<dat> & ,
     const std::vector<thetamap> & , const resp & ,
     const vec &  beta);
@@ -94,7 +95,7 @@ f2v irtm (const int & order, const std::vector<dat> & data,
 {
     f2v cresults, results;
     bool flag;
-    double sumprob;
+    double avelog,sumprob;
     int d,i,m,q;
     pwr newtheta;    
     newtheta.theta.iresp.copy_size(thetas[0].theta.iresp);
@@ -102,8 +103,8 @@ f2v irtm (const int & order, const std::vector<dat> & data,
     flag=scale.adapt;
     m=beta.n_elem;
     q=thetas.size();
-    vec prob(q);
-    std::vector<maxf2v>cloglik;
+    vec prob(q),weights(q);
+    std::vector<maxf2v>cloglik(q);
     if(scale.adapt)
     {
         if(scale.xselect.all)
@@ -114,14 +115,7 @@ f2v irtm (const int & order, const std::vector<dat> & data,
         {
              d=scale.xselect.list.n_elem;
         }
-        if(d>0)
-        {
-             cloglik.resize(q);
-        }
-        else
-        {
-             flag=false;
-        }  
+        if(d==0)flag=false;       
     }
     if(order>0)
     {
@@ -139,32 +133,39 @@ f2v irtm (const int & order, const std::vector<dat> & data,
 //Enter prior points and add.
     for(i=0;i<q;i++)
     {
-        newtheta=adaptpwr(thetas[i],scale); 
-        if(flag)
+        newtheta=adaptpwr(thetas[i],scale);
+        weights(i)=newtheta.weight; 
+        cloglik[i].locmax.resize(d);
+        if(order>0)cloglik[i].grad.resize(d);
+        if(order>1)cloglik[i].hess.resize(d,d);
+        if(scale.xselect.all)
         {
-            cloglik[i].locmax.resize(d);
-            if(scale.xselect.all)
-            {
-                 cloglik[i].locmax=newtheta.theta.dresp;
-            }
-            else
-            {
-                 cloglik[i].locmax=newtheta.theta.dresp.elem(scale.xselect.list);
-            }
-        }   
+            cloglik[i].locmax=newtheta.theta.dresp;
+        }
+        else
+        {
+            cloglik[i].locmax=newtheta.theta.dresp.elem(scale.xselect.list);
+        }  
         cresults=irtc(order,data,thetamaps,newtheta.theta,beta);
-        if(flag)cloglik[i].max=cresults.value;
-        cresults.value=exp(cresults.value);
-        prob(i)=cresults.value*newtheta.weight;
         if(order>1)cresults.hess=cresults.hess+cresults.grad*cresults.grad.t();
-        if(order>0)results.grad=results.grad+prob(i)*cresults.grad;
-        if(order>1)results.hess=results.hess+prob(i)*cresults.hess;
+        cloglik[i]=maxf2vvar(order,newtheta.theta.dresp,cresults);
+        prob(i)=cresults.value;
     }
-    sumprob=sum(prob);
-    if(order>0)results.grad=results.grad/sumprob;
-    if(order>1)results.hess=results.hess/sumprob-results.grad*results.grad.t();
-    results.value=log(sumprob);
-    if(scale.adapt)scale = rescale(scale, cloglik);
+    avelog=mean(prob);
+    prob=exp(prob-avelog)%weights;
+    sumprob=sum(prob);    
+    results.value=log(sumprob)+avelog;
+    if(order>0)
+    {
+         prob=prob/sumprob;
+         for(i=0;i<q;i++)
+         {
+             results.grad=results.grad+prob(i)*cloglik[i].grad;
+             if(order>1)results.hess=results.hess+prob(i)*cloglik[i].hess;
+         }
+    }
+    if(order>1)results.hess=results.hess-results.grad*results.grad.t();
+    if(flag)scale = rescale(scale, cloglik);
     return results;
 }
 

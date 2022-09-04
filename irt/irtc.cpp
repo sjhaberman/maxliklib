@@ -113,7 +113,8 @@ f2v irtc (const int & order, const std::vector<dat> & data,
             else
             {
                 irtdata[i].offset=irtdata[i].offset+thetamaps[i].offsets*thetasel;
-                for(g=0;g<h;g++)irtdata[i].indep=irtdata[i].indep+thetasel(g)*thetamaps[i].indeps.slice(g);
+                for(g=0;g<h;g++)
+                    irtdata[i].indep=irtdata[i].indep+thetasel(g)*thetamaps[i].indeps.slice(g);
             }
         }
         if(thetamaps[i].irespcols.all)
