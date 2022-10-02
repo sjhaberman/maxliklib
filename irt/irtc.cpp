@@ -5,6 +5,7 @@
 //the correspondence specified by thetamaps
 //of the latent response and the predictors and of the latent response
 //and the latent distribution.  The model parameter is beta.
+//datasel selects responses to use.
 #include<armadillo>
 using namespace arma;
 //Except for thetamap, the structs are also used in genresplik.cpp.
@@ -57,15 +58,24 @@ struct thetamap
 };
 ivec ivecsel(const xsel & xselect, const ivec & y);
 vec vecsel(const xsel & , const vec & y);
-f2v genresplik(const int & , const std::vector<dat> & , const vec & );
+f2v genresplik(const int & , const std::vector<dat> & , const xsel & , const vec & );
 f2v irtc (const int & order, const std::vector<dat> & data,
-    const std::vector<thetamap> & thetamaps, const resp & theta,
+    const std::vector<thetamap> & thetamaps, const xsel & datasel, const resp & theta,
     const vec &  beta)
 {
     f2v results;
     vec thetasel;
-    int g,h,i,m,n,p,q,r,s,t;
+    int g,h,i,m,n,nn,p,q,r,s,t;
     n=data.size();
+    if(datasel.all)
+    {
+         nn=n;
+    }
+    else
+    {
+        nn=datasel.list.size();
+    }
+    if(nn==0) return results;
     m=beta.n_elem;
     if(m>0)
     {
@@ -101,7 +111,7 @@ f2v irtc (const int & order, const std::vector<dat> & data,
         else
         {
             h=thetamaps[i].drespcols.list.size();
-        }
+        }                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
         if(h>0)
         {
             thetasel.set_size(h);
@@ -127,6 +137,6 @@ f2v irtc (const int & order, const std::vector<dat> & data,
         }
         if(h>0&&thetamaps[i].dep)irtdata[i].dep.iresp=ivecsel(thetamaps[i].irespcols,theta.iresp);
     }
-    results=genresplik(order,irtdata,beta);
+    results=genresplik(order,irtdata,datasel,beta);
     return results;
 }

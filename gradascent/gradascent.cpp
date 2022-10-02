@@ -35,6 +35,7 @@ struct maxf2v
 };
 struct params
 {
+    bool print;
     int maxit;
     int maxits;
     double eta;
@@ -81,6 +82,7 @@ maxf2v gradascent(const int & order, const params & mparams, const vec & start,
         if(norm(v,2)>mparams.kappa)v=(mparams.kappa/norm(v,2))*v;
 // Line search.
         vary1 = maxlinq2(order, mparams, v, vary0, f);
+        if(mparams.print)cout<<"Iteration="<<i<<", Function="<<vary1.max<<endl;
 //  Convergence check
         if(vary1.max<vary0.max+mparams.tol) return vary1;
         vary0=vary1;

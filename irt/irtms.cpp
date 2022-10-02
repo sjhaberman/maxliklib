@@ -9,6 +9,8 @@
 //The log likelihood is always given.  If order>0, the
 //gradient is found.  If order=2, the Hessian is computed.
 //If order=3, then the approximate Hessian is found.
+//datasel selects how to decompose individual responses.
+//obssel selects which responses to use.
 #include<armadillo>
 using namespace arma;
 struct f2v
@@ -92,17 +94,18 @@ struct obstheta
 };
 void addsel(const int & , const xsel & , const f2v & , f2v & , const double & );
 f2v irtm (const int & , const std::vector<dat> & ,
-    const std::vector<thetamap> & ,adq & , const std::vector<pwr> & , const vec & );
+    const std::vector<thetamap> & , const xsel & , adq & , const std::vector<pwr> & , const vec & );
 f2v irtms (const int & order, const vec & obsweight,
     const std::vector<obs> & obsdata,
-    const std::vector<obsthetamap> & obsthetamaps, std::vector<adq> & obsscale,
-    const std::vector<obstheta> & obsthetas, const std::vector<xsel> & betasel, const vec & beta)
+    const std::vector<obsthetamap> & obsthetamaps, const std::vector<xsel> & datasel,
+    const xsel & obssel, std::vector<adq> & obsscale,
+    const std::vector<obstheta> & obsthetas,
+    const std::vector<xsel> & betasel, const vec & beta)
 {
     f2v cresults, results;
-    int i, p, q, n;
+    int i, ii, p, q, n, nn;
     vec gamma;
     p=beta.n_elem;
-    n=obsdata.size();
     results.value=0.0;
     if(order>0)
     {
@@ -116,9 +119,28 @@ f2v irtms (const int & order, const vec & obsweight,
         
         results.hess.zeros();
     }
-//Enter individual observations and add.
-    for(i=0;i<n;i++)
+// Observations to use.
+    n=obsdata.size();
+    if(obssel.all)
     {
+        nn=n;
+    }
+    else
+    {
+        nn=obssel.list.size();
+    }
+    if(nn==0) return results;
+//Enter individual observations and add.
+    for(ii=0;ii<nn;ii++)
+    {
+        if(obssel.all)
+        {
+             i=ii;
+        }
+        else
+        {
+             i=obssel.list(ii);
+        }
         if(betasel[i].all)
         {
              q=p;
@@ -133,7 +155,7 @@ f2v irtms (const int & order, const vec & obsweight,
         }      
         if(order>0)cresults.grad.set_size(q);
         if(order>1)cresults.hess.set_size(q,q);
-        cresults=irtm(order,obsdata[i].data,obsthetamaps[i].thetamaps, obsscale[i],
+        cresults=irtm(order,obsdata[i].data,obsthetamaps[i].thetamaps, datasel[i], obsscale[i],
             obsthetas[i].thetas,gamma);
         addsel(order,betasel[i],cresults,results,obsweight(i));
     }

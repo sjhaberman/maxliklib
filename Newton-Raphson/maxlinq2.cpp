@@ -38,6 +38,7 @@ struct maxf2v
 };
 struct params
 {
+    bool print;
     int maxit;
     int maxits;
     double eta;

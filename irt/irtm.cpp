@@ -6,6 +6,7 @@
 //of the latent response and the predictors and of the latent response
 //and the latent distribution, the prior distribution specified in prior, the
 //adaptive quadrature information in adquad, and the model parameter beta.
+//datasel selects responses to use.
 #include<armadillo>
 using namespace arma;
 struct f2v
@@ -87,21 +88,29 @@ pwr adaptpwr(const pwr &, const adq &);
 adq rescale(const adq & , const std::vector<maxf2v> & );
 maxf2v maxf2vvar(const int & order , const vec & y, const f2v & fy);
 f2v irtc (const int & , const std::vector<dat> & ,
-    const std::vector<thetamap> & , const resp & ,
+    const std::vector<thetamap> & , const xsel & , const resp & ,
     const vec &  beta);
 f2v irtm (const int & order, const std::vector<dat> & data,
-    const std::vector<thetamap> & thetamaps, adq & scale,
+    const std::vector<thetamap> & thetamaps, const xsel & datasel, adq & scale,
     const std::vector<pwr> & thetas, const vec &  beta)
 {
     f2v cresults, results;
     bool flag;
     double avelog,sumprob;
-    int d,i,m,q;
+    int d,i,m,order1, q;
     pwr newtheta;    
     newtheta.theta.iresp.copy_size(thetas[0].theta.iresp);
     newtheta.theta.dresp.copy_size(thetas[0].theta.dresp);
     flag=scale.adapt;
     m=beta.n_elem;
+    if(order==3)
+    {
+         order1=1;
+    }
+    else
+    {
+         order1=order;
+    }
     q=thetas.size();
     vec prob(q),weights(q);
     std::vector<maxf2v>cloglik(q);
@@ -126,8 +135,11 @@ f2v irtm (const int & order, const std::vector<dat> & data,
     if(order>1)
     {
         results.hess.set_size(m,m);
-        results.hess.zeros();
-        cresults.hess.set_size(m,m);
+        if(order1>1)
+        {
+            results.hess.zeros();
+            cresults.hess.set_size(m,m);
+        }
     }
     results.value=0.0;
 //Enter prior points and add.
@@ -137,7 +149,7 @@ f2v irtm (const int & order, const std::vector<dat> & data,
         weights(i)=newtheta.weight; 
         cloglik[i].locmax.resize(d);
         if(order>0)cloglik[i].grad.resize(d);
-        if(order>1)cloglik[i].hess.resize(d,d);
+        if(order1>1)cloglik[i].hess.resize(d,d);
         if(scale.xselect.all)
         {
             cloglik[i].locmax=newtheta.theta.dresp;
@@ -146,9 +158,9 @@ f2v irtm (const int & order, const std::vector<dat> & data,
         {
             cloglik[i].locmax=newtheta.theta.dresp.elem(scale.xselect.list);
         }  
-        cresults=irtc(order,data,thetamaps,newtheta.theta,beta);
-        if(order>1)cresults.hess=cresults.hess+cresults.grad*cresults.grad.t();
-        cloglik[i]=maxf2vvar(order,newtheta.theta.dresp,cresults);
+        cresults=irtc(order1,data,thetamaps,datasel,newtheta.theta,beta);
+        if(order1>1)cresults.hess=cresults.hess+cresults.grad*cresults.grad.t();
+        cloglik[i]=maxf2vvar(order1,newtheta.theta.dresp,cresults);
         prob(i)=cresults.value;
     }
     avelog=mean(prob);
@@ -157,14 +169,15 @@ f2v irtm (const int & order, const std::vector<dat> & data,
     results.value=log(sumprob)+avelog;
     if(order>0)
     {
-         prob=prob/sumprob;
+         prob=prob/sumprob;     
          for(i=0;i<q;i++)
          {
              results.grad=results.grad+prob(i)*cloglik[i].grad;
-             if(order>1)results.hess=results.hess+prob(i)*cloglik[i].hess;
+             if(order1>1)results.hess=results.hess+prob(i)*cloglik[i].hess;
          }
     }
-    if(order>1)results.hess=results.hess-results.grad*results.grad.t();
+    if(order1>1)results.hess=results.hess-results.grad*results.grad.t();
+    if(order==3)results.hess=-results.grad*results.grad.t();
     if(flag)scale = rescale(scale, cloglik);
     return results;
 }

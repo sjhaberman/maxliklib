@@ -17,6 +17,7 @@
 //The largest permitted step length is mparams.kappa>0.
 //If a main iteration leads to a change of the function f less
 //than mparams.tol, then iterations cease.
+//Function value at end of iteration is sent to standard output if mparams.print is true.
 #include<armadillo>
 using namespace arma;
 struct f2v
@@ -34,6 +35,7 @@ struct maxf2v
 };
 struct params
 {
+    bool print;
     int maxit;
     int maxits;
     double eta;
@@ -85,6 +87,7 @@ maxf2v nrv(const int & order, const params & mparams, const vec & start, const s
 // Line search.
         if(norm(v,2)>mparams.kappa)v=(mparams.kappa/norm(v,2))*v;
         vary1 = maxlinq2(order, mparams,v,vary0,f);
+        if(mparams.print)cout<<"Iteration="<<i<<", Function="<<vary1.max<<endl;
 //  Convergence check
         if(vary1.max<vary0.max+mparams.tol) return vary1;
         vary0=vary1;

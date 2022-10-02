@@ -9,6 +9,7 @@
 //then the Hessian is replaced by the approximate Hessian
 //of the Louis method.
 //xselect indicates which predictors apply to which responses.
+//obssel indicates which observations to consider.
 #include<armadillo>
 using namespace arma;
 struct f2v
@@ -45,12 +46,13 @@ f2v genresp(const int & , const model &, const resp &, const vec &);
 void addsel(const int & , const xsel & , const f2v & , f2v & , const double & );
 f2v linsel(const int & , const f2v & , const mat & );
 vec vecsel(const xsel & , const vec & );
-f2v genresplik(const int & order, const std::vector<dat> & data, const vec & beta)
+f2v genresplik(const int & order, const std::vector<dat> & data, const xsel & obssel,
+    const vec & beta)
 {
     vec beta1, lambda, u, v;
     f2v obsresults,linresults;
     f2v results;
-    int i,j,jj,k,kk,order0=0,order1, p,q,r,n;
+    int i,ii,j,jj,k,kk,order0=0,order1, p,q,r,n,nn;
     results.value=0.0;
     p=beta.n_elem;
     n=data.size();
@@ -66,8 +68,25 @@ f2v genresplik(const int & order, const std::vector<dat> & data, const vec & bet
     }
     order1=order;
     if(order>2)order1=1;
-    for (i=0;i<n;i++)
+    if(obssel.all)
     {
+         nn=n;
+    }
+    else
+    {
+        nn=obssel.list.size();
+    }
+    if(nn==0) return results;
+    for (ii=0;ii<nn;ii++)
+    {
+        if(obssel.all)
+        {
+             i=ii;
+        }
+        else
+        {
+             i=obssel.list(ii);
+        }
         r=data[i].offset.n_elem;
         q=data[i].indep.n_cols;
         lambda.set_size(r);
