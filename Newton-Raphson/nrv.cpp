@@ -19,6 +19,7 @@
 //than mparams.tol, then iterations cease.
 //Function value at end of iteration is sent to standard output if mparams.print is true.
 #include<armadillo>
+using namespace std;
 using namespace arma;
 struct f2v
 {
@@ -46,8 +47,9 @@ struct params
 };
 maxf2v maxf2vvar(const int & , const vec & , const f2v & );
 maxf2v maxlinq2(const int & , const params &, const vec & , const maxf2v & ,
-    const std::function <f2v(const int &, const vec & )> f);
-maxf2v nrv(const int & order, const params & mparams, const vec & start, const std::function<f2v(const int &, const vec &)> f)
+    const function <f2v(const int &, const vec & )> f);
+maxf2v nrv(const int & order, const params & mparams, const vec & start,
+    const function<f2v(const int &, const vec &)> f)
 {
     f2v fy0;
     int i, p;

@@ -1,5 +1,6 @@
 //Compute product points and weights.
 #include<armadillo>
+using namespace std;
 using namespace arma;
 struct pwv
 {
@@ -11,7 +12,7 @@ struct pw
     vec points;
     vec weights;
 };
-pwv prodpwv(const std::vector<pw> & pws)
+pwv prodpwv(const vector<pw> & pws)
 {
     double x;
     int i,j,m,n;

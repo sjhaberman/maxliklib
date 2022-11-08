@@ -11,6 +11,7 @@
 //xselect indicates which predictors apply to which responses.
 //obssel indicates which observations to consider.
 #include<armadillo>
+using namespace std;
 using namespace arma;
 struct f2v
 {
@@ -46,7 +47,7 @@ f2v genresp(const int & , const model &, const resp &, const vec &);
 void addsel(const int & , const xsel & , const f2v & , f2v & , const double & );
 f2v linsel(const int & , const f2v & , const mat & );
 vec vecsel(const xsel & , const vec & );
-f2v genresplik(const int & order, const std::vector<dat> & data, const xsel & obssel,
+f2v genresplik(const int & order, const vector<dat> & data, const xsel & obssel,
     const vec & beta)
 {
     vec beta1, lambda, u, v;

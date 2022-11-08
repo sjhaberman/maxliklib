@@ -1,6 +1,7 @@
 //Generate products of sets of quadrature points and quadrature weights.
 //indices gives the products to use.  pw gives the univariate points and weights.
 #include<armadillo>
+using namespace std;
 using namespace arma;
 struct pw
 {
@@ -12,7 +13,7 @@ struct pwv
     mat points;
     vec weights;
 };
-pwv genprods(const imat & indices, const std::vector<pw> & pws)
+pwv genprods(const imat & indices, const vector<pw> & pws)
 {
     double w;
     int i,j;

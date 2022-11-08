@@ -12,6 +12,7 @@
 //datasel selects how to decompose individual responses.
 //obssel selects which responses to use.
 #include<armadillo>
+using namespace std;
 using namespace arma;
 struct f2v
 {
@@ -80,27 +81,15 @@ struct pwr
     double weight;
     resp theta;
 };
-struct obs
-{
-    std::vector<dat> data;
-};
-struct obsthetamap
-{
-    std::vector<thetamap>thetamaps;
-};
-struct obstheta
-{
-    std::vector<pwr> thetas;
-};
 void addsel(const int & , const xsel & , const f2v & , f2v & , const double & );
-f2v irtm (const int & , const std::vector<dat> & ,
-    const std::vector<thetamap> & , const xsel & , adq & , const std::vector<pwr> & , const vec & );
+f2v irtm (const int & , const vector<dat> & ,
+    const vector<thetamap> & , const xsel & , adq & , const vector<pwr> & , const vec & );
 f2v irtms (const int & order, const vec & obsweight,
-    const std::vector<obs> & obsdata,
-    const std::vector<obsthetamap> & obsthetamaps, const std::vector<xsel> & datasel,
-    const xsel & obssel, std::vector<adq> & obsscale,
-    const std::vector<obstheta> & obsthetas,
-    const std::vector<xsel> & betasel, const vec & beta)
+    const vector<vector<dat>> & obsdata,
+    const vector<vector<thetamap>> & obsthetamaps, const vector<xsel> & datasel,
+    const xsel & obssel, vector<adq> & obsscale,
+    const vector<vector<pwr>> & obsthetas,
+    const vector<xsel> & betasel, const vec & beta)
 {
     f2v cresults, results;
     int i, ii, p, q, n, nn;
@@ -155,8 +144,8 @@ f2v irtms (const int & order, const vec & obsweight,
         }      
         if(order>0)cresults.grad.set_size(q);
         if(order>1)cresults.hess.set_size(q,q);
-        cresults=irtm(order,obsdata[i].data,obsthetamaps[i].thetamaps, datasel[i], obsscale[i],
-            obsthetas[i].thetas,gamma);
+        cresults=irtm(order,obsdata[i],obsthetamaps[i], datasel[i], obsscale[i],
+            obsthetas[i],gamma);
         addsel(order,betasel[i],cresults,results,obsweight(i));
     }
     return results;

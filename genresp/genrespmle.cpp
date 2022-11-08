@@ -6,8 +6,9 @@
 //Conjugate gradient method is used if algorithm is C.
 //Gradient ascent is used if algorithm is G.
 #include<armadillo>
-using namespace arma;
+using namespace std;
 using namespace std::placeholders;
+using namespace arma;
 struct f2v
 {
     double value;
@@ -57,15 +58,15 @@ struct dat
      xsel xselect;
 };
 maxf2v conjgrad(const int &, const params & , const vec & ,
-           const std::function<f2v(const int & , const vec & )> f);
+           const function<f2v(const int & , const vec & )> f);
 maxf2v gradascent(const int &, const params & , const vec & ,
-           const std::function<f2v(const int & , const vec & )> f);
+           const function<f2v(const int & , const vec & )> f);
 maxf2v nrv(const int &, const params & , const vec & ,
-           const std::function<f2v(const int & , const vec & )> f);
+           const function<f2v(const int & , const vec & )> f);
 
-f2v genresplik(const int & , const std::vector<dat> & , const xsel & , const vec &);
+f2v genresplik(const int & , const vector<dat> & , const xsel & , const vec &);
 maxf2v genrespmle(const int & order, const params & mparams,
-    const char & algorithm, const std::vector<dat> & data, const xsel & obssel, const vec & start)
+    const char & algorithm, const vector<dat> & data, const xsel & obssel, const vec & start)
 {
     maxf2v results;
     int p;

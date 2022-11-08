@@ -19,6 +19,7 @@
 //If a main iteration leads to a change of the function f less
 //than mparams.tol, then iterations cease.
 #include<armadillo>
+using namespace std;
 using namespace arma;
 struct f2v
 {
@@ -48,7 +49,7 @@ maxf2v maxf2vvar(const int & , const vec & , const f2v & );
 maxf2v maxlinq2(const int & , const params & , const vec & , const maxf2v & ,
     const std::function <f2v(const int &, const vec &)> );
 maxf2v gradascent(const int & order, const params & mparams, const vec & start,
-    const std::function<f2v(const int &, const vec &)> f)
+    const function<f2v(const int &, const vec &)> f)
 {
     f2v fy0;
     int i, p;

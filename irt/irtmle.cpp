@@ -11,6 +11,7 @@
 //gradient is found.  If order=2, the Hessian is computed.
 //If order=3, then the approximate Hessian is found.
 #include<armadillo>
+using namespace std;
 using namespace arma;
 using namespace std::placeholders;
 struct f2v
@@ -98,34 +99,23 @@ struct pwr
     double weight;
     resp theta;
 };
-struct obs
-{
-    std::vector<dat> data;
-};
-struct obsthetamap
-{
-    std::vector<thetamap>thetamaps;
-};
-struct obstheta
-{
-    std::vector<pwr> thetas;
-};
 maxf2v conjgrad(const int &, const params & , const vec & ,
-    const std::function<f2v(const int & , const vec & )> f);
+    const function<f2v(const int & , const vec & )> f);
 maxf2v gradascent(const int &, const params & , const vec & ,
-    const std::function<f2v(const int & , const vec & )> f);
-maxf2v nrv(const int &, const params & , const vec & ,
-    const std::function<f2v(const int & , const vec & )> f);
-f2v irtms (const int & , const vec & , const std::vector<obs> & , const std::vector<obsthetamap> & ,
-    const std::vector<xsel> & , const xsel & , std::vector<adq> &,
-    const std::vector<obstheta> & ,
-    const std::vector<xsel> & ,const vec & );
+    const function<f2v(const int & , const vec & )> f);
+maxf2v nrv(const int &, const params & , const vec & ,  
+    const function<f2v(const int & , const vec & )> f);
+f2v irtms (const int & , const vec & , const vector<vector<dat>> & ,
+    const vector<vector<thetamap>> & ,
+    const vector<xsel> & , const xsel & , vector<adq> &,
+    const vector<vector<pwr>> & ,
+    const vector<xsel> & ,const vec & );
 maxf2v irtmle(const int & order, const params & mparams,
     const char & algorithm, const vec & obsweight,
-    const std::vector<obs> & obsdata,
-    const std::vector<obsthetamap> & obsthetamaps, const std::vector<xsel> & datasel,
-    const xsel & obssel, std::vector<adq> & obsscale,
-    const std::vector<obstheta> & obsthetas, const std::vector<xsel> & betasel, const vec & start)
+    const vector<vector<dat>> & obsdata,
+    const vector<vector<thetamap>> & obsthetamaps, const vector<xsel> & datasel,
+    const xsel & obssel, vector<adq> & obsscale,
+    const vector<vector<pwr>> & obsthetas, const vector<xsel> & betasel, const vec & start)
 {
     maxf2v results;
     int p;
@@ -133,7 +123,7 @@ maxf2v irtmle(const int & order, const params & mparams,
     results.locmax.set_size(p);
     results.grad.set_size(p);
     if(algorithm=='N'||algorithm=='L')results.hess.set_size(p,p);
-    auto f=std::bind(irtms,_1,obsweight,obsdata,obsthetamaps,datasel,
+    auto f=bind(irtms,_1,obsweight,obsdata,obsthetamaps,datasel,
         obssel,obsscale,obsthetas,betasel,_2);
     if(algorithm=='N'||algorithm=='L')results=nrv(order, mparams, start, f);
     if(algorithm=='C')results=conjgrad(order, mparams, start, f);

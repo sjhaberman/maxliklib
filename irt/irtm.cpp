@@ -8,17 +8,11 @@
 //adaptive quadrature information in adquad, and the model parameter beta.
 //datasel selects responses to use.
 #include<armadillo>
+using namespace std;
 using namespace arma;
 struct f2v
 {
     double value;
-    vec grad;
-    mat hess;
-};
-struct maxf2v
-{
-    vec locmax;
-    double max;
     vec grad;
     mat hess;
 };
@@ -85,19 +79,20 @@ struct adq
     vecmat tran;
 };
 pwr adaptpwr(const pwr &, const adq &);
-adq rescale(const adq & , const std::vector<maxf2v> & );
-maxf2v maxf2vvar(const int & order , const vec & y, const f2v & fy);
-f2v irtc (const int & , const std::vector<dat> & ,
-    const std::vector<thetamap> & , const xsel & , const resp & ,
+f2v irtc (const int & , const vector<dat> & ,
+    const vector<thetamap> & , const xsel & , const resp & ,
     const vec &  beta);
-f2v irtm (const int & order, const std::vector<dat> & data,
-    const std::vector<thetamap> & thetamaps, const xsel & datasel, adq & scale,
-    const std::vector<pwr> & thetas, const vec &  beta)
+vecmat eap(const vec &, const mat & );
+f2v irtm (const int & order, const vector<dat> & data,
+    const vector<thetamap> & thetamaps, const xsel & datasel, adq & scale,
+    const vector<pwr> & thetas, const vec &  beta)
 {
-    f2v cresults, results;
+    f2v results;
     bool flag;
     double avelog,sumprob;
-    int d,i,m,order1, q;
+    int d,i,j,k,m,order1, q;
+    mat points;
+    vec diff;
     pwr newtheta;    
     newtheta.theta.iresp.copy_size(thetas[0].theta.iresp);
     newtheta.theta.dresp.copy_size(thetas[0].theta.dresp);
@@ -112,8 +107,8 @@ f2v irtm (const int & order, const std::vector<dat> & data,
          order1=order;
     }
     q=thetas.size();
+    vector<f2v>cresults(q);
     vec prob(q),weights(q);
-    std::vector<maxf2v>cloglik(q);
     if(scale.adapt)
     {
         if(scale.xselect.all)
@@ -124,44 +119,52 @@ f2v irtm (const int & order, const std::vector<dat> & data,
         {
              d=scale.xselect.list.n_elem;
         }
-        if(d==0)flag=false;       
+        if(d==0)
+        {
+             flag=false;
+        }
+        else
+        {
+             points.resize(d,q); 
+             diff.resize(d);
+        }        
     }
     if(order>0)
     {
         results.grad.set_size(m);
         results.grad.zeros();
-        cresults.grad.set_size(m);
+        
     }
     if(order>1)
     {
         results.hess.set_size(m,m);
         if(order1>1)
         {
-            results.hess.zeros();
-            cresults.hess.set_size(m,m);
+            results.hess.zeros();       
         }
     }
     results.value=0.0;
 //Enter prior points and add.
     for(i=0;i<q;i++)
     {
+        if(order>0)cresults[i].grad.set_size(m);
+        if(order1>1)cresults[i].hess.set_size(m,m);
         newtheta=adaptpwr(thetas[i],scale);
         weights(i)=newtheta.weight; 
-        cloglik[i].locmax.resize(d);
-        if(order>0)cloglik[i].grad.resize(d);
-        if(order1>1)cloglik[i].hess.resize(d,d);
-        if(scale.xselect.all)
+        if(scale.adapt)
         {
-            cloglik[i].locmax=newtheta.theta.dresp;
-        }
-        else
-        {
-            cloglik[i].locmax=newtheta.theta.dresp.elem(scale.xselect.list);
+             if(scale.xselect.all)
+             {
+                 points.col(i)=newtheta.theta.dresp;
+             }
+             else
+             {
+                 points.col(i)=newtheta.theta.dresp.elem(scale.xselect.list);
+             }
         }  
-        cresults=irtc(order1,data,thetamaps,datasel,newtheta.theta,beta);
-        if(order1>1)cresults.hess=cresults.hess+cresults.grad*cresults.grad.t();
-        cloglik[i]=maxf2vvar(order1,newtheta.theta.dresp,cresults);
-        prob(i)=cresults.value;
+        cresults[i]=irtc(order1,data,thetamaps,datasel,newtheta.theta,beta);
+        if(order1>1)cresults[i].hess=cresults[i].hess+cresults[i].grad*cresults[i].grad.t();
+        prob(i)=cresults[i].value;
     }
     avelog=mean(prob);
     prob=exp(prob-avelog)%weights;
@@ -172,13 +175,17 @@ f2v irtm (const int & order, const std::vector<dat> & data,
          prob=prob/sumprob;     
          for(i=0;i<q;i++)
          {
-             results.grad=results.grad+prob(i)*cloglik[i].grad;
-             if(order1>1)results.hess=results.hess+prob(i)*cloglik[i].hess;
+             results.grad=results.grad+prob(i)*cresults[i].grad;
+             if(order1>1)results.hess=results.hess+prob(i)*cresults[i].hess;
          }
     }
     if(order1>1)results.hess=results.hess-results.grad*results.grad.t();
     if(order==3)results.hess=-results.grad*results.grad.t();
-    if(flag)scale = rescale(scale, cloglik);
+    if(flag)
+    {
+         scale.tran=eap(prob,points);
+         scale.tran.m=chol(scale.tran.m,"lower");  
+    }
     return results;
 }
 
