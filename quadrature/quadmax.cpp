@@ -2,8 +2,8 @@
 //Data are in functdat.
 //Output is a maxf2v struct.
 #include<armadillo>
+using namespace std;
 using namespace arma;
-
 struct maxf2v
 {
     vec locmax;
@@ -18,18 +18,17 @@ struct fvecmat
     mat m;
 };
 fvecmat trisym(const int & , const vec & );
-maxf2v quadmax(const std::vector<maxf2v> & functdat)
+maxf2v quadmax(const vector<vec> & points, const vec & values)
 {
     bool flag;
     double check;
     int h,i,j,k,m,n,p;
     maxf2v results;
-    n=functdat.size();
-    vec y(n);
-    for(i=0;i<n;i++)y(i)=functdat[i].max;
-    m=functdat[0].locmax.n_elem;    
+    n=values.n_elem;
+    m=points[0].n_elem;    
     results.locmax.set_size(m);
     results.locmax.zeros();
+    results.max=datum::nan;
     results.grad=zeros(m);
     results.hess.set_size(m,m);
     results.hess.eye(m,m);
@@ -45,7 +44,7 @@ maxf2v quadmax(const std::vector<maxf2v> & functdat)
         h=m+1;
         for(j=0;j<m;j++)
         {
-             x(i,j+1)=functdat[i].locmax(j);
+             x(i,j+1)=points[i](j);
 	     for(k=0;k<=j;k++)
              {
 		 x(i,h)=x(i,k+1)*x(i,j+1);
@@ -54,7 +53,7 @@ maxf2v quadmax(const std::vector<maxf2v> & functdat)
         }
         
     }
-    flag=solve(b,x,y);
+    flag=solve(b,x,values);
     if(!flag) return results;
     z=trisym(m,b);
     z.m=-z.m;

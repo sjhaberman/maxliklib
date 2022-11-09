@@ -7,6 +7,7 @@
 //and the latent distribution.  The model parameter is beta.
 //datasel selects responses to use.
 #include<armadillo>
+using namespace std;
 using namespace arma;
 //Except for thetamap, the structs are also used in genresplik.cpp.
 struct f2v
@@ -58,9 +59,9 @@ struct thetamap
 };
 ivec ivecsel(const xsel & xselect, const ivec & y);
 vec vecsel(const xsel & , const vec & y);
-f2v genresplik(const int & , const std::vector<dat> & , const xsel & , const vec & );
-f2v irtc (const int & order, const std::vector<dat> & data,
-    const std::vector<thetamap> & thetamaps, const xsel & datasel, const resp & theta,
+f2v genresplik(const int & , const vector<dat> & , const xsel & , const vec & );
+f2v irtc (const int & order, const vector<dat> & data,
+    const vector<thetamap> & thetamaps, const xsel & datasel, const resp & theta,
     const vec &  beta)
 {
     f2v results;

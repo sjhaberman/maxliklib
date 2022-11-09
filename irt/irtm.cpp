@@ -82,7 +82,7 @@ pwr adaptpwr(const pwr &, const adq &);
 f2v irtc (const int & , const vector<dat> & ,
     const vector<thetamap> & , const xsel & , const resp & ,
     const vec &  beta);
-vecmat eap(const vec &, const mat & );
+vecmat rescale(const vector<vec> & , const vec & );
 f2v irtm (const int & order, const vector<dat> & data,
     const vector<thetamap> & thetamaps, const xsel & datasel, adq & scale,
     const vector<pwr> & thetas, const vec &  beta)
@@ -91,8 +91,6 @@ f2v irtm (const int & order, const vector<dat> & data,
     bool flag;
     double avelog,sumprob;
     int d,i,j,k,m,order1, q;
-    mat points;
-    vec diff;
     pwr newtheta;    
     newtheta.theta.iresp.copy_size(thetas[0].theta.iresp);
     newtheta.theta.dresp.copy_size(thetas[0].theta.dresp);
@@ -107,8 +105,9 @@ f2v irtm (const int & order, const vector<dat> & data,
          order1=order;
     }
     q=thetas.size();
-    vector<f2v>cresults(q);
-    vec prob(q),weights(q);
+    vector<vec> points(q);
+    vector<f2v> cresults(q);
+    vec prob(q),weights(q),values(q);
     if(scale.adapt)
     {
         if(scale.xselect.all)
@@ -125,15 +124,15 @@ f2v irtm (const int & order, const vector<dat> & data,
         }
         else
         {
-             points.resize(d,q); 
-             diff.resize(d);
+             for(i=0;i<q;i++)points[i].resize(d); 
+             scale.tran.v.resize(d);
+             scale.tran.m.resize(d,d);       
         }        
     }
     if(order>0)
     {
         results.grad.set_size(m);
-        results.grad.zeros();
-        
+        results.grad.zeros();      
     }
     if(order>1)
     {
@@ -155,14 +154,15 @@ f2v irtm (const int & order, const vector<dat> & data,
         {
              if(scale.xselect.all)
              {
-                 points.col(i)=newtheta.theta.dresp;
+                 points[i]=newtheta.theta.dresp;
              }
              else
              {
-                 points.col(i)=newtheta.theta.dresp.elem(scale.xselect.list);
+                 points[i]=newtheta.theta.dresp.elem(scale.xselect.list);
              }
         }  
         cresults[i]=irtc(order1,data,thetamaps,datasel,newtheta.theta,beta);
+        values(i)=cresults[i].value;
         if(order1>1)cresults[i].hess=cresults[i].hess+cresults[i].grad*cresults[i].grad.t();
         prob(i)=cresults[i].value;
     }
@@ -181,11 +181,7 @@ f2v irtm (const int & order, const vector<dat> & data,
     }
     if(order1>1)results.hess=results.hess-results.grad*results.grad.t();
     if(order==3)results.hess=-results.grad*results.grad.t();
-    if(flag)
-    {
-         scale.tran=eap(prob,points);
-         scale.tran.m=chol(scale.tran.m,"lower");  
-    }
+    if(flag)scale.tran=rescale(points,values);
     return results;
 }
 
