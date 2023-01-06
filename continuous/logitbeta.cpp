@@ -1,8 +1,6 @@
 //Log likelihood component and its gradient and hessian matrix
-//for log-gamma model with response y and parameter vector beta
-//with positive elements beta(0) and beta(1).  The first parameter
-//is the argument of the gamma function associated with the distribution
-//and the second parameter is the scale parameter.  If order is 0,
+//for logit-beta model with response y and parameter vector beta
+//with positive elements beta(0) and beta(1).  If order is 0,
 //only the function is
 //found, if order is 1, then the function and gradient are found.
 //If order is 2,
@@ -23,9 +21,9 @@ struct resp
   ivec iresp;
   vec dresp;
 };
-f2v loggamma(const int & order, const resp & y, const vec & beta)
+f2v logitbeta(const int & order, const resp & y, const vec & beta)
 {
-    double z,zz;
+    double dz,tz,z,zz,zzz;
     f2v results;
     if(order>0) results.grad.set_size(2);
     if(order>1) results.hess.set_size(2,2);
@@ -37,19 +35,22 @@ f2v loggamma(const int & order, const resp & y, const vec & beta)
       return results;
     }
     z=y.dresp(0);
-    zz=exp(z);
-    results.value=beta(0)*z-beta(1)*zz+beta(0)*log(beta(1))-lgamma(beta(0));
+    zz=beta(0)+beta(1);
+    zzz=log(1.0+exp(z));
+    results.value=beta(0)*z-zz*zzz+lgamma(zz)-lgamma(beta(0))-lgamma(beta(1));
     if(order>0)
     {
-        results.grad(0)=z+log(beta(1))-digamma(beta(0));
-        results.grad(1)=-zz+beta(0)/beta(1);
+        dz=digamma(zz);
+        results.grad(0)=z-zzz+dz-digamma(beta(0));
+        results.grad(1)=-zzz+dz-digamma(beta(1));
     }
     if(order>1)
     {
-        results.hess(0,0)=-trigamma(beta(0));
-        results.hess(0,1)=1.0/beta(1);
+        tz=trigamma(zz);
+        results.hess(0,0)=tz-trigamma(beta(0));
+        results.hess(0,1)=tz;
         results.hess(1,0)=results.hess(0,1);
-        results.hess(1,1)=-beta(0)/(beta(1)*beta(1));
+        results.hess(1,1)=tz-trigamma(beta(1));
     }
     return results;
 }
