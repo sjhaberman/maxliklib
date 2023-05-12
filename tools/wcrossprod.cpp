@@ -1,16 +1,26 @@
 //Weighted matrix of cross-product.
-//Matrix is x and weight is w.
+//Matrix is wx.m and weight is wx.v.
 #include<armadillo>
 using namespace arma;
-mat wcrossprod(const mat & x,const vec & w)
+// Combination of vector and matrix.
+struct vecmat
 {
-    int i,j;
-    mat result(x.n_cols,x.n_cols);
-    for(i=0;i<x.n_cols;i++)
+    vec v;
+    mat m;
+};
+mat wcrossprod(const vecmat & wx)
+{
+    int i,j,k,m,n;
+    m=wx.v.n_elem;
+    n=wx.m.n_rows;
+    mat result(n,n);
+    
+    for(i=0;i<n;i++)
     {
         for(j=0;j<=i;j++)
         {
-            result(i,j)=sum(x.col(i)%x.col(j)%w);
+            result(i,j)=0.0;
+            for (k=0;k<m;k++)result(i,j)+=wx.m(i,k)*wx.m(j,k)*wx.v(k);
             if(j<i) result(j,i)=result(i,j);
         }
     }

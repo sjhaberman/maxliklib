@@ -5,7 +5,7 @@
 //the correspondence specified by thetamaps
 //of the latent response and the predictors and of the latent response
 //and the latent distribution, the prior distribution specified in prior, the
-//adaptive quadrature information in adquad, and the model parameter beta.
+//adaptive quadrature information in scale, and the model parameter beta.
 //datasel selects responses to use.
 #include<armadillo>
 using namespace std;
@@ -82,7 +82,7 @@ pwr adaptpwr(const pwr &, const adq &);
 f2v irtc (const int & , const vector<dat> & ,
     const vector<thetamap> & , const xsel & , const resp & ,
     const vec &  beta);
-vecmat rescale(const vector<vec> & , const vec & );
+vecmat rescale(const vecmat & );
 f2v irtm (const int & order, const vector<dat> & data,
     const vector<thetamap> & thetamaps, const xsel & datasel, adq & scale,
     const vector<pwr> & thetas, const vec &  beta)
@@ -105,7 +105,8 @@ f2v irtm (const int & order, const vector<dat> & data,
          order1=order;
     }
     q=thetas.size();
-    vector<vec> points(q);
+    vecmat pv;
+    pv.v.set_size(q);
     vector<f2v> cresults(q);
     vec prob(q),weights(q),values(q);
     if(scale.adapt)
@@ -124,10 +125,11 @@ f2v irtm (const int & order, const vector<dat> & data,
         }
         else
         {
-             for(i=0;i<q;i++)points[i].resize(d); 
-             scale.tran.v.resize(d);
-             scale.tran.m.resize(d,d);       
-        }        
+             scale.tran.v.set_size(d);
+             scale.tran.m.set_size(d,d);
+             pv.m.set_size(d,q);
+        } 
+           
     }
     if(order>0)
     {
@@ -154,11 +156,11 @@ f2v irtm (const int & order, const vector<dat> & data,
         {
              if(scale.xselect.all)
              {
-                 points[i]=newtheta.theta.dresp;
+                 pv.m.col(i)=newtheta.theta.dresp;
              }
              else
              {
-                 points[i]=newtheta.theta.dresp.elem(scale.xselect.list);
+                 pv.m.col(i)=newtheta.theta.dresp.elem(scale.xselect.list);
              }
         }  
         cresults[i]=irtc(order1,data,thetamaps,datasel,newtheta.theta,beta);
@@ -181,7 +183,7 @@ f2v irtm (const int & order, const vector<dat> & data,
     }
     if(order1>1)results.hess=results.hess-results.grad*results.grad.t();
     if(order==3)results.hess=-results.grad*results.grad.t();
-    if(flag)scale.tran=rescale(points,values);
+    if(flag)scale.tran=rescale(pv);
     return results;
 }
 

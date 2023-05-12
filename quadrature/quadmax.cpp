@@ -11,6 +11,11 @@ struct maxf2v
     vec grad;
     mat hess;
 };
+struct vecmat
+{
+    vec v;
+    mat m;
+};
 struct fvecmat
 {
     double value;
@@ -18,14 +23,13 @@ struct fvecmat
     mat m;
 };
 fvecmat trisym(const int & , const vec & );
-maxf2v quadmax(const vector<vec> & points, const vec & values)
+maxf2v quadmax(const vecmat & pv)
 {
     bool flag;
-    double check;
     int h,i,j,k,m,n,p;
     maxf2v results;
-    n=values.n_elem;
-    m=points[0].n_elem;    
+    n=pv.v.n_elem;
+    m=pv.m.n_rows;    
     results.locmax.set_size(m);
     results.locmax.zeros();
     results.max=datum::nan;
@@ -44,7 +48,7 @@ maxf2v quadmax(const vector<vec> & points, const vec & values)
         h=m+1;
         for(j=0;j<m;j++)
         {
-             x(i,j+1)=points[i](j);
+             x(i,j+1)=pv.m(j,i);
 	     for(k=0;k<=j;k++)
              {
 		 x(i,h)=x(i,k+1)*x(i,j+1);
@@ -53,7 +57,7 @@ maxf2v quadmax(const vector<vec> & points, const vec & values)
         }
         
     }
-    flag=solve(b,x,values);
+    flag=solve(b,x,pv.v);
     if(!flag) return results;
     z=trisym(m,b);
     z.m=-z.m;

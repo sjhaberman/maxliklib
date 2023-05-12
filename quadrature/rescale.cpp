@@ -17,22 +17,22 @@ struct vecmat
     vec v;
     mat m;
 };
-maxf2v quadmax(const vector<vec> & , const vec & );
-vecmat rescale(const vector<vec> & points, const vec & values)
+maxf2v quadmax(const vecmat & );
+vecmat rescale(const vecmat & pv)
 { 
     vecmat result;
     int d,i,q;
-    q=points.size();
-    d=points[0].size();
+    q=pv.v.n_elem;
+    d=pv.m.n_rows;
     maxf2v quadfit;
-    quadfit.locmax.resize(d);
-    quadfit.hess.resize(d,d);
-    quadfit.grad.resize(d);
-    result.v.resize(d);
-    result.m.resize(d,d); 
+    quadfit.locmax.set_size(d);
+    quadfit.hess.set_size(d,d);
+    quadfit.grad.set_size(d);
+    result.v.set_size(d);
+    result.m.set_size(d,d); 
     result.v.zeros();
     result.m=eye(d,d);      
-    quadfit=quadmax(points,values); 
+    quadfit=quadmax(pv); 
     if(isnan(quadfit.max)) return result;
     result.v =quadfit.locmax;
     result.m=chol(inv_sympd(-quadfit.hess),"lower");

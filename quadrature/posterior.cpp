@@ -89,16 +89,16 @@ vecmat posterior(const vector<dat> & data,
     m=beta.n_elem;
     q=thetas.size();
     k=thetas[0].theta.dresp.n_elem;
-    mat points(q,k);   
+    mat points(k,q);   
     vector<f2v> cresults(q);
     vec prob(q),weights(q);
     results.v.set_size(q);
-    results.m.set_size(q,k);
+    results.m.set_size(k,q);
     for(i=0;i<q;i++)
     {
         newtheta=adaptpwr(thetas[i],scale);
         weights(i)=newtheta.weight;
-        points.row(i)=newtheta.theta.dresp; 
+        points.col(i)=newtheta.theta.dresp; 
         cresults[i]=irtc(order,data,thetamaps,datasel,newtheta.theta,beta);
         prob(i)=cresults[i].value;
     }

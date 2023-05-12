@@ -81,7 +81,7 @@ vector<vecmat> posteriors(const vector<vector<dat>> & obsdata,
     const xsel & obssel, vector<adq> & obsscale,
     const vector<vector<pwr>> & obsthetas, const vector<xsel> & betasel, const vec &  beta)
 {
-    vector<vecmat> results(0);
+    vector<vecmat> results;
     int i,ii,n,nn,p,q,r,s;
     vec gamma;
     p=beta.n_elem;
@@ -95,7 +95,7 @@ vector<vecmat> posteriors(const vector<vector<dat>> & obsdata,
         nn=obssel.list.size();
     }
     if(nn==0) return results;
-    results.resize(nn);
+    results.resize(n);
     for(ii=0;ii<nn;ii++)
     {
          if(obssel.all)
@@ -121,7 +121,7 @@ vector<vecmat> posteriors(const vector<vector<dat>> & obsdata,
         r=obsthetas[i][0].theta.dresp.n_elem;
         s=obsthetas[i].size();      
         results[i].v.set_size(s);
-        results[i].m.set_size(s,r);
+        results[i].m.set_size(r,s);
         results[i]=posterior(obsdata[i],obsthetamaps[i],datasel[i],obsscale[i],obsthetas[i],gamma);
     }
     return results;

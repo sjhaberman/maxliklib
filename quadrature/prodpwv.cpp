@@ -2,17 +2,17 @@
 #include<armadillo>
 using namespace std;
 using namespace arma;
-struct pwv
+struct vecmat
 {
-    mat points;
-    vec weights;
+    vec v;
+    mat m;
 };
 struct pw
 {
     vec points;
     vec weights;
 };
-pwv prodpwv(const vector<pw> & pws)
+vecmat prodpwv(const vector<pw> & pws)
 {
     double x;
     int i,j,m,n;
@@ -23,19 +23,19 @@ pwv prodpwv(const vector<pw> & pws)
         ncoord(i)=pws[i].points.size();
     }
     m=prod(ncoord);
-    pwv results;
-    results.points.set_size(n,m);
-    results.weights.set_size(m);
+    vecmat results;
+    results.m.set_size(n,m);
+    results.v.set_size(m);
     coord.zeros();
     for(j=0;j<m;j++)
     {
          x=1.0;
          for(i=0;i<n;i++)
          {
-              results.points(i,j)=pws[i].points(coord(i));
+              results.m(i,j)=pws[i].points(coord(i));
               x=x*pws[i].weights(coord(i));
          }
-         results.weights(j)=x;
+         results.v(j)=x;
          for(i=0;i<n;i++)
          {
              coord(i)=coord(i)+1;

@@ -8,27 +8,27 @@ struct pw
     vec points;
     vec weights;
 };
-struct pwv
+struct vecmat
 {
-    mat points;
-    vec weights;
+    vec v;
+    mat m;
 };
-pwv genprods(const imat & indices, const vector<pw> & pws)
+vecmat genprods(const imat & indices, const vector<pw> & pws)
 {
     double w;
     int i,j;
-    pwv results;
-    results.weights.set_size(indices.n_cols);
-    results.points.set_size(indices.n_rows,indices.n_cols);
+    vecmat results;
+    results.v.set_size(indices.n_cols);
+    results.m.set_size(indices.n_rows,indices.n_cols);
     for(j=0;j<indices.n_cols;j++)
     {
         w=1.0;
         for(i=0;i<indices.n_rows;i++)
         {
             w=w*pws[i].weights(indices(i,j));
-            results.points(i,j)=pws[i].points(indices(i,j));
+            results.m(i,j)=pws[i].points(indices(i,j));
         }
-        results.weights(j)=w;
+        results.v(j)=w;
     }
     return results;
 }
