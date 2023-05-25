@@ -38,7 +38,6 @@ struct adq
 };
 pwr adaptpwr(const pwr & oldtheta, const adq & scale)
 { 
-    double mult;
     int i,p,n;
     pwr results;
     results.theta.iresp.copy_size(oldtheta.theta.iresp);

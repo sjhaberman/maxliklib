@@ -57,7 +57,7 @@ maxf2v quadmax(const vecmat & pv)
         }
         
     }
-    flag=solve(b,x,pv.v);
+    flag=solve(b,x,pv.v,solve_opts::no_approx);
     if(!flag) return results;
     z=trisym(m,b);
     z.m=-z.m;

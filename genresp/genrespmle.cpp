@@ -7,7 +7,6 @@
 //Gradient ascent is used if algorithm is G.
 #include<armadillo>
 using namespace std;
-using namespace std::placeholders;
 using namespace arma;
 struct f2v
 {
@@ -74,7 +73,8 @@ maxf2v genrespmle(const int & order, const params & mparams,
     results.locmax.set_size(p);
     results.grad.set_size(p);
     if(algorithm=='N'||algorithm=='L')results.hess.set_size(p,p);
-    auto f=std::bind(genresplik, _1, data, obssel, _2);
+    auto f=[data,obssel](const int order,const vec start)
+        {return genresplik(order,data,obssel,start);};
     if(algorithm=='N'||algorithm=='L')results=nrv(order, mparams, start, f);
     if(algorithm=='C')results=conjgrad(order, mparams, start, f);
     if(algorithm=='G')results=gradascent(order, mparams, start, f);

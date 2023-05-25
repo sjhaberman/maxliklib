@@ -1,7 +1,6 @@
 //Rescale for adaptive quadrature transformation for integration of function on vector space.
 //Transformation of points is loc+lt*point for the vector loc
-//and the lower triangular
-//matrix lt.
+//and the matrix lt.
 #include<armadillo>
 using namespace std;
 using namespace arma;
