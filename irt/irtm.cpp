@@ -75,24 +75,27 @@ struct vecmat
 struct adq
 {
     bool adapt;
+    double mult;
     xsel xselect;
     vecmat tran;
 };
 pwr adaptpwr(const pwr &, const adq &);
+vecmat rescale(const vecmat & );
 f2v irtc (const int & , const vector<dat> & ,
     const vector<thetamap> & , const xsel & , const resp & ,
     const vec &  beta);
-vecmat rescale(const vecmat & );
 f2v irtm (const int & order, const vector<dat> & data,
-    const vector<thetamap> & thetamaps, const xsel & datasel, const adq & scale,
+    const vector<thetamap> & thetamaps, const xsel & datasel,  adq & scale,
     const vector<pwr> & thetas, const vec &  beta)
 {
     f2v results;
-    adq sc;
+
     bool flag;
     double avelog,sumprob;
-    int d,i,j,k,m,order0=0,order1, q;
+    int d,i,j,k,m,order1, q;
     pwr newtheta;    
+    newtheta.theta.iresp.copy_size(thetas[0].theta.iresp);
+    newtheta.theta.dresp.copy_size(thetas[0].theta.dresp);
     flag=scale.adapt;
     m=beta.n_elem;
     if(order==3)
@@ -104,63 +107,23 @@ f2v irtm (const int & order, const vector<dat> & data,
          order1=order;
     }
     q=thetas.size();
-    vecmat pv;
-    
+    vecmat pv;   
     vector<f2v> cresults(q);
     vec prob(q),weights(q);
     if(scale.adapt)
-    {    
-        if(scale.xselect.all)
-        {
-             d=thetas[0].theta.dresp.n_elem;
-        }
-        else
-        {
-             d=scale.xselect.list.n_elem;
-        }
+    {
+        
+        d=scale.tran.v.n_elem;
         if(d==0)
         {
              flag=false;
         }
         else
         {
-             pv.v.set_size(q);
              pv.m.set_size(d,q);
-             sc.xselect.all=scale.xselect.all;
-             if(!sc.xselect.all)
-             {
-                  sc.xselect.list.set_size(d);
-                  sc.xselect.list=scale.xselect.list;
-             }
-             sc.tran.v.set_size(d);
-             sc.tran.m.set_size(d,d);
-             for(i=0;i<q;i++)
-             {
-                  if(sc.xselect.all)
-                  {
-                      pv.m.col(i)=thetas[i].theta.dresp;
-                  }
-                  else
-                  {
-                      pv.m.col(i)=thetas[i].theta.dresp.elem(sc.xselect.list);
-                  }
-             }
-        } 
-        sc.adapt=flag;   
-//Enter prior points.
-        for(i=0;i<q;i++)
-        {
-            weights(i)=thetas[i].weight; 
-            cresults[i]=irtc(order0,data,thetamaps,datasel,thetas[i].theta,beta);
-            pv.v(i)=cresults[i].value;
-        
-        }
-        sc.tran=rescale(pv);
-        sc.tran.m=chol(sc.tran.m,"lower");
+             pv.v.set_size(q);
+        }           
     }
-
-    newtheta.theta.iresp.copy_size(thetas[0].theta.iresp);
-    newtheta.theta.dresp.copy_size(thetas[0].theta.dresp);       
     if(order>0)
     {
         results.grad.set_size(m);
@@ -175,13 +138,24 @@ f2v irtm (const int & order, const vector<dat> & data,
         }
     }
     results.value=0.0;
-//Enter prior points.
+//Enter prior points and add.
     for(i=0;i<q;i++)
     {
         if(order>0)cresults[i].grad.set_size(m);
         if(order1>1)cresults[i].hess.set_size(m,m);
-        newtheta=adaptpwr(thetas[i],sc);
+        newtheta=adaptpwr(thetas[i],scale);
         weights(i)=newtheta.weight; 
+        if(flag)
+        {
+             if(scale.xselect.all)
+             {
+                 pv.m.col(i)=newtheta.theta.dresp;
+             }
+             else
+             {
+                 pv.m.col(i)=newtheta.theta.dresp.elem(scale.xselect.list);
+             }
+        }  
         cresults[i]=irtc(order1,data,thetamaps,datasel,newtheta.theta,beta);
         if(order1>1)cresults[i].hess=cresults[i].hess+cresults[i].grad*cresults[i].grad.t();
         prob(i)=cresults[i].value;
@@ -189,15 +163,13 @@ f2v irtm (const int & order, const vector<dat> & data,
     }
     avelog=mean(prob);
     prob=prob-avelog*ones(q);
+    if(flag)pv.v=prob;
     prob=exp(prob)%weights;
-    sumprob=sum(prob);
- 
+    sumprob=sum(prob);  
     results.value=log(sumprob)+avelog;
-    
+    if(order>0)prob=prob/sumprob;
     if(order>0)
-    {
-         prob=prob/sumprob;
-         
+    {    
          for(i=0;i<q;i++)
          {
              results.grad=results.grad+prob(i)*cresults[i].grad;
@@ -206,7 +178,11 @@ f2v irtm (const int & order, const vector<dat> & data,
     }
     if(order1>1)results.hess=results.hess-results.grad*results.grad.t();
     if(order==3)results.hess=-results.grad*results.grad.t();
-    
+    if(flag)
+    {
+         scale.tran=rescale(pv);
+         scale.mult=det(scale.tran.m);
+    }
     return results;
 }
 

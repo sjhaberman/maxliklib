@@ -2,8 +2,8 @@
 // oldtheta is unchanged if adq.adapt is false or adq.xselect.all is false and
 // adq.xselect.list has no elements.  Otherwise, oldtheta.iresp is unchanged, the vector
 // point of elements of oldtheta.dresp specified by adq.xselect are changed to
-// scale.tran.v+scale.tran.m*point, where adq.tran.m is lower triangular, and
-// oldtheta.weight is multiplied by the determinant of adq.tran.m.
+// scale.tran.v+scale.tran.m*point, and
+// oldtheta.weight is multiplied by the determinant scale.mult of adq.tran.m.
 #include<armadillo>
 using namespace arma;
 struct resp
@@ -33,6 +33,7 @@ struct vecmat
 struct adq
 {
     bool adapt;
+    double mult;
     xsel xselect;
     vecmat tran;
 };
@@ -48,18 +49,15 @@ pwr adaptpwr(const pwr & oldtheta, const adq & scale)
     if(!scale.adapt)return results;
     if(scale.xselect.all)
     {
-        p=results.theta.dresp.n_elem;
-        if(min(diagvec(scale.tran.m))<=0.0)return results;
         results.theta.dresp=scale.tran.v+scale.tran.m*results.theta.dresp;
     }
     else
     {
         p=scale.xselect.list.n_elem;
         if(p==0)return results;
-        if(min(diagvec(scale.tran.m))<=0.0)return results;
         results.theta.dresp.elem(scale.xselect.list)
              =scale.tran.v+scale.tran.m*results.theta.dresp.elem(scale.xselect.list);       
     }
-    results.weight=results.weight*prod(diagvec(scale.tran.m));
+    results.weight=results.weight*scale.mult;
     return results;
 }

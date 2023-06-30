@@ -69,6 +69,7 @@ struct vecmat
 struct adq
 {
     bool adapt;
+    double mult;
     xsel xselect;
     vecmat tran;
 };
@@ -103,7 +104,9 @@ vecmat posterior(const vector<dat> & data,
         prob(i)=cresults[i].value;
     }
     avelog=mean(prob);
-    prob=exp(prob-avelog)%weights;
+    prob=prob-avelog*ones(q);
+    
+    prob=exp(prob)%weights;
     sumprob=sum(prob);    
     prob=prob/sumprob;     
     results.v=prob;

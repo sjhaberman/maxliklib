@@ -1,4 +1,4 @@
-//Unpack vector beta of dimension d(d+3)/2 into a vector and a triangular matrix.
+//Unpack vector beta of dimension d(d+3)/2 into a vector and a symmetric matrix.
 #include<armadillo>
 using namespace arma;
 struct vecmat
@@ -18,7 +18,7 @@ vecmat unpack(const int & d, const vec & beta)
         for(j=0;j<=i;j++)
         {
             result.m(i,j)=beta(k);
-            if(j<i)result.m(j,i)=0.0;
+            if(j<i)result.m(j,i)=result.m(i,j);
             k=k+1;
         }
     }

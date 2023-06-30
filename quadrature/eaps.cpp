@@ -11,7 +11,7 @@ struct vecmat
     vec v;
     mat m;
 };
-vecmat eap(const vecmat &  );
+vecmat wmc(const vecmat &  );
 vector<vecmat> eaps(const vector<vecmat> & posts)
 { 
     int i,k,n;
@@ -24,7 +24,7 @@ vector<vecmat> eaps(const vector<vecmat> & posts)
          {
               result[i].v.set_size(k);
               result[i].m.set_size(k,k);
-              result[i]=eap(posts[i]);
+              result[i]=wmc(posts[i]);
          }
          
     }   

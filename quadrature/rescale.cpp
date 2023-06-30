@@ -30,10 +30,10 @@ vecmat rescale(const vecmat & pv)
     result.v.set_size(d);
     result.m.set_size(d,d); 
     result.v.zeros();
-    result.m=eye(d,d);      
-    quadfit=quadmax(pv); 
+    result.m=eye(d,d);     
+    quadfit=quadmax(pv);
     if(isnan(quadfit.max)) return result;
     result.v =quadfit.locmax;
-    result.m=chol(inv_sympd(-quadfit.hess),"lower");
+    result.m=inv_sympd(sqrtmat_sympd(-quadfit.hess));
     return result;
 }

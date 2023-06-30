@@ -73,6 +73,7 @@ struct vecmat
 struct adq
 {
     bool adapt;
+    double mult;
     xsel xselect;
     vecmat tran;
 };
@@ -83,11 +84,11 @@ struct pwr
 };
 void addsel(const int & , const xsel & , const f2v & , f2v & , const double & );
 f2v irtm (const int & , const vector<dat> & ,
-    const vector<thetamap> & , const xsel & , const adq & , const vector<pwr> & , const vec & );
+    const vector<thetamap> & , const xsel & , adq & , const vector<pwr> & , const vec & );
 f2v irtms (const int & order, const vec & obsweight,
     const vector<vector<dat>> & obsdata,
     const vector<vector<thetamap>> & obsthetamaps, const vector<xsel> & datasel,
-    const xsel & obssel, const vector<adq> & obsscale,
+    const xsel & obssel,  vector<adq> & obsscale,
     const vector<vector<pwr>> & obsthetas,
     const vector<xsel> & betasel, const vec & beta)
 {

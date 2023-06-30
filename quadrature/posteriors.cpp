@@ -69,6 +69,7 @@ struct vecmat
 struct adq
 {
     bool adapt;
+    double mult;
     xsel xselect;
     vecmat tran;
 };
