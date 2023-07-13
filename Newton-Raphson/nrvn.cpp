@@ -49,10 +49,9 @@ maxf2v nrv(const int & , const params & , const vec & ,
     const function<f2v(const int &, const vec &)> );
 f2v ngh(const int & , const double & , const vec & , 
     const function <f2v(const int & , const vec & )>);
-maxf2v nrvn(const double & step, const params & mparams, const vec & start,
+maxf2v nrvn(const int & order, const double & step, const params & mparams, const vec & start,
     const function<f2v(const int & , const vec &)> f)
 {
-    int order=2;
     auto f2=[step,f](const int & order, const vec & x){return ngh(order,step,x,f);};
     return nrv(order,mparams,start,f2);
 }    

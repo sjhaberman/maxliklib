@@ -16,6 +16,13 @@ struct f2v
     vec grad;
     mat hess;
 };
+struct maxf2v
+{
+    vec locmax;
+    double max;
+    vec grad;
+    mat hess;
+};
 struct model
 {
   char type;
@@ -70,30 +77,65 @@ struct vecmat
     mat m;
 };
 // Adaptive quadrature specifications.
-// The choice to use is indicated by adapt, xselect shows the elements involved, tran shows the
-// transformation.
+// The choice to use is indicated by adapt, xselect shows the elements involved,
+// step shows the step size,tran shows the
+// transformation.   mparams and step are used by nrvn.cpp, and mult is the weight multiplier.
+
+struct params
+{
+    bool print;
+    int maxit;
+    int maxits;
+    double eta;
+    double gamma1;
+    double gamma2;
+    double kappa;
+    double tol;
+};
 struct adq
 {
     bool adapt;
-    double mult;
     xsel xselect;
+    double step;
+};
+struct rescale
+{
+    double mult;
     vecmat tran;
 };
-pwr adaptpwr(const pwr &, const adq &);
-vecmat rescale(const vecmat & );
+pwr adaptpwr(const pwr &, const adq & ,const rescale & );
 f2v irtc (const int & , const vector<dat> & ,
     const vector<thetamap> & , const xsel & , const resp & ,
     const vec &  beta);
+maxf2v nrvn(const int & , const double & , const params & , const vec & ,
+    const function<f2v(const int &, const vec &)> );
 f2v irtm (const int & order, const vector<dat> & data,
-    const vector<thetamap> & thetamaps, const xsel & datasel,  adq & scale,
+    const vector<thetamap> & thetamaps, const xsel & datasel,
+    const adq & scale, const params & mparamsn, rescale & newscale,
     const vector<pwr> & thetas, const vec &  beta)
 {
     f2v results;
-
+    
     bool flag;
     double avelog,sumprob;
-    int d,i,j,k,m,order1, q;
-    pwr newtheta;    
+    int d,i,j,k,m,order1, order0=0, order2=2,q;
+    vec  th;
+    pwr newtheta;  
+    resp theta; 
+    auto f = [&order0,&scale,&data,&thetamaps,&datasel,&theta,&beta]
+    (const int & order2, const vec & th) mutable
+    {
+         if(scale.xselect.all)
+         {
+              theta.dresp=th;
+         }
+         else
+         {
+              theta.dresp(scale.xselect.list)=th;
+         }
+         return irtc(order0,data,thetamaps,datasel,theta,beta);
+    };
+    maxf2v scaleset;
     newtheta.theta.iresp.copy_size(thetas[0].theta.iresp);
     newtheta.theta.dresp.copy_size(thetas[0].theta.dresp);
     flag=scale.adapt;
@@ -113,16 +155,28 @@ f2v irtm (const int & order, const vector<dat> & data,
     if(scale.adapt)
     {
         
-        d=scale.tran.v.n_elem;
+        d=newscale.tran.v.n_elem;
         if(d==0)
         {
              flag=false;
         }
         else
         {
-             pv.m.set_size(d,q);
-             pv.v.set_size(q);
-        }           
+             th.set_size(d);
+             theta.iresp.copy_size(thetas[0].theta.iresp);
+             theta.dresp.copy_size(thetas[0].theta.dresp);
+             scaleset.grad.set_size(d);
+             scaleset.locmax.set_size(d);
+             scaleset.hess.set_size(d,d);
+             scaleset=nrvn(order2, scale.step,mparamsn,newscale.tran.v,f);
+             newscale.tran.v=scaleset.locmax;
+             if((-scaleset.hess).is_sympd())
+             {
+                  newscale.tran.v=scaleset.locmax;
+                  newscale.tran.m=inv_sympd(sqrtmat_sympd(-scaleset.hess));
+                  newscale.mult=det(newscale.tran.m);
+             }
+        }          
     }
     if(order>0)
     {
@@ -143,27 +197,17 @@ f2v irtm (const int & order, const vector<dat> & data,
     {
         if(order>0)cresults[i].grad.set_size(m);
         if(order1>1)cresults[i].hess.set_size(m,m);
-        newtheta=adaptpwr(thetas[i],scale);
+
+
+
+        newtheta=adaptpwr(thetas[i],scale,newscale);
         weights(i)=newtheta.weight; 
-        if(flag)
-        {
-             if(scale.xselect.all)
-             {
-                 pv.m.col(i)=newtheta.theta.dresp;
-             }
-             else
-             {
-                 pv.m.col(i)=newtheta.theta.dresp.elem(scale.xselect.list);
-             }
-        }  
         cresults[i]=irtc(order1,data,thetamaps,datasel,newtheta.theta,beta);
         if(order1>1)cresults[i].hess=cresults[i].hess+cresults[i].grad*cresults[i].grad.t();
-        prob(i)=cresults[i].value;
-        
+        prob(i)=cresults[i].value;   
     }
     avelog=mean(prob);
     prob=prob-avelog*ones(q);
-    if(flag)pv.v=prob;
     prob=exp(prob)%weights;
     sumprob=sum(prob);  
     results.value=log(sumprob)+avelog;
@@ -178,11 +222,6 @@ f2v irtm (const int & order, const vector<dat> & data,
     }
     if(order1>1)results.hess=results.hess-results.grad*results.grad.t();
     if(order==3)results.hess=-results.grad*results.grad.t();
-    if(flag)
-    {
-         scale.tran=rescale(pv);
-         scale.mult=det(scale.tran.m);
-    }
     return results;
 }
 

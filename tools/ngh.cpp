@@ -43,6 +43,7 @@ f2v ngh(const int & order, const double & delta, const vec & x,
         if(isnan(fu.value)||isnan(fv.value))
         {
             result.value=datum::nan;
+            result.grad.fill(datum::nan);
             return result;
         }
         result.grad(i)=(fu.value-fv.value)/delta2;
@@ -68,6 +69,8 @@ f2v ngh(const int & order, const double & delta, const vec & x,
                     if(isnan(fyu.value)||isnan(fzu.value)||isnan(fyv.value)||isnan(fzv.value))
                     {
                          result.value=datum::nan;
+                         result.grad.fill(datum::nan);
+                         result.hess.fill(datum::nan);
                          return result;
                     }
                     result.hess(i,j)=(fyu.value-fzu.value-fyv.value+fzv.value)/(4.0*deltasq);

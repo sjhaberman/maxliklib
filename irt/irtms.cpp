@@ -68,14 +68,30 @@ struct vecmat
     mat m;
 };
 // Adaptive quadrature specifications.
-// The choice to use is indicated by adapt, xselect shows the elements involved, tran shows the
+// The choice to use is indicated by adapt, xselect shows the elements involved, steo is the step
+// size, tran shows the
 // transformation.
 struct adq
 {
     bool adapt;
-    double mult;
     xsel xselect;
+    double step;
+};
+struct rescale
+{
+    double mult;
     vecmat tran;
+};
+struct params
+{
+    bool print;
+    int maxit;
+    int maxits;
+    double eta;
+    double gamma1;
+    double gamma2;
+    double kappa;
+    double tol;
 };
 struct pwr
 {
@@ -84,11 +100,11 @@ struct pwr
 };
 void addsel(const int & , const xsel & , const f2v & , f2v & , const double & );
 f2v irtm (const int & , const vector<dat> & ,
-    const vector<thetamap> & , const xsel & , adq & , const vector<pwr> & , const vec & );
+    const vector<thetamap> & , const xsel & , const adq & , const params & , rescale & , const vector<pwr> & , const vec & );
 f2v irtms (const int & order, const vec & obsweight,
     const vector<vector<dat>> & obsdata,
     const vector<vector<thetamap>> & obsthetamaps, const vector<xsel> & datasel,
-    const xsel & obssel,  vector<adq> & obsscale,
+    const xsel & obssel,  const adq & scale, const params & mparamsn, vector<rescale> & obsscale,
     const vector<vector<pwr>> & obsthetas,
     const vector<xsel> & betasel, const vec & beta)
 {
@@ -145,7 +161,7 @@ f2v irtms (const int & order, const vec & obsweight,
         }      
         if(order>0)cresults.grad.set_size(q);
         if(order>1)cresults.hess.set_size(q,q);
-        cresults=irtm(order,obsdata[i],obsthetamaps[i], datasel[i], obsscale[i],
+        cresults=irtm(order,obsdata[i],obsthetamaps[i], datasel[i], scale, mparamsn, obsscale[i],
             obsthetas[i],gamma);
         addsel(order,betasel[i],cresults,results,obsweight(i));
     }

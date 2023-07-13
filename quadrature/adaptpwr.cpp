@@ -33,11 +33,15 @@ struct vecmat
 struct adq
 {
     bool adapt;
-    double mult;
     xsel xselect;
+    double step;
+};
+struct rescale
+{
+    double mult;
     vecmat tran;
 };
-pwr adaptpwr(const pwr & oldtheta, const adq & scale)
+pwr adaptpwr(const pwr & oldtheta, const adq & scale, const rescale & newscale)
 { 
     int i,p,n;
     pwr results;
@@ -49,15 +53,15 @@ pwr adaptpwr(const pwr & oldtheta, const adq & scale)
     if(!scale.adapt)return results;
     if(scale.xselect.all)
     {
-        results.theta.dresp=scale.tran.v+scale.tran.m*results.theta.dresp;
+        results.theta.dresp=newscale.tran.v+newscale.tran.m*results.theta.dresp;
     }
     else
     {
         p=scale.xselect.list.n_elem;
         if(p==0)return results;
         results.theta.dresp.elem(scale.xselect.list)
-             =scale.tran.v+scale.tran.m*results.theta.dresp.elem(scale.xselect.list);       
+             =newscale.tran.v+newscale.tran.m*results.theta.dresp.elem(scale.xselect.list);       
     }
-    results.weight=results.weight*scale.mult;
+    results.weight=results.weight*newscale.mult;
     return results;
 }
