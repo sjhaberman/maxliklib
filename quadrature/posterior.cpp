@@ -69,16 +69,22 @@ struct vecmat
 struct adq
 {
     bool adapt;
-    double mult;
+    
     xsel xselect;
+    double step;
+};
+struct rescale
+{
+    double mult;
     vecmat tran;
 };
-pwr adaptpwr(const pwr &, const adq &);
+pwr adaptpwr(const pwr &, const adq &, const rescale & );
 f2v irtc (const int & , const vector<dat> & ,
     const vector<thetamap> & , const xsel & , const resp & ,
     const vec &  beta);
 vecmat posterior(const vector<dat> & data,
-    const vector<thetamap> & thetamaps, const xsel & datasel, adq & scale,
+    const vector<thetamap> & thetamaps, const xsel & datasel,
+    const adq & scale, const rescale & newscale,
     const vector<pwr> & thetas, const vec &  beta)
 {
     vecmat results;
@@ -97,7 +103,7 @@ vecmat posterior(const vector<dat> & data,
     results.m.set_size(k,q);
     for(i=0;i<q;i++)
     {
-        newtheta=adaptpwr(thetas[i],scale);
+        newtheta=adaptpwr(thetas[i],scale, newscale);
         weights(i)=newtheta.weight;
         points.col(i)=newtheta.theta.dresp; 
         cresults[i]=irtc(order,data,thetamaps,datasel,newtheta.theta,beta);

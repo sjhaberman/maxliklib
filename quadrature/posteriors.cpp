@@ -69,18 +69,25 @@ struct vecmat
 struct adq
 {
     bool adapt;
-    double mult;
+    
     xsel xselect;
+    double step;
+};
+struct rescale
+{
+    
+    double mult;
+    
     vecmat tran;
 };
-pwr adaptpwr(const pwr &, const adq &);
+pwr adaptpwr(const pwr &, const adq & , const rescale &);
 vecmat posterior (const vector<dat> & ,
-    const vector<thetamap> & , const xsel & , adq & scale,
-    const vector<pwr> & thetas, const vec &  beta);
+    const vector<thetamap> & , const xsel & , const adq & , const rescale & ,
+    const vector<pwr> & , const vec &  beta);
 vector<vecmat> posteriors(const vector<vector<dat>> & obsdata,
     const vector<vector<thetamap>> & obsthetamaps, const vector<xsel> & datasel, 
-    const xsel & obssel, vector<adq> & obsscale,
-    const vector<vector<pwr>> & obsthetas, const vector<xsel> & betasel, const vec &  beta)
+    const xsel & obssel, const adq & scale,  const vector<rescale> & obsscale,
+    const vector<pwr> & thetas, const vector<xsel> & betasel, const vec &  beta)
 {
     vector<vecmat> results;
     int i,ii,n,nn,p,q,r,s;
@@ -119,11 +126,12 @@ vector<vecmat> posteriors(const vector<vector<dat>> & obsdata,
              gamma.resize(q);
              gamma=beta.elem(betasel[i].list);
         }
-        r=obsthetas[i][0].theta.dresp.n_elem;
-        s=obsthetas[i].size();      
+        r=thetas[0].theta.dresp.n_elem;
+        s=thetas.size();      
         results[i].v.set_size(s);
         results[i].m.set_size(r,s);
-        results[i]=posterior(obsdata[i],obsthetamaps[i],datasel[i],obsscale[i],obsthetas[i],gamma);
+        results[i]=posterior(obsdata[i],obsthetamaps[i],datasel[i],scale, 
+             obsscale[i],thetas,gamma);
     }
     return results;
 }

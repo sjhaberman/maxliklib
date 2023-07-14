@@ -105,7 +105,7 @@ f2v irtms (const int & order, const vec & obsweight,
     const vector<vector<dat>> & obsdata,
     const vector<vector<thetamap>> & obsthetamaps, const vector<xsel> & datasel,
     const xsel & obssel,  const adq & scale, const params & mparamsn, vector<rescale> & obsscale,
-    const vector<vector<pwr>> & obsthetas,
+    const vector<pwr> & thetas,
     const vector<xsel> & betasel, const vec & beta)
 {
     f2v cresults, results;
@@ -162,7 +162,7 @@ f2v irtms (const int & order, const vec & obsweight,
         if(order>0)cresults.grad.set_size(q);
         if(order>1)cresults.hess.set_size(q,q);
         cresults=irtm(order,obsdata[i],obsthetamaps[i], datasel[i], scale, mparamsn, obsscale[i],
-            obsthetas[i],gamma);
+            thetas,gamma);
         addsel(order,betasel[i],cresults,results,obsweight(i));
     }
     return results;

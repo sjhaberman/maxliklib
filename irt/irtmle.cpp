@@ -114,14 +114,14 @@ maxf2v nrv(const int &, const params & , const vec & ,
 f2v irtms (const int & , const vec & , const vector<vector<dat>> & ,
     const vector<vector<thetamap>> & ,
     const vector<xsel> & , const xsel & , const adq & , const params & ,  vector<rescale> &,
-    const vector<vector<pwr>> & ,
+    const vector<pwr> & ,
     const vector<xsel> & ,const vec & );
 maxf2v irtmle(const int & order, const params & mparams,
     const char & algorithm, const vec & obsweight,
     const vector<vector<dat>> & obsdata,
     const vector<vector<thetamap>> & obsthetamaps, const vector<xsel> & datasel,
     const xsel & obssel,  const adq & scale, const params & mparamsn, vector<rescale> & obsscale,
-    const vector<vector<pwr>> & obsthetas, const vector<xsel> & betasel, const vec & start)
+    const vector<pwr> & thetas, const vector<xsel> & betasel, const vec & start)
 {
     maxf2v results;
     int p;
@@ -131,10 +131,10 @@ maxf2v irtmle(const int & order, const params & mparams,
     if(algorithm=='N'||algorithm=='L')results.hess.set_size(p,p);
     auto f=
         [&obsweight,&obsdata,&obsthetamaps,&datasel,
-        &obssel,&scale,&mparamsn,&obsscale,&obsthetas,&betasel]
+        &obssel,&scale,&mparamsn,&obsscale,&thetas,&betasel]
         (const int &order,const vec &start) mutable
         {return irtms(order,obsweight,obsdata,obsthetamaps,datasel,
-        obssel,scale,mparamsn,obsscale,obsthetas,betasel,start);};
+        obssel,scale,mparamsn,obsscale,thetas,betasel,start);};
     if(algorithm=='N'||algorithm=='L')results=nrv(order, mparams, start, f);
     if(algorithm=='C')results=conjgrad(order, mparams, start, f);
     if(algorithm=='G')results=gradascent(order, mparams, start, f);
