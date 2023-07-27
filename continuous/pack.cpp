@@ -19,7 +19,14 @@ vec pack(const vecmat & u)
     {
         for(j=0;j<=i;j++)
         {
-            result(k)=u.m(i,j);
+            if(j==i)
+            {
+                 result(k)=u.m(i,j);
+            }
+            else
+            {
+                 result(k)=2.0*u.m(i,j);
+            }
             k=k+1;
         }
     }

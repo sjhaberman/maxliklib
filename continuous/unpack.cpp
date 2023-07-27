@@ -17,8 +17,15 @@ vecmat unpack(const int & d, const vec & beta)
     {
         for(j=0;j<=i;j++)
         {
-            result.m(i,j)=beta(k);
-            if(j<i)result.m(j,i)=result.m(i,j);
+            if(j==i)
+            {
+                 result.m(i,j)=beta(k);
+            }
+            else
+            {
+                 result.m(i,j)=0.5*beta(k);
+                 result.m(j,i)=result.m(i,j);
+            }
             k=k+1;
         }
     }
