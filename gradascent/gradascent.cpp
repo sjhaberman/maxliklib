@@ -73,7 +73,7 @@ maxf2v gradascent(const int & order, const params & mparams, const vec & start,
     fy0=f(order, v);
     vary0=maxf2vvar(order, start, fy0);
 // Return if starting impossible.
-    if(isnan(vary0.max)) return vary0;
+    if(isnan(vary0.max)||mparams.maxit<=0) return vary0;
 // Iterations.
     for(i=0;i<mparams.maxit;i++)
     {

@@ -1,15 +1,15 @@
 //Thissen et al. algorithm for sum of independent
 //multinomials.  The tolerance is c>0.
 //Here S is the sum of X(i) for i from 0 to n-1.
-//X(i) is a multinomial trial with values 0 to cc(i)-1>0.  The vector p[i]
+//X(i) is a multinomial trial with values 0 to cc(i)-1>0.  The vector p(i)
 //consists of nonnegative real numbers with sum 1.  The probability that X(i) = j
-//is element j of p[i] for j from 0 to cc(i)-1.
+//is element j of p(i) for j from 0 to cc(i)-1.
 //The vector lwm that is returned has
 //1+maxsum elements, where maxsum is the sum of the (cc(i)-1) for 0<=i<n.
 #include<armadillo>
 using namespace std;
 using namespace arma;
-vec lwm(const double & c, const vector<vec> & p )
+vec lwm(const double & c, const field<vec> & p )
 {
     double d,sumd,xn;
     int bottom,bottom1,i,it,maxsum,n, top,top1;
@@ -19,7 +19,7 @@ vec lwm(const double & c, const vector<vec> & p )
     vec dist;
     for(i=0;i<n;i++)
     {
-        cc(i)=p[i].n_elem;
+        cc(i)=p(i).n_elem;
     }
     maxsum=sum(cc)-n;
     //bottom is lower bound for nonzero entries of S(k), the sum of X(j) for j from 0
@@ -28,7 +28,7 @@ vec lwm(const double & c, const vector<vec> & p )
     top=cc(0)-1;
     dist.set_size(maxsum+1);
 //S(0) has distribution of X(0).
-    dist.subvec(0,cc(0)-1)=p[0];
+    dist.subvec(0,cc(0)-1)=p(0);
 //Cycle through X(it) for it from 1 to n-1.
     for(it=1;it<n;it++)
     {
@@ -39,7 +39,7 @@ vec lwm(const double & c, const vector<vec> & p )
         bottom1=bottom;
         top1=top+cc(it)-1;
 //Convolution of distribution of S(it-1) and X(it).
-        dist.subvec(bottom1,top1)=conv(dist.subvec(bottom,top),p[it]);
+        dist.subvec(bottom1,top1)=conv(dist.subvec(bottom,top),p(it));
 //Negligibility check.
         sumd=0.0;
 //Update bottom.

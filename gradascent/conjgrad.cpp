@@ -19,6 +19,7 @@
 //If a main iteration leads to a change of the function f less
 //than mparams.tol, then iterations cease.
 #include<armadillo>
+using namespace std;
 using namespace arma;
 struct f2v
 {
@@ -46,8 +47,8 @@ struct params
 };
 maxf2v maxf2vvar(const int & , const vec & , const f2v & );
 maxf2v maxlinq2(const int & , const params & , const vec & , const maxf2v & ,
-    const std::function<f2v(const int &, const vec &)> );
-maxf2v conjgrad(const int & order, const params & mparams, const vec & start, const std::function<f2v(const int & , const vec &)> f)
+    const function<f2v(const int &, const vec &)> );
+maxf2v conjgrad(const int & order, const params & mparams, const vec & start, const function<f2v(const int & , const vec &)> f)
 {
     double tau;
     f2v fy0;
@@ -74,7 +75,7 @@ maxf2v conjgrad(const int & order, const params & mparams, const vec & start, co
 // Function settings at start.
     vary0=maxf2vvar(order, start, fy0);
 // Return if starting impossible.
-    if(isnan(vary0.max)) return vary0;
+    if(isnan(vary0.max)||mparams.maxit<=0) return vary0;
 // Iterations.
     for(i=0;i<mparams.maxit;i++)
     {

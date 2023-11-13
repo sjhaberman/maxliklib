@@ -1,7 +1,9 @@
 // Adaptive quadrature transformation for integration of function on vector space.
-// oldtheta is unchanged if adq.adapt is false or adq.xselect.all is false and
-// adq.xselect.list has no elements.  Otherwise, oldtheta.iresp is unchanged, the vector
-// point of elements of oldtheta.dresp specified by adq.xselect are changed to
+// thetas are unchanged if scale.adapt is false or scale.linselect.all and scale.quadselect.all
+// are false and scale.linselect.list and scale.quadselect.list have no elements.
+// Otherwise, oldtheta(i).theta.iresp is always unchanged, and adaptpwr(i).dresp is
+// A*thetas(i).theta.dresp+b. of thetas
+// point of elements of oldtheta(i).dresp specified by scale.xselect are changed to
 // scale.tran.v+scale.tran.m*point, and
 // oldtheta.weight is multiplied by the determinant scale.mult of adq.tran.m.
 #include<armadillo>
@@ -15,6 +17,11 @@ struct xsel
 {
   bool all;
   uvec list;
+};
+struct xselv
+{
+  bool all;
+  umat list;
 };
 struct pwr
 {
@@ -33,35 +40,34 @@ struct vecmat
 struct adq
 {
     bool adapt;
-    xsel xselect;
-    double step;
+    xsel linselect;
+    xselv quadselect;
 };
 struct rescale
 {
     double mult;
     vecmat tran;
 };
-pwr adaptpwr(const pwr & oldtheta, const adq & scale, const rescale & newscale)
+field<pwr> adaptpwr(const field<pwr> & thetas, const adq & scale, const rescale & newscale)
 { 
-    int i,p,n;
-    pwr results;
-    results.theta.iresp.copy_size(oldtheta.theta.iresp);
-    results.theta.dresp.copy_size(oldtheta.theta.dresp);
-    results.theta.iresp=oldtheta.theta.iresp;
-    results.theta.dresp=oldtheta.theta.dresp;
-    results.weight=oldtheta.weight;
-    if(!scale.adapt)return results;
-    if(scale.xselect.all)
+    int i,m, n, p, q;
+    m=thetas.n_elem;
+    field<pwr> results(m);
+    for(i=0;i<m; i++)
     {
-        results.theta.dresp=newscale.tran.v+newscale.tran.m*results.theta.dresp;
+        results(i).theta.iresp.copy_size(thetas(1).theta.iresp);
+        results(i).theta.dresp.copy_size(thetas(1).theta.dresp);
+        results(i).theta.iresp=thetas(i).theta.iresp;
+        if(!scale.adapt)
+        {
+             results(i).theta.dresp=thetas(i).theta.dresp;
+             results(i).weight=thetas(i).weight;
+        }
+        else
+        {
+            results(i).theta.dresp=newscale.tran.v+newscale.tran.m*thetas(i).theta.dresp;
+            results(i).weight=thetas(i).weight*newscale.mult;
+        }
     }
-    else
-    {
-        p=scale.xselect.list.n_elem;
-        if(p==0)return results;
-        results.theta.dresp.elem(scale.xselect.list)
-             =newscale.tran.v+newscale.tran.m*results.theta.dresp.elem(scale.xselect.list);       
-    }
-    results.weight=results.weight*newscale.mult;
     return results;
 }

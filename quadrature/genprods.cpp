@@ -13,7 +13,7 @@ struct vecmat
     vec v;
     mat m;
 };
-vecmat genprods(const imat & indices, const vector<pw> & pws)
+vecmat genprods(const imat & indices, const field<pw> & pws)
 {
     double w;
     int i,j;
@@ -25,8 +25,8 @@ vecmat genprods(const imat & indices, const vector<pw> & pws)
         w=1.0;
         for(i=0;i<indices.n_rows;i++)
         {
-            w=w*pws[i].weights(indices(i,j));
-            results.m(i,j)=pws[i].points(indices(i,j));
+            w=w*pws(i).weights(indices(i,j));
+            results.m(i,j)=pws(i).points(indices(i,j));
         }
         results.v(j)=w;
     }

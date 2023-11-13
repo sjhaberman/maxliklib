@@ -12,19 +12,19 @@ struct vecmat
     mat m;
 };
 vecmat wmc(const vecmat &  );
-vector<vecmat> eaps(const vector<vecmat> & posts)
+field<vecmat> eaps(const field<vecmat> & posts)
 { 
     int i,k,n;
     n=posts.size();
-    vector<vecmat> result(n);
+    field<vecmat> result(n);
     for(i=0;i<n;i++)
     {
-         k=posts[i].m.n_cols;
-         if(posts[i].v.n_elem>0&&k>0)
+         k=posts(i).m.n_cols;
+         if(posts(i).v.n_elem>0&&k>0)
          {
-              result[i].v.set_size(k);
-              result[i].m.set_size(k,k);
-              result[i]=wmc(posts[i]);
+              result(i).v.set_size(k);
+              result(i).m.set_size(k,k);
+              result(i)=wmc(posts(i));
          }
          
     }   
