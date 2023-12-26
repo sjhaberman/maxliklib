@@ -20,13 +20,12 @@ struct resp
 };
 f2v loglog(const int & order, const resp & y, const vec & beta)
 {
-//Probability of response of 1.
     double p,q,r;
     f2v results;
     if(order>0) results.grad.set_size(1);
     if(order>1) results.hess.set_size(1,1);
     r=exp(-beta(0));
-    if(y.iresp(0)==1)
+    if(y.iresp(0)==0)
     {
         results.value=-r;
         if(order>0) results.grad(0)=r;

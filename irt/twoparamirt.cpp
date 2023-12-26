@@ -10,6 +10,11 @@
 //The following pairs are used, with the first member of a pair a variable and the second
 //the value of the variable.
 //data infile (infile is the name of the data file).
+//sf startfile is the file containing the vector of starting values.  (If this pair is not
+//given, then the default procedure is used.)
+//outfile, where outfile is the name of the output file.
+//fflag is false if no output file is used.
+//pflag is false if nothing is printed in ascii form.
 //dist cdf, where cdf is N for normal, L for logistic, and G for Gumbel.  The default is L.
 //method algorithm, where algorithm is G for gradient ascent, C for conjugate gradient ascent,
 //N for modified Newton-Raphson, and L for Louis approximation.  The default is N.
@@ -51,105 +56,18 @@ struct xselv
     bool all;
     umat list;
 };
-//Constant component of lambda.
-struct lcomp
-{
-    int li;
-    double value;
-};
-//Interaction of predictor and lambda.
-struct lxcomp
-{
-    int li;
-    int pi;
-    double value;
-};
-//Interaction of predictor and lambda for predictor from another variable.
-struct lxocomp
-{
-    int li;
-    int pi;
-    int ob;
-    double value;
-};
-//Interaction of theta and lambda.
-struct ltcomp
-{
-    int li;
-    int th;
-    double value;
-};
-//Interaction of beta and lambda.
-struct lbcomp
-{
-    int li;
-    int bi;
-    double value;
-};
-//Interaction of beta and predictor with lambda.
-struct lxbcomp
-{
-    int li;
-    int pi;
-    int bi;
-    double value;
-};
-//Interaction of beta and predictor with lambda for predictor from another variable.
-struct lxobcomp
-{
-    int li;
-    int pi;
-    int ob;
-    int bi;
-    double value;
-};
-//Interaction of beta and theta with lambda.
-struct ltbcomp
-{
-    int li;
-    int th;
-    int bi;
-    double value;
-};
-//Data structure.
-struct dat
-{
-    resp y;
-    vec x;
-};    
 //Specify a model.
-//choice indicates transformation and type of model.
-//dim is dimension of lambda;
-//idim is dimension of integer response.
-//ddim is dimension of double response.
-//bdim is dimension of used beta elements.
-//lcomps indicates constant components.
-//lxcomps indicates components only dependent on the predictors.
-//lxocomps indicates components only dependent on predictors from other variables.
-//ltcomps indicates components only dependent on theta.
-//lbcomps indicates components only dependent on parameters.
-//lxbcomps indicates components dependent on predictors and parameters.
-//lxobcomps indicates components dependent on predictors from other variables and parameters.
-//ltbcompes indicates components dependent on theta and parameters.
-//ithetas are integer elements from theta in response.
-//dthetas are double elements from theta in response.
+//choice is model distribution.
+//o is constant vector.
+//x is tranformation from beta elements used to lambda that does not involve theta.
+//c is transformation from beta elements used and theta double elements  used to lambda.
 struct pattern
 {
      model choice;
-     int dim;
-     int idim;
-     int ddim;
-     field<lcomp> lcomps;
-     field<lxcomp>lxcomps;
-     field<lxocomp>lxocomps;
-     field<ltcomp>ltcomps;
-     field<lbcomp>lbcomps;
-     field<lxbcomp>lxbcomps;
-     field<lxobcomp>lxobcomps;
-     field<ltbcomp>ltbcomps;
-     uvec ithetas;
-     uvec dthetas;
-};
+     vec o;
+     mat x;
+     cube c;
+}; 
 //Basic quadrature rule.
 struct pw
 {
@@ -199,18 +117,20 @@ struct maxf2v
     mat hess;
 };
 maxf2v irtmle(const int & , const params & ,
-    const char & ,const field<pattern> & ,
-    const field<uvec> & , const uvec &  ,
-    const field<field<uvec>> & , const uvec & ,
-    const field<field <pwr>> & , const uvec & , 
-    const field<adq> & , const uvec & ,
-    field<dovecmat> & , 
-    const field<field<dat>> & ,
-    const field<field<xsel>> & , const uvec & , 
-    const field<uvec> & , const uvec & ,
-    const field<vec> & , const uvec & , const field<xsel> & , const uvec & ,
+    const char & , const field<pattern> & , 
+    const field<xsel> & , const xsel &  ,
+    const field<field<resp>> & , const field<field<pwr>> & , const xsel & ,
+    const field<adq> & , const xsel & , field<dovecmat> & ,
+    const field<xsel> & , const field<xsel> & , const xsel & ,
+    const field<xsel> & , const field<xsel> & , const xsel & ,
+    const field<xsel> & , const field<xsel> & , const xsel & ,
+    const field<xsel> & , const field<xsel> & , const xsel & ,
+    const field<xsel> & , const field<xsel> & , const xsel & ,
+    const field<vec> & , const xsel & , const field<xsel> & , const xsel & ,
     const vec & , const xsel & , 
-    const field<xsel> & , const uvec & , const vec &  );
+    const field<xsel> & , const xsel & , const vec &  );
+void savmaxf2v(const int & , const maxf2v & , const string & , const bool & , const bool & );
+vec starttwoparamirt(const char & , const imat & );
 pw hermpw(const int & );
 pw qnormpw(const int & );
 int main()
@@ -219,27 +139,28 @@ int main()
 //n is number of quadrature points,  nr is number of observed responses per observation,
 //nv is total number of responses.
 //nc is number of control entries.
-    bool aq=true;
+    bool aq=true,readflag,fflag=true,pflag=true,sflag=true;
     char algorithm='N',cdf='L',quad='G';
     int d, i, j, m, n=9, nc, nr, nv, order=2;
     params mparams;
     mparams.print=true;
-    mparams.maxit=10;
+    mparams.maxit=100;
     mparams.maxits=10;
     mparams.eta=0.5;
     mparams.gamma1=0.1;
     mparams.gamma2=0.1;
     mparams.kappa=3.0;
-    mparams.tol=1.0;
-    string controlfile,infile="infile.csv",key1,key2;
+    mparams.tol=0.001;
+    string controlfile,infile="infile.csv", outfile="outfile", sfile, key1, key2;
     imat responses;
     pw th;
     try{cin>>controlfile;}
-    catch(...){cout<<"No control file specification"<<endl;return 1;}
+    catch(...){cout<<"Name of control file not read."<<endl; return 1;}
     field<string>control;
     nc=0;
-    try{control.load(controlfile);}catch(...){nc=-1;}
-    if(nc>-1)nc=control.n_rows;
+    try{control.load(controlfile);}
+    catch(...){cout<<"Control file not read."<<endl; return 1;}
+    nc=control.n_rows;
     if(nc>0){for(i=0;i<nc;i++)
     {
          key1=control(i,0);
@@ -248,6 +169,11 @@ int main()
          {
               if(key2[0]=='f') aq=false;
               continue;
+         }
+         if(key1.substr(0,2)=="sf")
+         {
+              sfile=key2;
+              sflag=false;
          }
          if(key1.substr(0,2)=="da")
          {
@@ -283,95 +209,124 @@ int main()
          if(key1.substr(0,2)=="to")
          {
               try{mparams.tol=stod(key2);}
-              catch(...){mparams.tol=1.0;}
-              if(mparams.tol<=0.0) mparams.tol=1.0;
+              catch(...){mparams.tol=0.001;}
+              if(mparams.tol<=0.0) mparams.tol=0.001;
+              continue;
+         }
+         if(key1.substr(0,2)=="ou")
+         {
+              outfile=key2;
+              continue;
+         }
+         if(key1.substr(0,2)=="ff")
+         {
+              if(key2[0]=='f') fflag=false;
+              continue;
+         }
+         if(key1.substr(0,2)=="pf")
+         {
+              if(key2[0]=='f') pflag=false;
               continue;
          }
     }}
-    responses.load(infile,csv_ascii);
+    try
+    {
+         responses.load(infile);
+    }
+    catch(...)
+    {
+         cout<<"Responses not loaded"<<endl; return 1;
+    }
     m=responses.n_rows;
     nr=responses.n_cols;
     nv=nr+1;
-    d=2*nr;    
+    d=2*nr;
+    vec start(d);
+    maxf2v results;    
+    results.grad.set_size(d);
+    results.locmax.set_size(d);
+    if(order>1)results.hess.set_size(d,d);     
 //Two patterns for observed and latent cases.
     field<pattern>  patterns(2);
 //All observations satisfy the same model.
-    field<uvec>  patternnumber(1);
-    uvec   patno(m);
-    field<field<uvec>>  selectobs(1);
-    uvec selectobsno(m);
-    field<field<pwr>>thetas(1);
-    uvec  thetano(m); 
+    field<xsel>  patternnumber(1);
+    xsel   patno;
+    field<field<resp>>  data(m);
+    field<field <pwr>>  thetas(n);
+    xsel  thetano;
     field<adq>  scale(1);
-    uvec  scaleno(m);
-    field<dovecmat>  obsscale(m); 
-    field<field<dat>>  data(m);
-    field<field<xsel>>  selectbeta(1);
-    uvec  selectbetano(m); 
-    field<uvec>  betanumber(1);
-    uvec  betanono(m);
+    xsel  scaleno;
+    field<dovecmat>  obsscale(m);  
+    field<xsel>  selectbeta(nv);
+    field<xsel> selectbetano(1);
+    xsel selbetano;
+    field<xsel>  selectbetac(2);
+    field<xsel> selectbetacno(1);
+    xsel selbetacno;
+    field<xsel>  selectthetai(1);
+    field<xsel> selectthetaino(1);
+    xsel selthetaino;
+    field<xsel>  selectthetad(1);
+    field<xsel> selectthetadno(1);
+    xsel selthetadno;
+    field<xsel>  selectthetac(1);
+    field<xsel> selectthetacno(1);
+    xsel selthetacno;
     field<vec>  w(1);
-    uvec  wno(m);
+    xsel  wno;
     field<xsel>  obssel(1);
-    uvec obsselno(m);
+    xsel obsselno;
     vec  obsweight(m);
     xsel  datasel; 
     field<xsel>  betasel(1);
-    uvec  betaselno(m);
-    vec   start(d);
+    xsel  betaselno;
     patterns(0).choice.type='S';
     patterns(0).choice.transform=cdf;
-    patterns(0).dim=1;
-    patterns(0).idim=1;
-    patterns(0).ddim=0;
-    patterns(0).lbcomps.set_size(1);
-    patterns(0).lbcomps(0).li=0;
-    patterns(0).lbcomps(0).bi=0;
-    patterns(0).lbcomps(0).value=1.0;
-    patterns(0).ltbcomps.set_size(1);
-    patterns(0).ltbcomps(0).li=0;
-    patterns(0).ltbcomps(0).bi=1;
-    patterns(0).ltbcomps(0).th=0;
-    patterns(0).ltbcomps(0).value=1.0;
+    patterns(0).o.set_size(1);
+    patterns(0).o(0)=0.0;
+    patterns(0).x.set_size(1,2);
+    patterns(0).x(0,0)=1.0;
+    patterns(0).x(0,1)=0.0;
+    patterns(0).c.set_size(1,1,1);
+    patterns(0).c(0,0,0)=1.0;
     patterns(1).choice.type='D';
     patterns(1).choice.transform='N';
-    patterns(1).dim=2;
-    patterns(1).idim=0;
-    patterns(1).ddim=1;
-    patterns(1).dthetas.set_size(1);
-    patterns(1).dthetas(0)=0;
-    patterns(1).lcomps.set_size(1);
-    patterns(1).lcomps(0).li=1;
-    patterns(1).lcomps(0).value=1.0;
-    patternnumber(0).set_size(nv);
-    patternnumber(0).zeros();
-    patternnumber(0)(nr)=1;
-    patno.set_size(m);
-    patno.zeros();
-    selectobs(0).set_size(nv);
-    selectobsno.set_size(m);
-    selectobsno.zeros();
+    patterns(1).o.set_size(2);
+    patterns(1).o(0)=0.0;
+    patterns(1).o(1)=1.0;
+    patternnumber(0).all=false;
+    patternnumber(0).list.set_size(nv);
+    patternnumber(0).list.zeros();
+    patternnumber(0).list(nr)=1;
+    patno.all=false;
+    patno.list.set_size(m);
+    patno.list.zeros();
+    pw pws;
     thetas(0).set_size(n);
-    th.points.set_size(n);
-    th.weights.set_size(n);
+    pws.points.set_size(n);
+    pws.weights.set_size(n);
 //Set quadrature.
-    if(quad=='G'){th=hermpw(n);}else{th=qnormpw(n);}
+    if(quad=='G'){pws=hermpw(n);}else{pws=qnormpw(n);} 
     for(i=0;i<n;i++)
     {
          thetas(0)(i).theta.dresp.set_size(1);
          thetas(0)(i).theta.iresp.set_size(0);
-         thetas(0)(i).theta.dresp(0)=th.points(i);
-         thetas(0)(i).weight=th.weights(i);
-         thetas(0)(i).kernel=normpdf(th.points(i));
-    }  
-    thetano.zeros();
+         thetas(0)(i).theta.dresp(0)=pws.points(i);
+         thetas(0)(i).weight=pws.weights(i);
+         thetas(0)(i).kernel=normpdf(pws.points(i));
+    }
+    thetano.all=false;
+    thetano.list.set_size(m);  
+    thetano.list.zeros();
     scale(0).adapt=aq;
     if(aq)
     {
          scale(0).linselect.all=true;
          scale(0).quadselect.all=true;
     }
-    scaleno.zeros();
+    scaleno.all=false;
+    scaleno.list.set_size(m);
+    scaleno.list.zeros();
     for(j=0;j<m;j++)
     {
         obsscale(j).v.set_size(1);
@@ -383,57 +338,104 @@ int main()
         for(i=0;i<nr;i++)
         {
             
-            data(j)(i).y.iresp.set_size(1);          
-            data(j)(i).y.iresp(0)=responses(j,i);   
+            data(j)(i).iresp.set_size(1);          
+            data(j)(i).iresp(0)=responses(j,i);   
         }
-        data(j)(nr).y.dresp.set_size(1);
+        data(j)(nr).dresp.set_size(1);
     }
-    betanumber(0).set_size(nv);
-    selectbeta(0).set_size(nv);
     for(j=0;j<nr;j++)
     {
-         selectbeta(0)(j).all=false;
-         selectbeta(0)(j).list.set_size(2);
-         selectbeta(0)(j).list(0)=2*j;
-         selectbeta(0)(j).list(1)=2*j+1;
-         betanumber(0)(j)=j;
+         selectbeta(j).all=false;
+         selectbeta(j).list.set_size(2);
+         selectbeta(j).list(0)=j+j;
+         selectbeta(j).list(1)=j+j+1;
     }
-    selectbeta(0)(nr).all=false;
-    betanumber(0)(nr)=nr;
-    selectbetano.zeros();
-    betanono.set_size(m);
-    betanono.zeros();
-    w(0).set_size(nv);
+    selectbeta(nr).all=false;
+    selectbetac(0).all=false;
+    selectbetac(1).all=false;
+    selectbetac(0).list.set_size(1);
+    selectbetac(0).list(0)=1;
+    selectbetano(0).all=false;
+    selectbetano(0).list.set_size(nv);
+    selectbetano(0).list=regspace<uvec>(0,nr);
+    selectbetacno(0).all=false;
+    selectbetacno(0).list.set_size(nv);
+    selectbetacno(0).list.zeros();
+    selectbetacno(0).list(nr)=1;
+    selbetano.all=false;
+    selbetano.list.set_size(m);
+    selbetano.list.zeros();
+    selbetacno.all=false;
+    selbetacno.list.set_size(m);
+    selbetacno.list.zeros();
+    selectthetai.set_size(1);
+    selectthetai(0).all=false;
+    selectthetaino(0).list.set_size(m);
+    selectthetaino(0).list.zeros();
+    selthetaino.all=false;
+    selthetaino.list.set_size(m);
+    selthetaino.list.zeros();
+    selectthetad.set_size(2);
+    selectthetad(0).all=false;
+    selectthetad(1).all=true;
+    selectthetadno(0).all=false;
+    selectthetadno(0).list.set_size(nv);
+    selectthetadno(0).list.zeros();
+    selectthetadno(0).list(nr)=1;
+    selthetadno.all=false;
+    selthetadno.list.set_size(m);
+    selthetadno.list.zeros();
+    selectthetac.set_size(2);
+    selectthetac(0).all=true;
+    selectthetac(1).all=false;
+    selectthetacno(0).all=false;
+    selectthetacno(0).list.set_size(nv);
+    selectthetacno(0).list.zeros();
+    selectthetacno(0).list(nr)=1;
+    selthetacno.all=false;
+    selthetacno.list.set_size(m);
+    selthetacno.list.zeros();
+    w(0).set_size(m);
     w(0).ones();
-    wno.zeros();
+    wno.all=false;
+    wno.list.set_size(m);
+    wno.list.zeros();
     obssel(0).all=true;
-    obsselno.zeros();
+    obsselno.all=false;
+    obsselno.list.set_size(m);
+    obsselno.list.zeros();
     obsweight.ones();
     datasel.all=true;
     betasel(0).all=true;
-    betaselno.zeros();
-    start.zeros();
-    for(j=0;j<nr;j++) start(j+j+1)=1.0;  
-    maxf2v results;    
-    results.grad.set_size(d);
-    results.locmax.set_size(d);
-    if(order>1)results.hess.set_size(d,d);  
+    betaselno.all=false;
+    betaselno.list.set_size(m);
+    betaselno.list.zeros();
+    if(sflag)
+    {
+        start=starttwoparamirt(cdf,responses);
+        if(start.has_nan())
+        {
+            cout<<"MLE does not exist"<<endl; 
+            return 1;
+        }
+    }
+    else
+    {
+        try{start.load(sfile);}catch(...){cout<<"Starting values not read."<<endl; return 1;}
+    }
     results=irtmle(order, mparams,
-                     algorithm, 
-                     patterns,
+                     algorithm,  patterns, 
                      patternnumber, patno,
-                     selectobs, selectobsno,
-                     thetas, thetano, 
-                     scale, scaleno,
-                     obsscale, 
-                     data,
-                     selectbeta, selectbetano, 
-                     betanumber, betanono,
-                     w, wno, obssel, obsselno,
-                     obsweight, datasel, 
+                     data, thetas, thetano, 
+                     scale, scaleno, obsscale, 
+                     selectbeta, selectbetano, selbetano,
+                     selectbetac, selectbetacno, selbetacno,
+                     selectthetai, selectthetaino, selthetaino,
+                     selectthetad, selectthetadno, selthetadno,
+                     selectthetac, selectthetacno, selthetacno,
+                     w, wno,  obssel, obsselno, 
+                     obsweight, datasel,
                      betasel, betaselno, start);
-    cout<<results.max<<endl;
-    cout<<results.locmax<<endl;
-    if(order>1)cout<<results.hess<<endl;   
+    savmaxf2v(order,results,outfile,fflag,pflag);
     return 0;
 }

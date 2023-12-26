@@ -33,104 +33,17 @@ struct xselv
     bool all;
     umat list;
 };
-//Constant component of lambda.
-struct lcomp
-{
-    int li;
-    double value;
-};
-//Interaction of predictor and lambda.
-struct lxcomp
-{
-    int li;
-    int pi;
-    double value;
-};
-//Interaction of predictor and lambda for predictor from another variable.
-struct lxocomp
-{
-    int li;
-    int pi;
-    int ob;
-    double value;
-};
-//Interaction of theta and lambda.
-struct ltcomp
-{
-    int li;
-    int th;
-    double value;
-};
-//Interaction of beta and lambda.
-struct lbcomp
-{
-    int li;
-    int bi;
-    double value;
-};
-//Interaction of beta and predictor with lambda.
-struct lxbcomp
-{
-    int li;
-    int pi;
-    int bi;
-    double value;
-};
-//Interaction of beta and predictor with lambda for predictor from another variable.
-struct lxobcomp
-{
-    int li;
-    int pi;
-    int ob;
-    int bi;
-    double value;
-};
-//Interaction of beta and theta with lambda.
-struct ltbcomp
-{
-    int li;
-    int th;
-    int bi;
-    double value;
-};
-//Data structure.
-struct dat
-{
-    resp y;
-    vec x;
-};    
 //Specify a model.
-//choice indicates transformation and type of model.
-//dim is dimension of lambda;
-//idim is dimension of integer response.
-//ddim is dimension of double response.
-//bdim is dimension of used beta elements.
-//lcomps indicates constant components.
-//lxcomps indicates components only dependent on the predictors.
-//lxocomps indicates components only dependent on predictors from other variables.
-//ltcomps indicates components only dependent on theta.
-//lbcomps indicates components only dependent on parameters.
-//lxbcomps indicates components dependent on predictors and parameters.
-//lxobcomps indicates components dependent on predictors from other variables and parameters.
-//ltbcompes indicates components dependent on theta and parameters.
-//ithetas are integer elements from theta in response.
-//dthetas are double elements from theta in response.
+//choice is model distribution.
+//o is constant vector.
+//x is tranformation from beta elements used to lamnbda that does not involve theta.
+//c is transformation from beta elements used and theta double elements  used to lambda.
 struct pattern
 {
      model choice;
-     int dim;
-     int idim;
-     int ddim;
-     field<lcomp> lcomps;
-     field<lxcomp>lxcomps;
-     field<lxocomp>lxocomps;
-     field<ltcomp>ltcomps;
-     field<lbcomp>lbcomps;
-     field<lxbcomp>lxbcomps;
-     field<lxobcomp>lxobcomps;
-     field<ltbcomp>ltbcomps;
-     uvec ithetas;
-     uvec dthetas;
+     vec o;
+     mat x;
+     cube c;
 };
 // Weights and points for prior.
 struct pwr
@@ -158,14 +71,23 @@ struct dovecmat
 //Find rescaling.
 dovecmat fitquad(const field<f2v> & , const field<pwr> & , 
     const adq & , dovecmat & );
-f2v genresplik(const int & , const field<pattern> & , const uvec & , const field<uvec> & ,
-    const resp & , const field<dat> &  , const field<xsel> & , const uvec & ,
+f2v genresplik(const int & , const field<pattern> & ,
+    const xsel & , const field<resp> & , const resp & ,
+    const field<xsel> & , const xsel & ,
+    const field<xsel> & , const xsel & ,
+    const field<xsel> & , const xsel & ,
+    const field<xsel> & , const xsel & ,
+    const field<xsel> & , const xsel & ,
     const vec & , const xsel & , const vec & );
 f2v irtm (const int & order, const field<pattern> & patterns, 
-    const uvec & patternnumber, const field<uvec> & selectobs, const field <pwr> & thetas,  
-    const adq & scale, dovecmat & obsscale, const field<dat> & data,
-    const field<xsel> & selectbeta, const uvec & betanumber, const vec & w, 
-    const xsel & obssel, const vec &  beta)
+    const xsel & patternnumber, const field<resp> & data, const field <pwr> & thetas,  
+    const adq & scale, dovecmat & obsscale, 
+    const field<xsel> & selectbeta, const xsel & selectbetano,
+    const field<xsel> & selectbetac, const xsel & selectbetacno,
+    const field<xsel> & selectthetai, const xsel & selectthetaino,
+    const field<xsel> & selectthetad, const xsel & selectthetadno,
+    const field<xsel> & selectthetac, const xsel & selectthetacno,
+    const vec & w, const xsel & obssel, const vec &  beta)
 {
     f2v results;
     resp dummy;
@@ -198,8 +120,13 @@ f2v irtm (const int & order, const field<pattern> & patterns,
     q=thetas.n_elem;
     if(q<1)
     {
-         results=genresplik(order1, patterns, patternnumber, selectobs, dummy, 
-            data, selectbeta, betanumber, w, obssel, beta);
+         results=genresplik(order1, patterns, patternnumber, data, dummy,
+            selectbeta, selectbetano,
+            selectbetac, selectbetacno,
+            selectthetai, selectthetaino,
+            selectthetad, selectthetadno,
+            selectthetac, selectthetacno,
+            w, obssel, beta);
          return results;
     }
     field<pwr> newthetas(q);
@@ -223,10 +150,22 @@ f2v irtm (const int & order, const field<pattern> & patterns,
         if(order>0)cresults(i).grad.set_size(m);
         if(order1>1)cresults(i).hess.set_size(m,m);
         weights(i)=newthetas(i).weight/newthetas(i).kernel;
-        cresults(i)=genresplik(order1, patterns, patternnumber, selectobs, newthetas(i).theta, 
-            data, selectbeta, betanumber, w, obssel, beta);
+        cresults(i)=genresplik(order1, patterns, patternnumber, data, newthetas(i).theta,
+            selectbeta, selectbetano,
+            selectbetac, selectbetacno,
+            selectthetai, selectthetaino,
+            selectthetad, selectthetadno,
+            selectthetac, selectthetacno,
+            w, obssel, beta);
+        if(isnan(cresults(i).value))
+        {
+            results.value=datum::nan;
+            if(order>0)results.grad.fill(datum::nan);
+            if(order>1)results.hess.fill(datum::nan);
+            return results;
+        }
         if(order1>1)cresults(i).hess=cresults(i).hess+cresults(i).grad*cresults(i).grad.t();
-        prob(i)=cresults(i).value;  
+        prob(i)=cresults(i).value;
     }
     avelog=mean(prob);
     prob=prob-avelog*ones(q);

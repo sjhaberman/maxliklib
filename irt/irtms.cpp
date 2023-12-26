@@ -39,104 +39,17 @@ struct xselv
     bool all;
     umat list;
 };
-//Constant component of lambda.
-struct lcomp
-{
-    int li;
-    double value;
-};
-//Interaction of predictor and lambda.
-struct lxcomp
-{
-    int li;
-    int pi;
-    double value;
-};
-//Interaction of predictor and lambda for predictor from another variable.
-struct lxocomp
-{
-    int li;
-    int pi;
-    int ob;
-    double value;
-};
-//Interaction of theta and lambda.
-struct ltcomp
-{
-    int li;
-    int th;
-    double value;
-};
-//Interaction of beta and lambda.
-struct lbcomp
-{
-    int li;
-    int bi;
-    double value;
-};
-//Interaction of beta and predictor with lambda.
-struct lxbcomp
-{
-    int li;
-    int pi;
-    int bi;
-    double value;
-};
-//Interaction of beta and predictor with lambda for predictor from another variable.
-struct lxobcomp
-{
-    int li;
-    int pi;
-    int ob;
-    int bi;
-    double value;
-};
-//Interaction of beta and theta with lambda.
-struct ltbcomp
-{
-    int li;
-    int th;
-    int bi;
-    double value;
-};
-//Data structure.
-struct dat
-{
-    resp y;
-    vec x;
-};    
 //Specify a model.
-//choice indicates transformation and type of model.
-//dim is dimension of lambda;
-//idim is dimension of integer response.
-//ddim is dimension of double response.
-//bdim is dimension of used beta elements.
-//lcomps indicates constant components.
-//lxcomps indicates components only dependent on the predictors.
-//lxocomps indicates components only dependent on predictors from other variables.
-//ltcomps indicates components only dependent on theta.
-//lbcomps indicates components only dependent on parameters.
-//lxbcomps indicates components dependent on predictors and parameters.
-//lxobcomps indicates components dependent on predictors from other variables and parameters.
-//ltbcompes indicates components dependent on theta and parameters.
-//ithetas are integer elements from theta in response.
-//dthetas are double elements from theta in response.
+//choice is model distribution.
+//o is constant vector.
+//x is tranformation from beta elements used to lambda that does not involve theta.
+//c is transformation from beta elements used and theta double elements  used to lambda.
 struct pattern
 {
      model choice;
-     int dim;
-     int idim;
-     int ddim;
-     field<lcomp> lcomps;
-     field<lxcomp>lxcomps;
-     field<lxocomp>lxocomps;
-     field<ltcomp>ltcomps;
-     field<lbcomp>lbcomps;
-     field<lxbcomp>lxbcomps;
-     field<lxobcomp>lxobcomps;
-     field<ltbcomp>ltbcomps;
-     uvec ithetas;
-     uvec dthetas;
+     vec o;
+     mat x;
+     cube c;
 };
 // Weights and points for prior.
 struct pwr
@@ -163,16 +76,27 @@ struct dovecmat
 };
 //Add in components.
 void addsel(const int & , const xsel & , const f2v & , f2v & , const double & );
+int intsel(const xsel & , const int & );
+ivec ivecsel(const xsel & , const ivec & );
+vec vecsel(const xsel & , const vec & );
+int sintsel(const xsel & , const int & );
+int sivecsel(const xsel & , const ivec & );
+int svecsel(const xsel & , const vec & );
 //Components  for a single observation.
-f2v irtm (const int & , const field<pattern> & , const uvec & , const field<uvec> & , 
-    const field <pwr> & , const adq & , dovecmat &,
-    const field<dat> & , const field<xsel> & , const uvec & , const vec & , 
-    const xsel & , const vec & );
+f2v irtm (const int & , const field<pattern> & , 
+    const xsel & , const field<resp> & , const field <pwr> & ,  
+    const adq & , dovecmat & , 
+    const field<xsel> & , const xsel & ,
+    const field<xsel> & , const xsel & ,
+    const field<xsel> & , const xsel & ,
+    const field<xsel> & , const xsel & ,
+    const field<xsel> & , const xsel & ,
+    const vec & , const xsel & , const vec &  );
 //order is 0 if only values are found, 1 if gradient vectors are found, 2 if Hessian
 //matrices found, and 3 if Louis approximation is used.
 //patterns are possible response definitions.
-//patternnumber(j) is vector of pattern numbers for form j.
-//patno(i) is number j of patternnumber vector for observation i.
+//patternnumber is vector of pattern numbers.
+//ipatno is number patno of patternnumber vector for observation i.
 //selectobs(k) is data selection pattern k.
 //selectobsno(i) is data selection pattern number of observation i.
 //data(i) is responses for observation i.
@@ -181,34 +105,50 @@ f2v irtm (const int & , const field<pattern> & , const uvec & , const field<uvec
 //scale(o) is scale pattern o.
 //scaleno(i) is scale pattern number for observation i.
 //obsscale(i) is scaling for observation i.
-//selectbeta(r) is selection pattern r of beta parameters.
-//selectbetano(i) is selection pattern for observation i.
-//betanumber(s) is pattern s for mapping of beta parameters to items.
-//betanono(i) is pattern number  for observation i for mapping of beta parameters to items.
-//w(t) is vector of item weights for pattern t.
-//wno(i) is number t for vector of item weights.
-//obssel(u) specifies pattern u of items to use.
-//obsselno(i) is number  for observation i of pattern u of items to use.
+//selectbeta gives selection pattern of beta parameters.
+//selectbetano gives number of selection pattern for beta parameters.
+//selbetano gives number of number of selection pattern for beta parameters.
+//selectbeta gives selection pattern of beta parameters.
+//selectbetano gives number of selection pattern for beta parameters.
+//selbetano gives number of number of selection pattern for beta parameters.
+//selectbetac gives selection pattern of beta parameters.
+//selectbetacno gives number of selection pattern for beta parameters.
+//selbetacno gives number of number of selection pattern for beta parameters.
+//selectthetai gives selection pattern of beta parameters.
+//selectthetaino gives number of selection pattern for beta parameters.
+//selthetaino gives number of number of selection pattern for beta parameters.
+//selectthetad gives selection pattern of beta parameters.
+//selectthetadno gives number of selection pattern for beta parameters.
+//selthetadno gives number of number of selection pattern for beta parameters.
+//w is vector of item weights.
+//wno is number of vector of item weights.
+//obssel specifies pattern of items to use.
+//obsselno is number of pattern of items to use.
 //obsweight(i) is weight of observation i.
 //datasel is selection of observations.
-//betasel(v) is selection pattern v of the parameters beta.
-//betaselno(i) is the selection pattern of beta for observation i.
+//betasel is selection pattern of the parameter beta.
+//betaselno is the selection pattern of beta for observation i.
 //beta is the parameter vector.
-f2v irtms (const int & order, const field<pattern> & patterns,
-    const field<uvec> & patternnumber, const uvec &  patno,
-    const field<field<uvec>> & selectobs, const uvec & selectobsno,
-    const field<field <pwr>> & thetas, const uvec & thetano, 
-    const field<adq> & scale, const uvec & scaleno, 
-    field<dovecmat> & obsscale, 
-    const field<field<dat>> & data,
-    const field<field<xsel>> & selectbeta, const uvec & selectbetano, 
-    const field<uvec> & betanumber, const uvec & betanono,
-    const field<vec> & w, const uvec & wno, const field<xsel> & obssel, const uvec & obsselno,
-    const vec & obsweight, const xsel & datasel, 
-    const field<xsel> & betasel, const uvec & betaselno, const vec &  beta)
+f2v irtms (const int & order, const field<pattern> & patterns, 
+    const field<xsel> & patternnumber, const xsel & patno,
+    const field<field<resp>> & data, const field<field <pwr>> & thetas, const xsel & thetano, 
+    const field<adq> & scale, const xsel & scaleno, field<dovecmat> & obsscale, 
+    const field<xsel> & selectbeta, const field<xsel> & selectbetano, const xsel & selbetano,
+    const field<xsel> & selectbetac, const field<xsel> & selectbetacno,
+    const xsel & selbetacno,
+    const field<xsel> & selectthetai, const field<xsel> & selectthetaino,
+    const xsel & selthetaino,
+    const field<xsel> & selectthetad, const field<xsel> & selectthetadno,
+    const xsel & selthetadno,
+    const field<xsel> & selectthetac, const field<xsel> & selectthetacno,
+    const xsel & selthetacno,
+    const field<vec> & w, const xsel & wno, const field<xsel> & obssel, const xsel & obsselno, 
+    const vec & obsweight, const xsel & datasel,
+    const field<xsel> & betasel, const xsel & betaselno, const vec &  beta)
 {
     f2v cresults, results;
-    int i, ii, j, k, m, n, nn, o, p, q, r, s, t, u, v;
+    int i, ibetasel, ii, iobssel, ipat, iscale, iselbeta,
+        iselbetac, iselthetai, iselthetad, iselthetac, itheta, iw, n, nn, p, q;
     vec gamma;
     p=beta.n_elem;
     results.value=0.0;
@@ -226,36 +166,23 @@ f2v irtms (const int & order, const field<pattern> & patterns,
     }
 // Observations to use.
     n=data.n_elem;
-    if(datasel.all)
-    {
-        nn=n;
-    }
-    else
-    {
-        nn=datasel.list.n_elem;
-    }
+    nn=sintsel(datasel,n);
     if(nn==0) return results;
 //Enter individual observations and add.
     for(ii=0;ii<nn;ii++)
     {
-        if(datasel.all)
-        {
-             i=ii;
-        }
-        else
-        {
-             i=datasel.list(ii);
-        }
-        j=patno(i);
-        k=selectobsno(i);
-        m=thetano(i);
-        o=scaleno(i);
-        r=selectbetano(i);
-        s=betanono(i);
-        t=wno(i);
-        u=obsselno(i);
-        v=betaselno(i);
-        if(betasel(v).all)
+        i=intsel(datasel,ii);
+        ipat=intsel(patno,i);
+        itheta=intsel(thetano,i);
+        iscale=intsel(scaleno,i);
+        iselbeta=intsel(selbetano,i);
+        iselbetac=intsel(selbetacno,i);
+        iselthetai=intsel(selthetaino,i);
+        iselthetad=intsel(selthetadno,i);
+        iw=intsel(wno,i);
+        iobssel=intsel(obsselno,i);
+        ibetasel=intsel(betaselno,i);
+        if(betasel(ibetasel).all)
         {
              q=p;
              gamma.set_size(p);
@@ -263,17 +190,28 @@ f2v irtms (const int & order, const field<pattern> & patterns,
         }
         else
         {
-             q=betasel(v).list.n_elem;
+             q=betasel(ibetasel).list.n_elem;
              gamma.set_size(q);
-             gamma=beta.elem(betasel(v).list);
-        }      
+             gamma=beta.elem(betasel(ibetasel).list);
+        }     
         if(order>0)cresults.grad.set_size(q);
         if(order>1)cresults.hess.set_size(q,q);
-        cresults=irtm(order, patterns, patternnumber(j), selectobs(k), 
-             thetas(m),  scale(o), obsscale(i),
-             data(i), selectbeta(r), betanumber(s), w(t),
-             obssel(u), gamma);
-        addsel(order,betasel(v),cresults,results,obsweight(i));
+        cresults=irtm(order, patterns, patternnumber(ipat), data(i),
+             thetas(itheta), scale(iscale), obsscale(i),
+             selectbeta,selectbetano(iselbeta),
+             selectbetac,selectbetacno(iselbetac), 
+             selectthetai,selectthetaino(iselthetai),
+             selectthetad,selectthetadno(iselthetad),
+             selectthetac,selectthetacno(iselthetac),
+             w(iw),  obssel(iobssel), gamma);
+        if(isnan(cresults.value))
+        {
+            results.value=datum::nan;
+            if(order>0)results.grad.fill(datum::nan);
+            if(order>1)results.hess.fill(datum::nan);
+            return results;
+        }
+        addsel(order,betasel(ibetasel),cresults,results,obsweight(i));
     }
     return results;
 }
