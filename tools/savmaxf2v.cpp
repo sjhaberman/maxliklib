@@ -38,7 +38,11 @@ void savmaxf2v(const int & order , const maxf2v & vlm, const string & out,
         result(1).col(1)=sqrt(diagvec(result(4)));
     }
 
-    if(fflag)result.save(out);
+    if(fflag)
+    {
+          try{result.save(out);}
+          catch(...){cout<<"Cannot save to specified file"<<endl;}
+    }
     if(pflag)result.print();
     return;
 }

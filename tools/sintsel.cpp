@@ -1,4 +1,4 @@
-//Select number of selected integers from 0 to n-1. 
+//Count the number of selected integers from 0 to n-1. 
 //xselect gives elements to select.
 #include<armadillo>
 using namespace arma;
