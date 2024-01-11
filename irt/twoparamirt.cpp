@@ -18,6 +18,7 @@
 //dist cdf, where cdf is N for normal, L for logistic, and G for Gumbel.  The default is L.
 //method algorithm, where algorithm is G for gradient ascent, C for conjugate gradient ascent,
 //N for modified Newton-Raphson, and L for Louis approximation.  The default is N.
+//tol indicates the convergence tolerance.  The default is 0.001.
 //adapt aq, where aq is true for adaptive quadrature and false otherwise.
 //quadrature quad, where quad is G for Gauss-Hermite and Q for normal quantiles.  The default is 
 //G.  The last case is 
