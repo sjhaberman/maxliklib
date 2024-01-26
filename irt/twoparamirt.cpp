@@ -133,7 +133,7 @@ maxf2v irtmle(const int & , const params & ,
 void savmaxf2v(const int & , const maxf2v & , const string & , const bool & , const bool & );
 vec starttwoparamirt(const char & , const imat & );
 pw hermpw(const int & );
-pw qnormpw(const int & );
+pw qnormpwe(const int & );
 int main()
 {
 //d is model dimension, i and j are indices, m is number of observations, 
@@ -307,7 +307,7 @@ int main()
     pws.points.set_size(n);
     pws.weights.set_size(n);
 //Set quadrature.
-    if(quad=='G'){pws=hermpw(n);}else{pws=qnormpw(n);} 
+    if(quad=='G'){pws=hermpw(n);}else{pws=qnormpwe(n);} 
     for(i=0;i<n;i++)
     {
          thetas(0)(i).theta.dresp.set_size(1);

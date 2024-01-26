@@ -1,6 +1,5 @@
 //Log likelihood and its gradient and Hessian
-//for response model with response y and predictor vector x.
-//Weight w is used.
+//for response model with responses data.
 //Model codes are found in genresp.cpp.
 //If order is 0, only the function is
 //found, if order is 1, then the function and gradient are found.  If order is 2,
@@ -9,11 +8,16 @@
 //of the Louis method.
 //patterns indicates full specification of models used for responses.
 //patternnumber connects data to model pattern.
-//selectobs connects responses for use in pattern.
-//theta provides variable replacement values for selected elements of data.
-//data indicates data used.
-//selectbeta connects beta elements to patterns.
-//betanumber connects data to selectbeta elements.
+//theta provides supplemental variables often used in latent structure models.
+//selectbeta connects beta elements to matrix x of patterns.
+//selectbetano connects data to selectbeta elements.
+//selectbetac connects beta elements to cube c of patterns.
+//selectbetacno connects data to selectbetac elements.
+//selecttheta connects theta elements to response.
+//selectthetano connects data to selecttheta elements.
+//selectthetac connects theta elements to cube c of patterns.
+//selectthetacno connects data to selecttheta elements.
+//Weight w is used.
 //obssel indicates which observations to consider.
 //beta is parameter vector.
 #include<armadillo>
@@ -42,307 +46,169 @@ struct xsel
   bool all;
   uvec list;
 };
-//Constant component of lambda.
-struct lcomp
-{
-    int li;
-    double value;
-};
-//Interaction of predictor and lambda.
-struct lxcomp
-{
-    int li;
-    int pi;
-    double value;
-};
-//Interaction of predictor and lambda for predictor from another variable.
-struct lxocomp
-{
-    int li;
-    int pi;
-    int ob;
-    double value;
-};
-//Interaction of theta and lambda.
-struct ltcomp
-{
-    int li;
-    int th;
-    double value;
-};
-//Interaction of beta and lambda.
-struct lbcomp
-{
-    int li;
-    int bi;
-    double value;
-};
-//Interaction of beta and predictor with lambda.
-struct lxbcomp
-{
-    int li;
-    int pi;
-    int bi;
-    double value;
-};
-//Interaction of beta and predictor with lambda for predictor from another variable.
-struct lxobcomp
-{
-    int li;
-    int pi;
-    int ob;
-    int bi;
-    double value;
-};
-//Interaction of beta and theta with lambda.
-struct ltbcomp
-{
-    int li;
-    int th;
-    int bi;
-    double value;
-};
-//Data structure.
-struct dat
-{
-    resp y;
-    vec x;
-};    
 //Specify a model.
-//choice indicates transformation and type of model.
-//dim is dimension of lambda;
-//idim is dimension of integer response.
-//ddim is dimension of do
-//bdim is dimension of used beta elements.
-//lcomps indicates constant components.
-//lxcomps indicates components only dependent on the predictors.
-//lxocomps indicates components only dependent on predictors from other variables.
-//ltcomps indicates components only dependent on theta.
-//lxbcomps indicates components dependent on predictors and parameters.
-//lxobcomps indicates components dependent on predictors from other variables and parameters.
-//ltbcompes indicates components dependent on theta and parameters.
-//ithetas are integer elements from theta in response.
-//dthetas are double elements from theta in response.
+//choice is model distribution.
+//o is constant vector.
+//x is tranformation from beta elements used to lamnbda that does not involve theta.
+//c is transformation from beta elements used and theta double elements  used to lambda.
 struct pattern
 {
      model choice;
-     int dim;
-     int idim;
-     int ddim;
-     field<lcomp> lcomps;
-     field<lxcomp>lxcomps;
-     field<lxocomp>lxocomps;
-     field<ltcomp>ltcomps;
-     field<lbcomp>lbcomps;
-     field<lxbcomp>lxbcomps;
-     field<lxobcomp>lxobcomps;
-     field<ltbcomp>ltbcomps;
-     uvec ithetas;
-     uvec dthetas;
+     vec o;
+     mat x;
+     cube c;
 };
 f2v genresp(const int & , const model &, const resp &, const vec &);
 void addsel(const int & , const xsel & , const f2v & , f2v & , const double & );
 f2v linsel(const int & , const f2v & , const mat & );
+int intsel(const xsel & , const int & );
+ivec ivecsel(const xsel & , const ivec & );
 vec vecsel(const xsel & , const vec & );
-f2v genresplik(const int & order, const field<pattern> & patterns, const uvec & patternnumber,
-    const field<uvec> & selectobs, const resp & theta, const field<dat> & data,
-    const field<xsel> & selectbeta, const uvec & betanumber, const vec & w, const xsel & obssel,
-    const vec & beta)
+int sintsel(const xsel & , const int & );
+int sivecsel(const xsel & , const ivec & );
+int svecsel(const xsel & , const vec & );
+mat cx(const cube & , const vec & );
+f2v genresplik(const int & order, const field<pattern> & patterns,
+    const xsel & patternnumber, const field<resp> & data, const resp & theta,
+    const field<xsel> & selectbeta, const xsel & selectbetano,
+    const field<xsel> & selectbetac, const xsel & selectbetacno,
+    const field<xsel> & selectthetai, const xsel & selectthetaino,
+    const field<xsel> & selectthetad, const xsel & selectthetadno,
+    const field<xsel> & selectthetac, const xsel & selectthetacno,
+    const vec & w, const xsel & obssel, const vec & beta)
 {
-//Generic real value.
-    double z;
-//Model parameter.
-    vec gamma,lambda;
-//Matrix of all interactions of lambda and beta.
-    mat indepx;
-//Observation contributions to log likelihood and gradient and Hessian.
-    f2v obsresults, linresults;
+//Linear model parameter is gamma.
+//lambda is final model parameter.
+//t is theta component used in lambda quadratic term.
+    vec gamma, lambda, t;
+//Matrix of all interactions of lambda and gamma.
+    mat indep;
 //Log likelihood, gradient, and Hessian.
-    f2v results;
+    f2v obsresults, linresults, results;
 //Counters and sizes.
-    int h, hh, hhh, i, ii, j, jj, jjj, jjjj, k, kk,  m, n, nn, order0 = 0, 
-         order1, p, pp, q, r, rr, rrr, s, t, tt, ttt, u, uu, uuu, v, vv;
-//Response.
+//dp is number of elements of theta.dresp.
+//dp1 is number of elements of theta.dresp to use.
+//i locates observations,
+//ii counts observations.
+//ip is number of elements of theta.iresp.
+//ip1 is number of elements of theta.iresp to use.
+//j locates patterns.
+//jj locates beta selections.
+//jjj locates beta selections for cubes.
+//k is dimension of lambda.
+//kc locates thetas for cubes.
+//kd locates double thetas.
+//ki locates int thetas.
+//n is total observation count.
+//nn counts observations  used.
+//order0 is for only values.
+//order1 is for values and gradients.
+//p is dimension of beta.
+//q is dimension of used part of beta.
+//qq is number of theta elements for cube.
+    int dp, dp1, i, ii, ip, ip1, j, jj, jjj, k, kc, kd, ki, kk, n, nn, order0 = 0, 
+         order1, p, q, qq;
+//Response from observation is response.
     resp response;
+//Starting value for log likelihood.
     results.value = 0.0;
 //Number of elements of beta.
     p=beta.n_elem;
+//Number of elements of theta.iresp.
+    ip=theta.iresp.n_elem;
+//Number of elements of theta.dresp.
+    dp=theta.dresp.n_elem;
 //Number of observations.
     n=data.n_elem;
 //Set up results elements.
-    if(order>0)results.grad.zeros(p);
-    if(order>1)results.hess.zeros(p,p);
+    if(order>0)
+    {
+         results.grad.set_size(p);
+         results.grad.zeros();
+    }
+    if(order>1)
+    {
+         results.hess.set_size(p,p);
+         results.hess.zeros();
+    }
 //Order specification if Louis approach used.
     order1=order;
     if(order>2)order1=1;
 //Select observations.
-    if(obssel.all)
-    {
-         nn=n;
-    }
-    else
-    {
-        nn=obssel.list.size();
-    }
+    nn=sintsel(obssel,n);
 //If nothing selected, nothing to do.
     if(nn==0) return results;
 //Cycle through observations.
     for (ii=0;ii<nn;ii++)
     {
-        if(obssel.all)
-        {
-             i=ii;
-        }
-        else
-        {
-             i=obssel.list(ii);
-        }
+        i=intsel(obssel,ii);
 //Pattern to use.
-        j=patternnumber(i);
-//Beta selection to use
-        jj=betanumber(i);
-//pp is lambda dimension.
-//q is number of elements of lcomps.
-//r is number of elements of lxcomps.
-//rr is number of elements of lxocomps.
-//rrr is number of elements of ltcomps.
-//s is number of elements of lbcomps.
-//t is number of elements of lxbcomps.
-//tt is number of elements of lxobcomps.
-//ttt is number of elements of ltbcomps.
-//u is number of elements of beta to use.
-//v is dimension of integer part of response.
-//vv is dimension of double part of response.
-        pp=patterns(j).dim;
-        q=patterns(j).lcomps.n_elem;
-        r=patterns(j).lxcomps.n_elem;
-        rr=patterns(j).lxocomps.n_elem;
-        rrr=patterns(j).ltcomps.n_elem;
-        s=patterns(j).lbcomps.n_elem;
-        t=patterns(j).lxbcomps.n_elem;
-        tt=patterns(j).lxobcomps.n_elem;
-        ttt=patterns(j).ltbcomps.n_elem;
-        uu=patterns(j).ithetas.n_elem;
-        uuu=patterns(j).dthetas.n_elem;
-        v=patterns(j).idim;
-        vv=patterns(j).ddim;
-        if(selectbeta(jj).all)
+        j=intsel(patternnumber,i);
+//Beta selection to use.
+        jj=intsel(selectbetano,i);
+        ip1=0;
+        if(ip>0)
         {
-             u=p;
+             ki=intsel(selectthetaino,i);
+             ip1=sivecsel(selectthetai(ki),theta.iresp);
+        }
+        dp1=0;
+        if(dp>0)
+        {
+             kd=intsel(selectthetadno,i);
+             dp1=svecsel(selectthetad(kd),theta.dresp);
+        }
+//No theta.
+        if(ip1+dp1==0)
+        {
+            response.iresp.copy_size(data(i).iresp);
+            response.iresp=data(i).iresp;
+            response.dresp.copy_size(data(i).dresp);
+            response.dresp=data(i).dresp;
         }
         else
         {
-             u=selectbeta(jj).list.n_elem;
+            response.iresp.set_size(ip1);
+            response.dresp.set_size(dp1);
+            if(ip1>0)response.iresp=ivecsel(selectthetai(ki),theta.iresp);
+            if(dp1>0)response.dresp=vecsel(selectthetad(kd),theta.dresp);
         }
-        if(u>0)
-        {
-             gamma.set_size(u);
-             gamma=vecsel(selectbeta(jj),beta);
-        }
-        lambda.set_size(pp);
-        lambda.zeros();
-        response.iresp.set_size(v);
-        response.dresp.set_size(vv);
-        if(u>0)
-        {
-             indepx.set_size(pp,u);
-             indepx.zeros();
-        }
-
+//Now for predictors.
+        k=patterns(j).o.n_elem;
+        lambda.set_size(k);
+        lambda=patterns(j).o;
+        q=patterns(j).x.n_cols;
         if(q>0)
         {
-             for(k=0;k<q;k++)
+             indep.set_size(k,q);
+             indep=patterns(j).x;
+             gamma.set_size(q);
+             gamma=vecsel(selectbeta(jj),beta);
+             if(dp>0)
              {
-                  kk=patterns(j).lcomps(k).li;
-                  lambda(kk)=patterns(j).lcomps(k).value;
+                  kc=intsel(selectthetacno,i);
+                  qq=svecsel(selectthetac(kc),theta.dresp);
+                  if(qq>0)
+                  {
+                       t.set_size(qq);                
+                       t=vecsel(selectthetac(kc),theta.dresp);
+                       jjj=intsel(selectbetacno,i);
+                       if(selectbetac(jjj).all)
+                       {
+                            indep=indep+cx(patterns(j).c,t);
+                       }
+                       else
+                       {
+                           indep.cols(selectbetac(jjj).list)
+                             =indep.cols(selectbetac(jjj).list)+cx(patterns(j).c,t);
+                       }
+                   }
              }
+             lambda=lambda+indep*gamma;
         }
-        if(r>0)
-        {
-             for(k=0;k<r;k++)
-             {
-                  kk=patterns(j).lxcomps(k).li;
-                  h=patterns(j).lxcomps(k).pi;
-                  lambda(kk)=lambda(kk)+patterns(j).lxcomps(k).value*data(i).x(h);
-             }
-        }
-        if(rr>0)
-        {
-             for(k=0;k<rr;k++)
-             {
-                  kk=patterns(j).lxocomps(k).li;
-                  h=patterns(j).lxocomps(k).pi;
-                  jjj=patterns(j).lxocomps(k).ob;
-                  jjjj=selectobs(i)(jjj);
-                  lambda(kk)=lambda(kk)+patterns(j).lxcomps(k).value*data(jjjj).x(h);
-             }
-        }
-        if(rrr>0)
-        {
-             for(k=0;k<rrr;k++)
-             {
-                  kk=patterns(j).ltcomps(k).li;
-                  h=patterns(j).ltcomps(k).th;
-                  lambda(kk)=lambda(kk)+patterns(j).ltcomps(k).value*theta.dresp(h);
-             }
-        }
-        if(s>0)
-        {
-             for(k=0;k<s;k++)
-             {
-                  kk=patterns(j).lbcomps(k).li;
-                  h=patterns(j).lbcomps(k).bi;
-                  z=patterns(j).lbcomps(k).value;
-                  lambda(kk)=lambda(kk)+z*gamma(h);
-                  indepx(kk,h)=indepx(kk,h)+z;
-             }
-        }
-        if(t>0)
-        {
-             for(k=0;k<t;k++)
-             {
-                  kk=patterns(j).lxbcomps(k).li;
-                  hh=patterns(j).lxbcomps(k).pi;
-                  h=patterns(j).lxbcomps(k).bi;
-                  z=patterns(j).lxbcomps(k).value*data(i).x(hh);
-                  lambda(kk)=lambda(kk)+z*gamma(h);
-                  indepx(kk,h)=indepx(kk,h)+z;
-             }
-        }
-        if(tt>0)
-        {
-             for(k=0;k<tt;k++)
-             {
-                  kk=patterns(j).lxobcomps(k).li;
-                  hh=patterns(j).lxobcomps(k).pi;
-                  h=patterns(j).lxobcomps(k).bi;
-                  jjj=patterns(j).lxobcomps(k).ob;
-                  jjjj=selectobs(i)(jjj);
-                  z=patterns(j).lxobcomps(k).value*data(jjjj).x(hh);
-                  lambda(kk)=lambda(kk)+z*gamma(h);
-                  indepx(kk,h)=indepx(kk,h)+z;
-             }
-        }
-        if(ttt>0)
-        {
-             for(k=0;k<ttt;k++)
-             {
-                  kk=patterns(j).ltbcomps(k).li;
-                  hh=patterns(j).ltbcomps(k).th;
-                  h=patterns(j).ltbcomps(k).bi;
-                  z=patterns(j).ltbcomps(k).value*theta.dresp(hh);
-                  lambda(kk)=lambda(kk)+z*gamma(h);
-                  indepx(kk,h)=indepx(kk,h)+z;
-             }
-        }
-        
-        response.iresp=data(i).y.iresp;
-        if(uu>0)response.iresp.elem(patterns(j).ithetas)=theta.iresp.elem(patterns(j).ithetas);
-        response.dresp=data(i).y.dresp;
-        if(uuu>0)response.dresp.elem(patterns(j).dthetas)=theta.dresp.elem(patterns(j).dthetas);
-        if(order>0&&q>0)obsresults.grad.set_size(r);
-        if(order>1&&q>0)obsresults.hess.set_size(r,r);
-        if(u>0)
+        if(order>0&&q>0)obsresults.grad.set_size(q);
+        if(order>1&&q>0)obsresults.hess.set_size(q,q);
+        if(q>0)
         {    
             obsresults=genresp(order1, patterns(j).choice, response, lambda);
         }
@@ -350,14 +216,37 @@ f2v genresplik(const int & order, const field<pattern> & patterns, const uvec & 
         {
             obsresults=genresp(order0, patterns(j).choice, response, lambda);
         }
-        if(isnan(obsresults.value))
+        if(!isfinite(obsresults.value))
         {
             results.value=datum::nan;
             if(order>0)results.grad.fill(datum::nan);
             if(order>1)results.hess.fill(datum::nan);
             return results;
-        }    
-        if((u==0)||order==0)
+        }
+        if(order>0)
+        {
+             if(!is_finite(results.grad))
+             {
+                  results.value=datum::nan;
+                  results.grad.fill(datum::nan);
+                  if(order>1)results.hess.fill(datum::nan);
+                  return results;
+             }
+        
+        }
+        if(order>1)
+        {
+             if(!is_finite(results.hess))
+             {
+                  results.value=datum::nan;
+                  results.grad.fill(datum::nan);
+                  results.hess.fill(datum::nan);
+                  return results;
+             }
+        
+        }
+             
+        if(q==0||order==0)
         {
             addsel(order0,selectbeta(jj),obsresults,results,w(i));
         }
@@ -366,7 +255,7 @@ f2v genresplik(const int & order, const field<pattern> & patterns, const uvec & 
             if(order>2)obsresults.hess=-obsresults.grad*obsresults.grad.t();
             linresults.grad.set_size(q);
             if(order>1) linresults.hess.set_size(q,q);
-            linresults=linsel(order,obsresults,indepx);
+            linresults=linsel(order,obsresults,indep);
             addsel(order,selectbeta(jj),linresults,results,w(i));  
         }
     }

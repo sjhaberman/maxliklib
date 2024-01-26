@@ -204,7 +204,7 @@ f2v irtms (const int & order, const field<pattern> & patterns,
              selectthetad,selectthetadno(iselthetad),
              selectthetac,selectthetacno(iselthetac),
              w(iw),  obssel(iobssel), gamma);
-        if(isnan(cresults.value))
+        if(!isfinite(cresults.value))
         {
             results.value=datum::nan;
             if(order>0)results.grad.fill(datum::nan);

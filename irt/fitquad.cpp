@@ -167,7 +167,8 @@ dovecmat fitquad(const field<f2v> & cresults, const field<pwr> & newthetas,
 //If not positive definite, quit.   
     if(!(W.is_sympd()))return results;
 //Otherwise find new results;
-    results.m=inv_sympd(W);
+    flag=inv_sympd(results.m,W);
+    if(!flag)return results;
     results.v=results.m*lin;
     results.m=sqrtmat_sympd(results.m);
     results.s=det(results.m);

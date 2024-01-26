@@ -150,6 +150,7 @@ f2v irtm (const int & order, const field<pattern> & patterns,
         if(order>0)cresults(i).grad.set_size(m);
         if(order1>1)cresults(i).hess.set_size(m,m);
         weights(i)=newthetas(i).weight/newthetas(i).kernel;
+        
         cresults(i)=genresplik(order1, patterns, patternnumber, data, newthetas(i).theta,
             selectbeta, selectbetano,
             selectbetac, selectbetacno,
@@ -157,20 +158,25 @@ f2v irtm (const int & order, const field<pattern> & patterns,
             selectthetad, selectthetadno,
             selectthetac, selectthetacno,
             w, obssel, beta);
-        if(isnan(cresults(i).value))
+        if(!isfinite(cresults(i).value))
         {
-            results.value=datum::nan;
-            if(order>0)results.grad.fill(datum::nan);
-            if(order>1)results.hess.fill(datum::nan);
-            return results;
+            weights(i)=0.0;
+            cresults(i).value=0.0;
+            if(order>0)cresults(i).grad.zeros();
+            if(order>1)cresults(i).hess.zeros();
+            prob(i)=0.0;
         }
-        if(order1>1)cresults(i).hess=cresults(i).hess+cresults(i).grad*cresults(i).grad.t();
-        prob(i)=cresults(i).value;
+        else
+        {
+            if(order1>1)cresults(i).hess=cresults(i).hess+cresults(i).grad*cresults(i).grad.t();
+            prob(i)=cresults(i).value;
+        }
     }
-    avelog=mean(prob);
+    avelog=max(prob);
     prob=prob-avelog*ones(q);
-    prob=exp(prob)%weights;
+    prob=weights%exp(prob);
     sumprob=sum(prob);
+
     if(order>0)prob=prob/sumprob;
     results.value=log(sumprob)+avelog;
     if(order>0)
@@ -183,7 +189,7 @@ f2v irtm (const int & order, const field<pattern> & patterns,
     }
     if(order1>1)results.hess=results.hess-results.grad*results.grad.t();
     if(order==3)results.hess=-results.grad*results.grad.t();
-    if(scale.adapt)obsscale=fitquad(cresults, newthetas, scale, obsscale);
+    if(scale.adapt&&all(weights))obsscale=fitquad(cresults, newthetas, scale, obsscale);
 
     return results;
 }
