@@ -1,8 +1,8 @@
-//Maximum likelihood is applied to a two-parameter IRT model with a standard normal
-//latent variable.
+//Maximum likelihood is applied to a generalized partial credit IRT model
+//with a standard normal latent variable.
 //The elementary case is considered in which all individuals have the same items and no data are
-//missing.  In addition, all observations have unit weight.  Responses are all 0 or 1.
-//They are obtained from a file infile for an integer matrix of responses.
+//missing.  In addition, all observations have unit weight.  Responses
+//are obtained from a file infile for a matrix of integers.
 //The model specifications are provided by the control file.
 //The name of the file is read from standard input. 
 //The file includes multiple lines of text.  Each line has two strings that are separated by
@@ -15,7 +15,6 @@
 //outfile, where outfile is the name of the output file.
 //fflag is false if no output file is used.
 //pflag is false if nothing is printed in ascii form.
-//dist cdf, where cdf is N for normal, L for logistic, and G for Gumbel.  The default is L.
 //method algorithm, where algorithm is G for gradient ascent, C for conjugate gradient ascent,
 //N for modified Newton-Raphson, and L for Louis approximation.  The default is N.
 //tol indicates the convergence tolerance.  The default is 0.001.
@@ -131,21 +130,21 @@ maxf2v irtmle(const int & , const params & ,
     const vec & , const xsel & , 
     const field<xsel> & , const xsel & , const vec &  );
 void savmaxf2v(const int & , const maxf2v & , const string & , const bool & , const bool & );
-vec starttwoparamirt(const int & , const params & , const char & , const char & ,
-    const imat & );
+vec startgpcm(const int & , const params & , const char & , const imat & );
 pw hermpw(const int & );
 pw qnormpwe(const int & );
 int main()
 {
-//d is model dimension, i and j are indices, m is number of observations, 
+//d is model dimension, h, i, j, and k are indices, m is number of observations, 
 //n is number of quadrature points,  nr is number of observed responses per observation,
+//nmaxmin is smallest maximum value of a response variable,
+//nmaxmax is largest maximum value of a responses variable.
+//nmaxrange is range of maximum values of response variables.
 //nv is total number of responses.
 //nc is number of control entries.
     bool aq=true,readflag,fflag=true,pflag=true,sflag=true;
     char algorithm='N',cdf='L',quad='G';
-    int d, i, j, m, n=9, nc, nr, nv, order=2;
-    field<xsel>obssel(1);
-    obssel(0).all=true;
+    int d, h, i, j, k, m, n=9, nc, nr, nmaxmin, nmaxmax,nmaxrange, nv, order=2;
     params mparams;
     mparams.print=true;
     mparams.maxit=100;
@@ -155,8 +154,7 @@ int main()
     mparams.gamma2=0.1;
     mparams.kappa=3.0;
     mparams.tol=0.001;
-    string controlfile,infile="infile.csv", outfile="outfile",
-        sfile, key1, key2;
+    string controlfile,infile="infile.csv", outfile="outfile", sfile, key1, key2;
     imat responses;
     pw th;
     try{cin>>controlfile;}
@@ -196,7 +194,7 @@ int main()
          {
               if(key2[0]=='G') {algorithm='G';order=1;}
               if(key2[0]=='C') {algorithm='C';order=1;}
-              if(key2[0]=='L') {algorithm='L';order=3;}
+              if(key2[0]=='L') algorithm='L';
               continue;
          }   
          if(key1.substr(0,2)=="po")
@@ -244,16 +242,45 @@ int main()
     }
     m=responses.n_rows;
     nr=responses.n_cols;
+    irowvec nmax(nr);
+    nmax=max(responses,0);
     nv=nr+1;
-    d=2*nr;
+    d=nr+sum(nmax);
     vec start(d);
     maxf2v results;    
     results.grad.set_size(d);
     results.locmax.set_size(d);
-    if(order>1)results.hess.set_size(d,d);     
-//Two patterns for observed and latent cases.
-    field<pattern>  patterns(2);
-//All observations satisfy the same model.
+    if(order>1)results.hess.set_size(d,d);
+    nmaxmax=max(nmax);
+    nmaxmin=min(nmax);
+    nmaxrange=nmaxmax-nmaxmin;
+//Table of values of maxima of response variables and mapping of response maxima to
+//patterns.
+    uvec nmaxtab(nmaxrange+1,fill::zeros),nmaxmap(nmaxrange+1,fill::zeros);
+//Classify by number of categories.
+    for(i=0;i<nr;i++)
+    {
+         j=nmax(i)-nmaxmin;
+         nmaxtab(j)=nmaxtab(j)+1;
+    }
+    j=0;
+    for(i=0;i<=nmaxrange;i++)
+    {
+        nmaxmap(i)=j;
+        if(nmaxtab(i)>0) j=j+1;
+    }
+    uvec nmaxes(j);
+    k=0;
+    for(i=0;i<=nmaxrange;i++)
+    {
+        if(nmaxtab(i)>0)
+        {
+            nmaxes(k)=nmaxmin+i;
+            k=k+1;
+        }
+    } 
+//j+1 patterns for observed and latent cases.
+    field<pattern>  patterns(j+1);
     field<xsel>  patternnumber(1);
     xsel   patno;
     field<field<resp>>  data(m);
@@ -265,13 +292,13 @@ int main()
     field<xsel>  selectbeta(nv);
     field<xsel> selectbetano(1);
     xsel selbetano;
-    field<xsel>  selectbetac(2);
+    field<xsel>  selectbetac(j+1);
     field<xsel> selectbetacno(1);
     xsel selbetacno;
     field<xsel>  selectthetai(1);
     field<xsel> selectthetaino(1);
     xsel selthetaino;
-    field<xsel>  selectthetad(1);
+    field<xsel>  selectthetad(2);
     field<xsel> selectthetadno(1);
     xsel selthetadno;
     field<xsel>  selectthetac(1);
@@ -279,29 +306,33 @@ int main()
     xsel selthetacno;
     field<vec>  w(1);
     xsel  wno;
+    field<xsel>  obssel(1);
     xsel obsselno;
     vec  obsweight(m);
     xsel  datasel; 
     field<xsel>  betasel(1);
     xsel  betaselno;
-    patterns(0).choice.type='S';
-    patterns(0).choice.transform=cdf;
-    patterns(0).o.set_size(1);
-    patterns(0).o(0)=0.0;
-    patterns(0).x.set_size(1,2);
-    patterns(0).x(0,0)=1.0;
-    patterns(0).x(0,1)=0.0;
-    patterns(0).c.set_size(1,1,1);
-    patterns(0).c(0,0,0)=1.0;
-    patterns(1).choice.type='D';
-    patterns(1).choice.transform='N';
-    patterns(1).o.set_size(2);
-    patterns(1).o(0)=0.0;
-    patterns(1).o(1)=1.0;
+    for(i=0;i<j;i++)
+    {
+         k=nmaxes(i);
+         patterns(i).choice.type='L';
+         patterns(i).o.set_size(k);
+         patterns(i).o.zeros();
+         patterns(i).x.set_size(k,k+1);
+         patterns(i).x.cols(0,k-1)=eye(k,k);
+         patterns(i).x.col(k).zeros();
+         patterns(i).c.set_size(k,1,1);
+         for(h=0;h<k;h++) patterns(i).c(h,0,0)=(double) (h+1); 
+    }
+    patterns(j).choice.type='D';
+    patterns(j).choice.transform='N';
+    patterns(j).o.set_size(2);
+    patterns(j).o(0)=0.0;
+    patterns(j).o(1)=1.0;
     patternnumber(0).all=false;
     patternnumber(0).list.set_size(nv);
-    patternnumber(0).list.zeros();
-    patternnumber(0).list(nr)=1;
+    for(i=0;i<nr;i++)patternnumber(0).list(i)=nmaxmap(nmax(i)-nmaxmin);
+    patternnumber(0).list(nr)=j;
     patno.all=false;
     patno.list.set_size(m);
     patno.list.zeros();
@@ -331,41 +362,44 @@ int main()
     scaleno.all=false;
     scaleno.list.set_size(m);
     scaleno.list.zeros();
-    for(j=0;j<m;j++)
+    for(h=0;h<m;h++)
     {
-        obsscale(j).v.set_size(1);
-        obsscale(j).v(0)=0.0;
-        obsscale(j).m.set_size(1,1);
-        obsscale(j).m(0,0)=1.0;
-        obsscale(j).s=1.0;
-        data(j).set_size(nv);
+        obsscale(h).v.set_size(1);
+        obsscale(h).v(0)=0.0;
+        obsscale(h).m.set_size(1,1);
+        obsscale(h).m(0,0)=1.0;
+        obsscale(h).s=1.0;
+        data(h).set_size(nv);
         for(i=0;i<nr;i++)
         {
             
-            data(j)(i).iresp.set_size(1);          
-            data(j)(i).iresp(0)=responses(j,i);   
+            data(h)(i).iresp.set_size(1);          
+            data(h)(i).iresp(0)=responses(h,i);   
         }
-        data(j)(nr).dresp.set_size(1);
+        data(h)(nr).dresp.set_size(1);
     }
-    for(j=0;j<nr;j++)
+    k=0;
+    for(i=0;i<nr;i++)
     {
-         selectbeta(j).all=false;
-         selectbeta(j).list.set_size(2);
-         selectbeta(j).list(0)=j+j;
-         selectbeta(j).list(1)=j+j+1;
+         selectbeta(i).all=false;
+         selectbeta(i).list.set_size(nmax(i)+1);
+         selectbeta(i).list=regspace<uvec>(k,k+nmax(i));
+         k=k+nmax(i)+1;
     }
     selectbeta(nr).all=false;
-    selectbetac(0).all=false;
-    selectbetac(1).all=false;
-    selectbetac(0).list.set_size(1);
-    selectbetac(0).list(0)=1;
+    for(i=0;i<j;i++)
+    {
+         selectbetac(i).all=false;
+         selectbetac(i).list.set_size(1);
+         selectbetac(i).list(0)=nmaxes(i);
+    }
+    selectbetac(j).all=false;
     selectbetano(0).all=false;
     selectbetano(0).list.set_size(nv);
     selectbetano(0).list=regspace<uvec>(0,nr);
     selectbetacno(0).all=false;
     selectbetacno(0).list.set_size(nv);
-    selectbetacno(0).list.zeros();
-    selectbetacno(0).list(nr)=1;
+    selectbetacno(0).list=patternnumber(0).list;
     selbetano.all=false;
     selbetano.list.set_size(m);
     selbetano.list.zeros();
@@ -416,7 +450,7 @@ int main()
     betaselno.list.zeros();
     if(sflag)
     {
-        start=starttwoparamirt(order,mparams,algorithm,cdf,responses);
+        start=startgpcm(order,mparams,algorithm,responses);
         if(start.has_nan())
         {
             cout<<"MLE does not exist"<<endl; 

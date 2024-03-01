@@ -75,7 +75,7 @@ maxf2v conjgrad(const int & order, const params & mparams, const vec & start, co
 // Function settings at start.
     vary0=maxf2vvar(order, start, fy0);
 // Return if starting impossible.
-    if(isnan(vary0.max)||mparams.maxit<=0) return vary0;
+    if(!isfinite(vary0.max)||mparams.maxit<=0) return vary0;
 // Iterations.
     for(i=0;i<mparams.maxit;i++)
     {

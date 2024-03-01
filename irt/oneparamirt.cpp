@@ -1,4 +1,4 @@
-//Maximum likelihood is applied to a two-parameter IRT model with a standard normal
+//Maximum likelihood is applied to a one-parameter IRT model with a standard normal
 //latent variable.
 //The elementary case is considered in which all individuals have the same items and no data are
 //missing.  In addition, all observations have unit weight.  Responses are all 0 or 1.
@@ -131,8 +131,7 @@ maxf2v irtmle(const int & , const params & ,
     const vec & , const xsel & , 
     const field<xsel> & , const xsel & , const vec &  );
 void savmaxf2v(const int & , const maxf2v & , const string & , const bool & , const bool & );
-vec starttwoparamirt(const int & , const params & , const char & , const char & ,
-    const imat & );
+vec startoneparamirt(const char & , const imat & );
 pw hermpw(const int & );
 pw qnormpwe(const int & );
 int main()
@@ -245,7 +244,7 @@ int main()
     m=responses.n_rows;
     nr=responses.n_cols;
     nv=nr+1;
-    d=2*nr;
+    d=nr+1;
     vec start(d);
     maxf2v results;    
     results.grad.set_size(d);
@@ -351,8 +350,8 @@ int main()
     {
          selectbeta(j).all=false;
          selectbeta(j).list.set_size(2);
-         selectbeta(j).list(0)=j+j;
-         selectbeta(j).list(1)=j+j+1;
+         selectbeta(j).list(0)=j;
+         selectbeta(j).list(1)=nr;
     }
     selectbeta(nr).all=false;
     selectbetac(0).all=false;
@@ -416,7 +415,7 @@ int main()
     betaselno.list.zeros();
     if(sflag)
     {
-        start=starttwoparamirt(order,mparams,algorithm,cdf,responses);
+        start=startoneparamirt(cdf,responses);
         if(start.has_nan())
         {
             cout<<"MLE does not exist"<<endl; 

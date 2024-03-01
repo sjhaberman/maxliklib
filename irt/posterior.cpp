@@ -42,7 +42,7 @@ field<pwr> posterior(const field<pwrf2v> & irtcomps)
         results(i).kernel=irtcomps(i).kernel;
         prob(i)=irtcomps(i).value;
     }
-    avelog=mean(prob);
+    avelog=max(prob);
     prob=prob-avelog*ones(q);
     
     prob=exp(prob)%weights;

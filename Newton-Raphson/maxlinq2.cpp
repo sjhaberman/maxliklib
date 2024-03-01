@@ -93,7 +93,7 @@ maxf2v maxlinq2(const int & order, const params & mparams, const vec & v,
     fy2.grad.set_size(p);
     if(order>1) fy2.hess.set_size(p,p);
 // Stuck if starting value out of domain.
-    if(isnan(vary0.max)) return vary1;
+    if(!isfinite(vary0.max)) return vary1;
 //  Start at 0 and 1.
     alpha1=0.0;
 // Find maximum step size stepmax for line.
@@ -109,7 +109,7 @@ maxf2v maxlinq2(const int & order, const params & mparams, const vec & v,
 // b.upper is upper bound for location of maximum.
     b.upper=INFINITY;
 // modify bounds if needed so that alpha2 in range.
-    while(isnan(fy2.value))
+    while(!isfinite(fy2.value))
     {
         b.upper=alpha2;
         alpha2=(1.0-mparams.eta)*alpha1+mparams.eta*alpha2;
@@ -158,7 +158,7 @@ maxf2v maxlinq2(const int & order, const params & mparams, const vec & v,
         y2=y0+alpha2*v;
         fy2=f(order, y2);
 // modify bounds if needed so that alpha2 in range.
-        while(isnan(fy2.value))
+        while(!isfinite(fy2.value))
         {
             b.upper=alpha2;
             alpha2=(1.0-mparams.eta)*alpha1+mparams.eta*alpha2;

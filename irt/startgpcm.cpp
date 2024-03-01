@@ -1,7 +1,6 @@
-//Starting values for two-parameter IRT model with a standard normal
+//Starting values for generalized partial credit model with a standard normal
 //latent variable.  The elementary case is considered in which all individuals
-//have the same items and no data are
-//missing.  In addition, all observations have unit weight.  Responses are all 0 or 1.
+//have the same items and responses are nonnegative integers.
 //responses is the data matrix.  cdf is the distribution specification, with
 //'G' for gumbel, 'L' for logistic, and 'N' for normal.
 
@@ -41,57 +40,72 @@ struct params
 };
 maxf2v regprod(const int & , const params & , const char & ,
     const field<resp> & , const vec & );
-vec starttwoparamirt(const int & order , const params & mparams, const char & algorithm, 
-    const char & cdf, const imat & responses)
+vec startgpcm(const int & order , const params & mparams, const char & algorithm, 
+    const imat & responses)
 {
-    int d, i, j, k, p, r, n;
-    double q=0.0;
+    int d, i, j, k, n, p, r;
+    double q,x,y;
     n=responses.n_rows;
     p=responses.n_cols;
-    d=p+p;
     r=p*(p-1)/2;
+    field<resp>yy(r);
+    irowvec nmax(p);
+    nmax=max(responses,0);
+    d=p+sum(nmax);
+    field<ivec>counts(p);
     vec results(d), start(p);
     maxf2v result;
     result.locmax.set_size(p);
     result.grad.set_size(p);
     if(order>1)result.hess.set_size(p,p);
+    
+    k=0;
+    for(j=0;j<p;j++)
+    {
+         counts(j).set_size(nmax(j)+1);
+         counts(j).zeros();
+         for(i=0;i<n;i++)counts(j)(responses(i,j))=counts(j)(responses(i,j))+1;
+         if(min(counts(j))==0)
+         {
+              results.fill(datum::nan); 
+              return results;
+         }
+         x=(double)counts(j)(0);
+         for(i=0;i<nmax(j);i++)
+         {
+              y=(double)counts(j)(i+1);
+              results(k+i)=log(y/x);
+         }
+         k=k+nmax(j)+1;  
+    }
     mat m(1,p),rsp(n,p),c(p,p);
     rsp=conv_to<mat>::from(responses);
     field<f1> tranm(p);
-    field<resp> y(r);
     m=mean(rsp);
-//No solution.
-    if(m.min()==0.0||m.max()==1.0)
-    {
-         results.fill(datum::nan); 
-         return results;
-    }
     c=cov(rsp);
-    i=0;
     start=ones(p);
+    i=0;
     for(j=1;j<p;j++)
     {
          for(k=0;k<j;k++)
          {
-              y(i).iresp.set_size(2);
-              y(i).iresp(0)=j;
-              y(i).iresp(1)=k;
-              y(i).dresp.set_size(1);
-              y(i).dresp(0)=c(j,k);
+              yy(i).iresp.set_size(2);
+              yy(i).iresp(0)=j;
+              yy(i).iresp(1)=k;
+              yy(i).dresp.set_size(1);
+              yy(i).dresp(0)=c(j,k);
               q=q+c(j,k);
               i=i+1;
          }
     }
     q=q/(double)r;
     start=q*start;
-    result=regprod(order, mparams, algorithm, y, start);     
-    j=0;
-    for(i=0;i<p;i++)
+    result=regprod(order, mparams, algorithm, yy, start);
+    k=0;
+    for(j=0;j<p;j++)
     {
-         tranm(i)=invcdf(cdf,m(0,i));
-         results(j)=tranm(i).value;
-         results(j+1)=result.locmax(i)*tranm(i).der;
-         j=j+2;
+         results(k+nmax(j))=result.locmax(j)/c(j,j);    
+         k=k+nmax(j)+1;  
     }
     return results;
 }
