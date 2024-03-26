@@ -18,7 +18,8 @@ struct resp
     vec dresp;
 };
 f2v logit(const int & , const resp & , const vec & );
-f2v loglog(const int & , const resp & , const vec & );
+f2v loglogl(const int & , const resp & , const vec & );
+f2v loglogu(const int & , const resp & , const vec & );
 f2v probit(const int &, const resp & , const vec & );
 f2v berresp(const int & order, const char & transform, const resp & y,
     const vec & beta)
@@ -28,7 +29,8 @@ f2v berresp(const int & order, const char & transform, const resp & y,
     if(order>1) result.hess.set_size(1,1);
     switch(transform)
     {
-        case 'G': return loglog(order, y, beta);
+        case 'G': return loglogl(order, y, beta);
+        case 'H': return loglogu(order, y, beta);
         case 'L': return logit(order, y, beta);
         default:  return probit(order, y, beta);
     }

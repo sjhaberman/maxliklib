@@ -1,5 +1,5 @@
 //Log likelihood component, gradient, and Hessian matrix
-//for the log-log model with response y and one-dimensional
+//for the complementary log-log model with response y and one-dimensional
 //parameter beta.
 //If order is 0, only the function is
 //found, if order is 1, then the function and gradient are found.
@@ -18,7 +18,7 @@ struct resp
   ivec iresp;
   vec dresp;
 };
-f2v loglog(const int & order, const resp & y, const vec & beta)
+f2v loglogu (const int & order, const resp & y, const vec & beta)
 {
     double p,q,r;
     f2v results;
@@ -27,17 +27,17 @@ f2v loglog(const int & order, const resp & y, const vec & beta)
     r=exp(-beta(0));
     if(y.iresp(0)==0)
     {
-        results.value=-r;
-        if(order>0) results.grad(0)=r;
-        if(order>1) results.hess(0,0)=-r;
-    }
-    else
-    {
         p=exp(-r);
         q=1.0-p;
         results.value=log(q);
         if(order>0) results.grad(0)=-r*p/q;
-        if(order>1) results.hess(0,0)=-results.grad(0)*(1.0-r+results.grad(0));
+        if(order>1) results.hess(0,0)=results.grad(0)*(-1.0+r-results.grad(0));
+    }
+    else
+    {
+        results.value=-r;
+        if(order>0) results.grad(0)=r;
+        if(order>1) results.hess(0,0)=-r;
     }
     return results;
 }
