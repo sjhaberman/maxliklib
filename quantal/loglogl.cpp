@@ -1,5 +1,5 @@
 //Log likelihood component, gradient, and Hessian matrix
-//for the complementary log-log model with response y and one-dimensional
+//for the lower complementary log-log model with response y and one-dimensional
 //parameter beta.
 //If order is 0, only the function is
 //found, if order is 1, then the function and gradient are found.

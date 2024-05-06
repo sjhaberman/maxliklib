@@ -1,6 +1,6 @@
-//Find EAP and corresponding conditional covariance matrix for all observations.
-//prob has n elements that are conditional probabilities.
-//x is m by n with columns that correspond to elements of prob.
+//Find EAP and corresponding conditional covariance matrix for all n observations.
+//For each observation j, posts(j) has a vector of m probabilities and
+//a m by k matrix of m responses of dimension k.
 //eap.v is mean and eap.m is covariance.
 #include<armadillo>
 using namespace std;

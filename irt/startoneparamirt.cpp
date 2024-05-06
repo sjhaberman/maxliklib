@@ -34,7 +34,7 @@ struct params
 };
 vec startoneparamirt(const char & cdf, const imat & responses)
 {
-    int d, j, k, p, r, n;
+    int d, i, j, k, p, r, n;
     double q=0.0, s=0.0;
     n=responses.n_rows;
     p=responses.n_cols;
@@ -45,6 +45,7 @@ vec startoneparamirt(const char & cdf, const imat & responses)
     mat m(1,p),rsp(n,p),c(p,p);
     rsp=conv_to<mat>::from(responses);
     field<f1> tranm(p);
+    field<resp> y(r);
     m=mean(rsp);
 //No solution.
     if(m.min()==0.0||m.max()==1.0)
@@ -52,21 +53,33 @@ vec startoneparamirt(const char & cdf, const imat & responses)
          results.fill(datum::nan); 
          return results;
     }
+    for(i=0;i<p;i++)
+    {
+         tranm(i)=invcdf(cdf,m(0,i));
+         results(j)=tranm(i).value;
+    }
     c=cov(rsp);
+//Predicted transformed covariances.
+    i=0;
     for(j=1;j<p;j++)
     {
          for(k=0;k<j;k++)
          {
-              q=q+c(j,k);
+              y(i).iresp.set_size(2);
+              y(i).iresp(0)=j;
+              y(i).iresp(1)=k;
+              y(i).dresp.set_size(1);
+              y(i).dresp(0)=c(j,k)*tranm(j).der*tranm(k).der;
+              q=q+y(i).dresp(0);
+              i=i+1;
          }
     }
-    q=q/(double)r;    
+    q=sqrt(q/(double)r);
+ //Return results. 
     for(j=0;j<p;j++)
     {
-         tranm(j)=invcdf(cdf,m(0,j));
          results(j)=tranm(j).value;
-         s=s+tranm(j).der;
     }
-    results(p)=q*s/(double)p;
+    results(p)=q;
     return results;
 }
