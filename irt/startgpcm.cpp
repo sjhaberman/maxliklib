@@ -8,12 +8,6 @@
 #include<armadillo>
 using namespace std;
 using namespace arma;
-struct f1
-{
-    double value;
-    double der; 
-};
-f1 invcdf(const char & , const double & prob);
 struct maxf2v
 {
     vec locmax;
@@ -44,7 +38,7 @@ vec startgpcm(const int & order , const params & mparams, const char & algorithm
     const imat & responses)
 {
     int d, i, j, k, n, p, r;
-    double q,x,y;
+    double q=0.0,x,y;
     n=responses.n_rows;
     p=responses.n_cols;
     r=p*(p-1)/2;
@@ -80,9 +74,8 @@ vec startgpcm(const int & order , const params & mparams, const char & algorithm
     }
     mat m(1,p),rsp(n,p),c(p,p);
     rsp=conv_to<mat>::from(responses);
-    field<f1> tranm(p);
     m=mean(rsp);
-    c=cov(rsp);
+    c=cov(rsp,1);
     start=ones(p);
     i=0;
     for(j=1;j<p;j++)
@@ -93,18 +86,18 @@ vec startgpcm(const int & order , const params & mparams, const char & algorithm
               yy(i).iresp(0)=j;
               yy(i).iresp(1)=k;
               yy(i).dresp.set_size(1);
-              yy(i).dresp(0)=c(j,k);
-              q=q+c(j,k);
+              yy(i).dresp(0)=c(j,k)/(c(j,j)*c(k,k));
+              q=q+yy(i).dresp(0);
               i=i+1;
          }
     }
-    q=q/(double)r;
+    q=sqrt(q/(double)r);
     start=q*start;
     result=regprod(order, mparams, algorithm, yy, start);
     k=0;
     for(j=0;j<p;j++)
     {
-         results(k+nmax(j))=result.locmax(j)/c(j,j);    
+         results(k+nmax(j))=result.locmax(j);    
          k=k+nmax(j)+1;  
     }
     return results;

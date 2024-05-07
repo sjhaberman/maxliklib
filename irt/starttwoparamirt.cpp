@@ -69,9 +69,9 @@ vec starttwoparamirt(const int & order , const params & mparams, const char & al
     for(i=0;i<p;i++)
     {
          tranm(i)=invcdf(cdf,m(0,i));
-         results(j)=tranm(i).value;
+         results(i+i)=tranm(i).value;
     }
-    c=cov(rsp);
+    c=cov(rsp,1);
     i=0;
     start=ones(p);
 //Predicted transformed covariances.
@@ -94,11 +94,10 @@ vec starttwoparamirt(const int & order , const params & mparams, const char & al
 //Fitted components.
     result=regprod(order, mparams, algorithm, y, start);    
 //Return answers. 
-    j=0;
+    j=1;
     for(i=0;i<p;i++)
     {
-         results(j)=tranm(i).value;
-         results(j+1)=result.locmax(i);
+         results(j)=result.locmax(i);
          j=j+2;
     }
     return results;

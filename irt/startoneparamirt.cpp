@@ -56,9 +56,9 @@ vec startoneparamirt(const char & cdf, const imat & responses)
     for(i=0;i<p;i++)
     {
          tranm(i)=invcdf(cdf,m(0,i));
-         results(j)=tranm(i).value;
+         results(i)=tranm(i).value;
     }
-    c=cov(rsp);
+    c=cov(rsp,1);
 //Predicted transformed covariances.
     i=0;
     for(j=1;j<p;j++)
@@ -75,11 +75,6 @@ vec startoneparamirt(const char & cdf, const imat & responses)
          }
     }
     q=sqrt(q/(double)r);
- //Return results. 
-    for(j=0;j<p;j++)
-    {
-         results(j)=tranm(j).value;
-    }
     results(p)=q;
     return results;
 }
