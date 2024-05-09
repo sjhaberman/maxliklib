@@ -35,17 +35,14 @@ struct params
 vec startoneparamirt(const char & cdf, const imat & responses)
 {
     int d, i, j, k, p, r, n;
-    double q=0.0, s=0.0;
     n=responses.n_rows;
     p=responses.n_cols;
     d=p+1;
     r=p*(p-1)/2;
-    vec results(d), start(p);
-    
+    vec results(d), start(p),y(r); 
     mat m(1,p),rsp(n,p),c(p,p);
     rsp=conv_to<mat>::from(responses);
     field<f1> tranm(p);
-    field<resp> y(r);
     m=mean(rsp);
 //No solution.
     if(m.min()==0.0||m.max()==1.0)
@@ -65,16 +62,10 @@ vec startoneparamirt(const char & cdf, const imat & responses)
     {
          for(k=0;k<j;k++)
          {
-              y(i).iresp.set_size(2);
-              y(i).iresp(0)=j;
-              y(i).iresp(1)=k;
-              y(i).dresp.set_size(1);
-              y(i).dresp(0)=c(j,k)*tranm(j).der*tranm(k).der;
-              q=q+y(i).dresp(0);
+              y(i)=c(j,k)*tranm(j).der*tranm(k).der;
               i=i+1;
          }
     }
-    q=sqrt(q/(double)r);
-    results(p)=q;
+    results(p)=mean(y);
     return results;
 }

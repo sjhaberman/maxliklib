@@ -177,6 +177,7 @@ int main()
          {
               sfile=key2;
               sflag=false;
+              continue;
          }
          if(key1.substr(0,2)=="da")
          {
@@ -244,7 +245,7 @@ int main()
     nr=responses.n_cols;
     irowvec nmax(nr);
  
-   nmax=max(responses,0);
+    nmax=max(responses,0);
     nv=nr+1;
     d=1+sum(nmax);
     vec start(d);

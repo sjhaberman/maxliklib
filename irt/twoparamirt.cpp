@@ -179,6 +179,7 @@ int main()
          {
               sfile=key2;
               sflag=false;
+              continue;
          }
          if(key1.substr(0,2)=="da")
          {
