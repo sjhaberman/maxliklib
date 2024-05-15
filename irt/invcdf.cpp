@@ -1,4 +1,4 @@
-//Inverse cdf and derivatives for Gumbel, logistic, and normal cases.
+//Inverse cdf and information for Gumbel, logistic, and normal cases.
 //cdf is 'G'for Gumbel, 'L' for logistic, and 'N' for normal.
 #include<armadillo>
 #define STATS_ENABLE_ARMA_WRAPPERS
@@ -7,29 +7,33 @@ using namespace arma;
 struct f1
 {
     double value;
-    double der;
+    double info;
 };
 f1 invcdf(const char & cdf, const double & prob)
 {     
     f1 result;
-    double q;    
+    double q,r,s,t;
+    q=1.0-prob;   
     switch (cdf)
     {
        case 'G':
-            q=log(1.0-prob);
-            result.value=-log(-q);
-            result.der=-1.0/((1.0-prob)*q);
+            result.value=log(-log(q));
+            result.info=(q/prob)*exp(2.0*result.value);
             return result;
-
+       case 'H':
+            result.value=-log(-log(prob));
+            result.info=(prob/q)*exp(-2.0*result.value);
+            return result;
        case 'N':
-            result.value=stats::qnorm(prob,0.0,1.0);
-            result.der=1.0/normpdf(result.value);
+            r=stats::qnorm(prob,0.0,1.0);
+            result.value=r;
+            t=normpdf(r);
+            result.info=t*t/(prob*q);
             return result;
 
        default:
-            q=1.0-prob;
             result.value=log(prob/q);
-            result.der=1.0/(prob*q);
+            result.info=prob*q;
             return result;
     }
 }

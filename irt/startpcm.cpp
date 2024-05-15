@@ -20,7 +20,7 @@ vec startpcm(const imat & responses)
     nmax=max(responses,0);
     d=1+sum(nmax);
     field<ivec>counts(p);
-    vec results(d), yy(r);
+    vec results(d);
     
     k=0;
     for(j=0;j<p;j++)
@@ -46,14 +46,10 @@ vec startpcm(const imat & responses)
     m=mean(rsp);
     c=cov(rsp,1);
     i=0;
-    for(j=1;j<p;j++)
-    {
-         for(k=0;k<j;k++)
-         {
-              yy(i)=c(j,k)/(c(j,j)*c(k,k));
-              i=i+1;
-         }
-    }
-    results(d-1)=mean(yy);
+    x=trace(c);
+    y=x*x-sum(square(c.diag()));
+//Compare sums of squares for off-diagonals.
+    
+    results(d-1)=sqrt((accu(c)-x)/y);
     return results;
 }

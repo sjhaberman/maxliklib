@@ -15,7 +15,8 @@
 //outfile, where outfile is the name of the output file.
 //fflag is false if no output file is used.
 //pflag is false if nothing is printed in ascii form.
-//dist cdf, where cdf is N for normal, L for logistic, and G for Gumbel.  The default is L.
+//dist cdf, where cdf is N for normal, L for logistic,
+//G for minimum Gumbel, and H for maximum Gumbel.  The default is L.
 //method algorithm, where algorithm is G for gradient ascent, C for conjugate gradient ascent,
 //N for modified Newton-Raphson, and L for Louis approximation.  The default is N.
 //tol indicates the convergence tolerance.  The default is 0.001.
@@ -189,6 +190,7 @@ int main()
          if(key1.substr(0,2)=="di")
          {
               if(key2[0]=='G') cdf='G';
+              if(key2[0]=='H') cdf='H';
               if(key2[0]=='N') cdf='N';
               continue;
          }

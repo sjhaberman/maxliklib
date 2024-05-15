@@ -188,6 +188,7 @@ int main()
          if(key1.substr(0,2)=="di")
          {
               if(key2[0]=='G') cdf='G';
+              if(key2[0]=='H') cdf='H';
               if(key2[0]=='N') cdf='N';
               continue;
          }

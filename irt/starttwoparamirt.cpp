@@ -12,7 +12,7 @@ using namespace arma;
 struct f1
 {
     double value;
-    double der; 
+    double info; 
 };
 f1 invcdf(const char & , const double & prob);
 struct maxf2v
@@ -83,7 +83,7 @@ vec starttwoparamirt(const int & order , const params & mparams, const char & al
               y(i).iresp(0)=j;
               y(i).iresp(1)=k;
               y(i).dresp.set_size(1);
-              y(i).dresp(0)=c(j,k)*tranm(j).der*tranm(k).der;
+              y(i).dresp(0)=c(j,k)/(tranm(j).info*tranm(k).info);
               q=q+y(i).dresp(0);
               i=i+1;
          }
