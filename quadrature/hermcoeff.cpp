@@ -6,7 +6,7 @@ vec hermcoeff(const int & n)
 {
     double x;
     int i,k;    
-    mat coeff=zeros(n+1,n+1);
+    mat coeff(n+1,n+1,fill::zeros);
     coeff(0,0)=1.0;
     if(n>0)
     {
@@ -20,7 +20,7 @@ vec hermcoeff(const int & n)
     {
         for(i=1;i<n;i++)
         {
-            x=(double)i;
+            x=double(i);
             
             coeff(0,i+1)=-x*coeff(0,i-1);
             for(k=1;k<i;k++)

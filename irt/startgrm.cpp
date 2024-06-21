@@ -1,7 +1,8 @@
-//Starting values for generalized partial credit model with a standard normal
+//Starting values for graded response model with a standard normal
 //latent variable.  The elementary case is considered in which all individuals
 //have the same items and responses are nonnegative integers.
-//responses is the data matrix.
+//responses is the data matrix.  cdf is the distribution specification, with
+//'G' for minimum Gumbel, 'H' for maximum Gumbel, 'L' for logistic, and 'N' for normal.
 
 
 #include<armadillo>
@@ -13,6 +14,11 @@ struct maxf2v
     double max;
     vec grad;
     mat hess;
+};
+struct f1v
+{
+    vec values;
+    double info; 
 };
 struct resp
 {
@@ -33,19 +39,23 @@ struct params
 };
 maxf2v regprod(const int & , const params & , const char & ,
     const field<resp> & , const vec & );
-vec startgpcm(const int & order , const params & mparams, const char & algorithm, 
-    const imat & responses)
+f1v invgrad(const char & , const vec & probs);
+vec startgrm(const int & order , const params & mparams, const char & algorithm, 
+    const char & cdf, const imat & responses)
 {
     int d, i, j, k, n, p, r;
     double q=0.0,x,y;
     n=responses.n_rows;
+    x=double(n);
     p=responses.n_cols;
     r=p*(p-1)/2;
+    field<f1v>tranm(p);
     field<resp>yy(r);
     irowvec nmax(p);
     nmax=max(responses,0);
     d=p+sum(nmax);
     field<ivec>counts(p);
+    field<vec>probs(p);
     vec results(d), start(p);
     maxf2v result;
     result.locmax.set_size(p);
@@ -63,12 +73,11 @@ vec startgpcm(const int & order , const params & mparams, const char & algorithm
               results.fill(datum::nan); 
               return results;
          }
-         x=double(counts(j)(0));
-         for(i=0;i<nmax(j);i++)
-         {
-              y=double(counts(j)(i+1));
-              results(k+i)=log(y/x);
-         }
+         probs(j).set_size(nmax(j));
+         probs(j)=(conv_to<vec>::from(counts(j).tail(nmax(j))))/x;
+         tranm(j).values.set_size(nmax(j));
+         tranm(j)=invgrad(cdf,probs(j));
+         results.subvec(k,k+nmax(j)-1)=tranm(j).values;
          k=k+nmax(j)+1;  
     }
     mat m(1,p),rsp(n,p),c(p,p);
@@ -85,7 +94,7 @@ vec startgpcm(const int & order , const params & mparams, const char & algorithm
               yy(i).iresp(0)=j;
               yy(i).iresp(1)=k;
               yy(i).dresp.set_size(1);
-              yy(i).dresp(0)=c(j,k)/(c(j,j)*c(k,k));
+              yy(i).dresp(0)=c(j,k)/(tranm(j).info*tranm(k).info);
               q=q+yy(i).dresp(0);
               i=i+1;
          }

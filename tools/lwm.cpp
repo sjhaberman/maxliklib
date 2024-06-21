@@ -32,7 +32,7 @@ vec lwm(const double & c, const field<vec> & p )
 //Cycle through X(it) for it from 1 to n-1.
     for(it=1;it<n;it++)
     {
-        xn=(double) it;
+        xn=double(it);
 //Bound for when S(it)<=i or S(it)>=i has negligible probability.
         d=xn*c/(2.0*xn+1.0);
 //Tentative new values of bottom and top.

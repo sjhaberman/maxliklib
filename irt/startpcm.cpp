@@ -33,10 +33,10 @@ vec startpcm(const imat & responses)
               results.fill(datum::nan); 
               return results;
          }
-         x=(double)counts(j)(0);
+         x=double(counts(j)(0));
          for(i=0;i<nmax(j);i++)
          {
-              y=(double)counts(j)(i+1);
+              y=double(counts(j)(i+1));
               results(k+i)=log(y/x);
          }
          k=k+nmax(j);  

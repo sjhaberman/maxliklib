@@ -11,7 +11,7 @@ vec hermpoly(const int & n, const double & x)
     if(n>1)
         for(i=1;i<n;i++)
         {
-            xn=(double)i;
+            xn=double(i);
             h(i+1)=x*h(i)-xn*h(i-1);
         }
     return h;

@@ -51,7 +51,7 @@ f2v normalv(const int & order, const resp & y, const vec & beta)
         if(order>1) results.hess.fill(datum::nan);
         return results;
     }
-    x=(double)n;
+    x=double(n);
     results.value=log_det_sympd(dec.m)-0.5*(dot(z,z)+x*log(datum::tau));
     if(order==0)return results;  
     b.v.set_size(n);

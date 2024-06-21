@@ -21,7 +21,7 @@ pw hermpw(const int & n)
     {
         for(i=1;i<n;i++)
         {
-            x=(double)i;
+            x=double(i);
             J(i-1,i)=sqrt(x);
             J(i,i-1)=J(i-1,i);
         }

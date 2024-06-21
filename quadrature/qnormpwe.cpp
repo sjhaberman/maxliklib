@@ -14,7 +14,7 @@ pw qnormpwe(const int & n)
 {
     double x,xn,y,z;
     int i,n1;
-    xn=1.0/((double)n);
+    xn=1.0/double(n);
     n1=n-1;
     pw pws;
     pws.points.set_size(n);

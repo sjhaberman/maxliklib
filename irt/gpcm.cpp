@@ -323,7 +323,7 @@ int main()
          patterns(i).x.cols(0,k-1)=eye(k,k);
          patterns(i).x.col(k).zeros();
          patterns(i).c.set_size(k,1,1);
-         for(h=0;h<k;h++) patterns(i).c(h,0,0)=(double) (h+1); 
+         for(h=0;h<k;h++) patterns(i).c(h,0,0)=double(h+1); 
     }
     patterns(j).choice.type='D';
     patterns(j).choice.transform='N';
