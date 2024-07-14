@@ -16,7 +16,7 @@ struct vn
      field<string>varnames;
      mat vars;
 };
-field<vn>getfiles(field<string> & datafiles)
+field<vn>getfiles(const field<string> & datafiles)
 {
 //i is a counter.
      bool flag;
@@ -36,7 +36,7 @@ field<vn>getfiles(field<string> & datafiles)
                if(!flag)
                {
                     cout<<datafiles(i)<<" not read successfully"<<endl;
-                    results(i).varnames.clear();
+                    results.clear();
                     return results;
                }
           }
@@ -45,6 +45,7 @@ field<vn>getfiles(field<string> & datafiles)
                if(fl1<=fl)
                {
                     cout<<datafiles(i)<<" not in correct format.";
+                    results.clear();
                     return results;
                } 
                str1=datafiles(i).substr(0,fl);
@@ -53,13 +54,14 @@ field<vn>getfiles(field<string> & datafiles)
                if(!flag)
                {
                     cout<<str1<<" not read successfully"<<endl;
+                    results.clear();
                     return results;
                }
                flag=results(i).varnames.load(str2);
                if(!flag)
                {
                     cout<<str2<<" not read successfully"<<endl;
-                    results(i).varnames.clear();
+                    results.clear();
                     return results;
                }
           }

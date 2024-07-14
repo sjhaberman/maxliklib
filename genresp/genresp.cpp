@@ -14,12 +14,13 @@
 //yields a model for Bernoulli data, and choice.type='T' yields a
 //censored continuous model.
 //For cumulative, graded, and Bernoulli cases, choice.transform='G'
-//yields a log-log transform, choice.transform='L' yields a logit
+//yields a complementary log-log transformation, choice.transform='H'
+//yields a log-log transformation, choice.transform='L' yields a logit
 //transformation, and choice.transform='N' yields a probit transformation.
-//For continuous models, choice.transform='G' yields a Gumbel model,
-//choice.transform='L'  yields a logistic model, choice.transform='N'
-//yields a normal model, and choice.type='T' yields a truncated continuous
-//model.  If order is 0, only the function is
+//For continuous models, choice.transform='G' yields a minimum Gumbel model,
+//choice.transform='H' yields a maximum Gumbel model,
+//choice.transform='L'  yields a logistic model, and choice.transform='N'
+//yields a normal model.  If order is 0, only the function is
 //found, if order is 1, then the function and gradient are found.  If order is 2,
 //then the function, gradient, and Hessian are returned.
 #include<armadillo>

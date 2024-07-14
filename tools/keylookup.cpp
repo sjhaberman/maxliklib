@@ -3,31 +3,12 @@
 using namespace arma;
 using namespace std;
 
-string keylookup(string & name, field<string> & source, string & def)
+string keylookup(const string & name, const vector<vector<string>> & controlvec)
 {
-    int c,i,lower,n,pivot,r, upper;
-
-    n=source.n_rows;
-    lower=0;
-    upper=n-1;
-    while(lower<upper)
-    {
-         pivot=(lower+upper)/2;
-         c=name.compare(source(pivot,0));
-         if(c==0)return source(pivot,1);
-         if(c<0)
-         {
-              upper=pivot-1;
-              continue;
-         }
-         lower=pivot+1;
-    }
-    if(c==0)
-    {
-         return source(pivot,1);
-    }
-    else
-    {
-         return def;
-    }
+    int i;
+    const function <bool(const vector<string> & v)>f=[&name](const vector<string> & v)
+         {return (v[0]==name);};
+    i=find_if(controlvec.begin(),controlvec.end(),f)-controlvec.begin();
+    if(i>=controlvec.size())return "";
+    return controlvec[i][1];
 }

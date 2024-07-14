@@ -1,7 +1,8 @@
 //Log likelihood component, gradient, and Hessian matrix
 //for Bernoulli response model with response y and one-dimensional parameter beta.
 //Choice of tranformation is determined by transform, with 'G' for
-//log-log, 'L' for logit, and 'N' for probit.  If order is 0, only the function is
+//complementary log-log, 'H' for log-log, 'L' for logit, and 'N' for probit.
+//If order is 0, only the function is
 //found, if order is 1, then the function and gradient are found.  If order is 2,
 //then the function, gradient, and Hessian are returned.
 #include<armadillo>

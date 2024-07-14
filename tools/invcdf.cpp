@@ -1,5 +1,5 @@
 //Inverse cdf and information for Gumbel, logistic, and normal cases.
-//cdf is 'G'for Gumbel, 'L' for logistic, and 'N' for normal.
+//cdf is 'G'for minimum Gumbel, 'H' for maximum Gumbel, 'L' for logistic, and 'N' for normal.
 #include<armadillo>
 #define STATS_ENABLE_ARMA_WRAPPERS
 #include "stats.hpp"

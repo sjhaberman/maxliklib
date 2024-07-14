@@ -8,7 +8,7 @@
 #include<string>
 using namespace std;
 using namespace arma;
-field<string> getcontrolfile(string & controlfile)
+field<string> getcontrolfile(const string & controlfile)
 {
     field<string>result;
     try{result.load(controlfile);}

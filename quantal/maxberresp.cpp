@@ -2,7 +2,8 @@
 //for Bernoulli response that is the maximum of two independent Bernoulli
 //random variables. The response is y and the two-dimesional parameter
 //vector is beta. The struct variable choice governs the model selection.
-//transform='G' applies to the log-log case,
+//transform='G' applies to the complementary log-log case,
+//transform='H' applies to the log-log case,
 //transform='L' applies to the logit case, and 
 //transform='N' applies to the probit case.
 //If order is 0, only the function is

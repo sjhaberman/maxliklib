@@ -1,6 +1,6 @@
 //Log likelihood component and its gradient and Hessian
 //for continuous model with response y and parameter beta.
-//transform determines the model with 'G' for Gumbel,
+//transform determines the model with 'G' for minimum Gumbel, 'H' for maximum Gumbel, 
 //'L' for logistic, and 'N' for normal.
 //If order is 0, only the function is
 //found, if order is 1, then the function and gradient are found.

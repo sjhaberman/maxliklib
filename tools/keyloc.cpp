@@ -8,9 +8,11 @@ int keyloc(string & name, field<string> & source)
     int c,i,lower,n,pivot,r, upper;
 
     n=source.n_rows;
+    if(n==0)return -1;
+    
     lower=0;
     upper=n-1;
-    while(lower<upper)
+    while(lower<=upper)
     {
          pivot=(lower+upper)/2;
          c=name.compare(source(pivot,0));
@@ -22,13 +24,6 @@ int keyloc(string & name, field<string> & source)
          }
          lower=pivot+1;
     }
-    if(c==0)
-    {
-         return pivot;
-    }
-    else
-    {
-         return -1;
-    }
+    return -1;
 }
 
