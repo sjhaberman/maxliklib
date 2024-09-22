@@ -4,27 +4,18 @@ using namespace arma;
 using namespace std;
 struct varlocs
 {
-      string varname;
-      imat locs;
+     string varname;
+     vector<int> forms;
+     vector<int> positions;
+     char type;
+     char transform;
+     vector<string>catnames;
 };
-int varlookup(string & name, field<varlocs>&vartab)
+vector<varlocs>::iterator varlookup(const string & name, vector<varlocs>&vartab)
 {
-    int c,i,lower,n,pivot,upper;
-
-    n=vartab.n_elem;
-    lower=0;
-    upper=n-1;
-    while(lower<upper)
-    {
-         pivot=(lower+upper)/2;
-         c=name.compare(vartab(pivot).varname);
-         if(c==0)return pivot;
-         if(c<0)
-         {
-              upper=pivot-1;
-              continue;
-         }
-         lower=pivot+1;
-    }
-    return lower;
+    const function <bool(const varlocs & v)>f=[&name](const varlocs & v)
+         {return (v.varname==name);};
+    vector<varlocs>::iterator it;
+    it=find_if(vartab.begin(),vartab.end(),f);
+    return it;
 }

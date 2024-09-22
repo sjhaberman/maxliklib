@@ -24,7 +24,7 @@ struct resp
   vec dresp;
 };
 vec pack(const vecmat & u);
-vecmat unpack(const int &, const vec &);
+vecmat unpack(const vec &);
 f2v normalv(const int & order, const resp & y, const vec & beta)
 {
     double x;
@@ -42,7 +42,7 @@ f2v normalv(const int & order, const resp & y, const vec & beta)
     vec d;
     dec.v.set_size(n);
     dec.m.set_size(n,n);
-    dec=unpack(n,beta);
+    dec=unpack(beta);
     z=dec.v+dec.m*y.dresp;
     if(!dec.m.is_sympd())
     {

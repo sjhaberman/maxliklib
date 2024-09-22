@@ -5,10 +5,10 @@ using namespace std;
 
 string keylookup(const string & name, const vector<vector<string>> & controlvec)
 {
-    int i;
+    vector<vector<string>>::const_iterator it;
     const function <bool(const vector<string> & v)>f=[&name](const vector<string> & v)
          {return (v[0]==name);};
-    i=find_if(controlvec.begin(),controlvec.end(),f)-controlvec.begin();
-    if(i>=controlvec.size())return "";
-    return controlvec[i][1];
+    it=find_if(controlvec.cbegin(),controlvec.cend(),f);
+    if(it==controlvec.cend()) return "";
+    return (*it)[1];
 }

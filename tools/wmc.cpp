@@ -10,25 +10,24 @@ struct vecmat
 };
 vecmat wmc(const int & order, const vecmat & wx)
 {
-    int i,j,k,m,n;
+    int j,m,n;
 //m observations of dimension n.
     m=wx.v.n_elem;
     n=wx.m.n_cols;
     vecmat result;
-    result.v.set_size(n);   
+//Column vector of weighted means;
+    result.v.set_size(n);  
     result.v=trans(wx.m)*wx.v;
     if(order>1)
     {
       result.m.set_size(n,n);
-      for(i=0;i<n;i++)
-      {
-        for(j=0;j<=i;j++)
-        {
-            result.m(i,j)=0.0;
-            for (k=0;k<m;k++)result.m(i,j)+=(wx.m(k,i)-result.v(i))*(wx.m(k,j)-result.v(j))*wx.v(k);
-            if(j<i) result.m(j,i)=result.m(i,j);
-        }
-     }
+//t is matrix of residuals.
+//u is matrix of residuals by weights.
+      mat t(m,n),u(m,n);
+      t=wx.m.each_row()-trans(result.v);
+      u=wx.v%t.each_col();
+//Weighted covariance matrix.
+      result.m=trans(u)*t;
     }
     return result;
 }

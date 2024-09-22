@@ -6,9 +6,10 @@ struct vecmat
     vec v;
     mat m;
 };
-vecmat unpack(const int & d, const vec & beta)
+vecmat unpack(const vec & beta)
 {
-    int i,j,k;
+    int d,i,j,k;
+    d=(int)((-3.0+sqrt(9.0+8.0*((double)beta.n_elem)))/2.0);
     vecmat result;
     result.v=beta.subvec(0,d-1);
     result.m.set_size(d,d);

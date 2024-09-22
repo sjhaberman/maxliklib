@@ -2,38 +2,32 @@
 #include<armadillo>
 using namespace arma;
 using namespace std;
-struct vn
-{
-     field<string>varnames;
-     mat vars;
-};
-struct model 
-{
-     char type;
-     char transform;
-};
 struct varlocs
 {
      string varname;
-     vector<int>forms;
-     vector<int>positions;
-     model choice;
-     int ncat;
+     vector<int> forms;
+     vector<int> positions;
+     char type;
+     char transform;
+     vector<string>catnames;
 };
-int varlookup(const string & , const vector<varlocs> &);
-bool varfinite(const string & name, const vector<varlocs> & vartab, const field<vn> & dataf)
+struct patobs
 {
-     int i, j, k, m, n;
-     i=varlookup(name,vartab);
-     n=vartab[i].forms.size();
-//See if variable on all forms.
-     if(n!=dataf.n_elem)return false;
-//See if always finite.   
-     for(j=0;j<n;j++)
+     int obs;
+     vector<int>present;
+};
+vector<varlocs>::iterator varlookup(const string & , vector<varlocs> &);
+bool varfinite(const string & name, vector<varlocs> & vartab,
+     vector<vector<int>> & patdata)
+{
+     size_t i;
+     vector<varlocs>::iterator vartabit;
+     vartabit=varlookup(name,vartab);
+     i=distance(vartab.begin(),vartabit);
+     vector<vector<int>>::iterator patdatait;
+     for(patdatait=patdata.begin();patdatait!=patdata.end();++patdatait)
      {
-         k=vartab[i].forms[j];
-         m=vartab[i].positions[j];
-         if(!dataf(k).vars.col(m).is_finite())return false;
+          if((*patdatait)[i]==0)return false;
      }
      return true;
 }

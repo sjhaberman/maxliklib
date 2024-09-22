@@ -4,7 +4,7 @@ using namespace arma;
 using namespace std;
 struct vn
 {
-     field<string>varnames;
+     vector<string>varnames;
      mat vars;
 };
 struct varforpos
@@ -16,76 +16,92 @@ struct varforpos
 struct varlocs
 {
      string varname;
-     vector<int>forms;
-     vector<int>positions;
+     vector<int> forms;
+     vector<int> positions;
      char type;
      char transform;
-     int ncat;
+     vector<string>catnames;
 };
 bool vtabsort(const varforpos & a,const varforpos & b)
      {return(a.varname<b.varname);};
 
 bool vtabchk(const varforpos & a, const varforpos & b)
      {return((a.varname==b.varname)&&(a.form==b.form));};
-vector<varlocs> vfp(const field<vn> & dataf)
+vector<varlocs> vfp(const vector<vn> & dataf)
 {
-     int h, i, j, k, numforms, nvar, varcounts;
+     int i, j, latform=-1, varcounts;
      varforpos u;
-     numforms=dataf.n_elem;
+     vector<vn>::const_iterator datafit;
+//Maximum possible number of variables.
      varcounts=0;
-     for(i=0;i<numforms;i++)varcounts+=dataf(i).varnames.n_elem;
-     vector<varforpos>vtab(varcounts);
-     vector<varlocs>result;
-     k=0;
-     for(i=0;i<numforms;i++)
+     for(datafit=dataf.begin();datafit!=dataf.end();++datafit)
      {
-         for(j=0;j<dataf(i).varnames.n_elem;j++)
+          varcounts+=datafit->varnames.size();
+     }
+     vector<varforpos>vtab(varcounts);
+     vector<varforpos>::iterator vtabit,vtabit1,vtabit2;
+     vector<varlocs>result(varcounts);
+     vector<varlocs>::iterator resultit;
+     vector<int>::iterator formit,posit;
+     vector<string>::const_iterator varit;
+     vtabit=vtab.begin();
+     i=0;
+     for(datafit=dataf.cbegin();datafit!=dataf.cend();++datafit)
+     {
+         j=0; 
+         if(datafit->vars.n_cols==0)latform=i;
+         for(varit=datafit->varnames.cbegin();varit!=datafit->varnames.cend();++varit)
          {
-               vtab[k].varname=dataf(i).varnames(j);
-               vtab[k].form=i;
-               vtab[k].position=j;
-               k++;
-          }
+               vtabit->varname=*varit;
+               vtabit->form=i;
+               vtabit->position=j;
+               ++vtabit;
+               j++;
+         }
+         i++;
      }
      stable_sort(vtab.begin(),vtab.end(),vtabsort);
 //Check for variable duplication on form.
-     if(adjacent_find(vtab.begin(),vtab.end(),vtabchk)<vtab.end())
+     if(distance(adjacent_find(vtab.begin(),vtab.end(),vtabchk),vtab.end())>0)
      {
           cout<<"Duplicate variable name on a form "<<endl;
           return result;
      }
-//Check for where variables in vtab start and end.
-     vector<int>varcum(varcounts);
-     h=0;
-     for(i=0;i<varcounts;i++)
+//Check for where variables in vtab start and end.																			
+     vtabit=vtab.begin();
+     for(resultit=result.begin();resultit!=result.end();++resultit)
      {
-          u=vtab[h];    
+          u=*vtabit;    
           const function <bool(const varforpos & v)>f=[&u](const varforpos & v)
           {return vtabsort(u,v);};
-          varcum[i]=find_if(vtab.begin()+h,vtab.end(),f)-vtab.begin();
-          h=varcum[i];
-          if(h==vtab.size())break;
-     }
-     nvar=h++;
-//Now for desired table.
-     result.resize(nvar);
-     h=0;
-     for(k=0;k<nvar;k++)
-     {
-//Number of entries for variable k.
-          i=varcum[k]-h;
-          result[k].varname=vtab[h].varname;
-          result[k].ncat=0;
-          result[k].forms.resize(i);
-          result[k].positions.resize(i);
-          for(j=0;j<i;j++)
+          vtabit1=find_if(vtabit,vtab.end(),f);
+          i=distance(vtabit,vtabit1);
+          resultit->varname=vtabit->varname;
+          resultit->forms.resize(i);
+          resultit->positions.resize(i);
+
+          formit=resultit->forms.begin();
+          posit=resultit->positions.begin();
+          for(vtabit2=vtabit;vtabit2!=vtabit1;++vtabit2)
           {
-               result[k].forms[j]=vtab[h+j].form;
-               result[k].positions[j]=vtab[h+j].position;
+               if(vtabit2->form==latform&&i>1)
+               {
+                    cout<<"Variable cannot be both observed and unobserved."<<endl;
+                    result.clear();
+                    return result;
+               }
+               *formit=vtabit2->form;
+               *posit=vtabit2->position;
+               ++formit;
+               ++posit;           
           }
-          result[k].type='.';
-          result[k].transform='.';
-          h=varcum[k];
-     }
+          resultit->type='.';
+          resultit->transform='.';
+          if(vtabit1==vtab.end())break;
+          vtabit=vtabit1;
+     }   
+//Now for desired table.
+     j=distance(result.begin(),resultit);
+     result.resize(j);
      return result; 
 }

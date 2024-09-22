@@ -2,21 +2,26 @@
 #include<armadillo>
 using namespace arma;
 using namespace std;
-field<string> keyvar(const string & name, const vector<vector<string>> & controlvec )
+vector<string> keyvar(const string & name, const vector<vector<string>> & controlvec )
 {
-    int h=0, i, j, k;
-    const function <bool(const vector<string> & v)>f=[&name](const vector<string> & v)
-         {return (v[0]==name);};
-    field<string>result(0);
-    
-    i=find_if(controlvec.begin(),controlvec.end(),f)-controlvec.begin();
-    if(i>=controlvec.size())return result;
-    k=controlvec.rend()-find_if(controlvec.rbegin(),controlvec.rend(),f);
-    result.set_size(k-i);
-    for(j=i;j<k;j++)
+    vector<string>result(0);
+    vector<string>t(2),u(2);
+    t[0]=name;
+    t[1]=" ";
+    u[0]=name;
+    u[1]="~~";
+    vector<string>::iterator resultit;
+    vector<vector<string>>::const_iterator citb,cite;
+    vector<vector<string>>::const_iterator cit;
+    citb=lower_bound(controlvec.cbegin(),controlvec.cend(),t);
+    cite=upper_bound(controlvec.cbegin(),controlvec.cend(),u);
+    if(citb==cite)return result;
+    result.resize(distance(citb,cite));
+    cit=citb;
+    for(resultit=result.begin();resultit!=result.end();++resultit)
     {
-           result(h)=controlvec[j][1];
-           h++;
+           *resultit=(*cit)[1];
+           ++cit;
     }
     return result;
 }
