@@ -1,6 +1,7 @@
 //Log likelihood component and its gradient and Hessian
 //for continuous model with response y and parameter beta.
-//transform determines the model with 'G' for minimum Gumbel, 'H' for maximum Gumbel, 
+//transform determines the model with 'G' for minimum Gumbel,
+//'H' for maximum Gumbel,
 //'L' for logistic, and 'N' for normal.
 //If order is 0, only the function is
 //found, if order is 1, then the function and gradient are found.
@@ -56,13 +57,13 @@ f2v contresp(const int & order, const char & transform, const resp & y,
     {
         results.grad(0)=result.der;
         results.grad(1)=y.dresp(0)*result.der+1.0/beta(1);
-   }
-   if(order>1)
-   {
+    }
+    if(order>1)
+    {
         results.hess(0,0)=result.der2;
         results.hess(1,0)=y.dresp(0)*result.der2;
         results.hess(0,1)=results.hess(1,0);
         results.hess(1,1)=y.dresp(0)*results.hess(0,1)-1.0/(beta(1)*beta(1));
-   }
-   return results;
+    }
+    return results;
 }

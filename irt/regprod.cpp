@@ -1,8 +1,7 @@
 //Regression of sum of squares of y(i,j)-a(i)a(j) over selected pairs i and j.
 //Algorithm uses minus the sum of squares and may 
-//be gradient ascent (G), conjugate gradient (C), Newton-Raphson (N), or Lous (L). 
-
-
+//be gradient ascent (G), conjugate gradient (C), Newton-Raphson (N),
+//or Lous (L).
 #include<armadillo>
 using namespace std;
 using namespace arma;
@@ -14,8 +13,8 @@ struct f2v
 };
 struct resp
 {
-  ivec iresp;
-  vec dresp;
+    ivec iresp;
+    vec dresp;
 };
 //Parameters for function maximization.
 struct params
@@ -49,9 +48,8 @@ maxf2v regprod(const int & order, const params & mparams, const char & algorithm
     results.grad.set_size(p);
     if(order>1)results.hess.set_size(p,p);
     const function<f2v(const int & order, const vec & start)> f=
-        [ &y](const int & order,const vec & start) mutable
-             {return regprodf(order, y, start);};
+        [&y](const int & order,const vec & start) mutable
+        {return regprodf(order, y, start);};
     results=maxselect(order, mparams, algorithm, start, f);
     return results;
 }
-

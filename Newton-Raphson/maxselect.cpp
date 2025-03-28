@@ -1,12 +1,15 @@
-//Select maximization algorithm.  Choices are modified Newton-Raphson (algorithm='N'), modified
-//modified Louis (algorithm='L'),
+//Select maximization algorithm.  Choices are modified Newton-Raphson
+//(algorithm='N'), modified Louis (algorithm='L'),
 //conjugate gradient (algorithm='C'), and gradient ascent (algorithm='G').
 //The function f.value maximized is always a
 //continuously differentiable real function of real vectors of dimension p on a
 //nonempty open convex set O of p-dimensional vectors.  The gradient of f.value
-//is f.grad.  For the Newton-Raphson case, the function must have a continuous Hessian
-//matrix f.hess.  The integer order must be 1, 2, or 3.  If order is 2, then f.hess, the
-//Hessian (order=2) or approximate Hessian (order=3) of f.value is found even if it is not
+//is f.grad.  For the Newton-Raphson case,
+//the function must have a continuous Hessian
+//matrix f.hess.  The integer order must be 1, 2, or 3.
+//If order is 2, then f.hess, the
+//Hessian (order=2) or approximate Hessian (order=3) of f.value is found
+//even if it is not
 //used for the gradient ascent or conjugate gradient cases.
 //The strict pseudoconcavity condition described in the document
 //convergence.pdf is assumed to apply for the real number a.  For the starting
@@ -51,13 +54,14 @@ struct params
     double tol;
 };
 maxf2v conjgrad(const int &, const params & , const vec & ,
-           const function<f2v(const int & , const vec & )> f);
+    const function<f2v(const int & , const vec & )> f);
 maxf2v gradascent(const int &, const params & , const vec & ,
-           const function<f2v(const int & , const vec & )> f);
+    const function<f2v(const int & , const vec & )> f);
 maxf2v nrv(const int &, const params & , const vec & ,
-           const function<f2v(const int & , const vec & )> f);
-maxf2v maxselect(const int & order, const params & mparams, const char & algorithm,
-           const vec & start, const function<f2v(const int & , const vec & )> f)
+    const function<f2v(const int & , const vec & )> f);
+maxf2v maxselect(const int & order, const params & mparams,
+    const char & algorithm,
+    const vec & start, const function<f2v(const int & , const vec & )> f)
 {
     
     maxf2v results;

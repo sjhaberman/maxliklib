@@ -13,19 +13,19 @@ struct f2v
 };
 struct model
 {
-  char type;
-  char transform;
+    char type;
+    char transform;
 };
 struct resp
 {
-  ivec iresp;
-  vec dresp;
+    ivec iresp;
+    vec dresp;
 };
 //Select elements of vector.  all indicates all elements.  list lists elements.
 struct xsel
 {
-  bool all;
-  uvec list;
+    bool all;
+    uvec list;
 };
 //Select elements of matrix.  all indicates all elements.  list lists elements in columns.
 struct xselv
@@ -36,14 +36,14 @@ struct xselv
 //Specify a model.
 //choice is model distribution.
 //o is constant vector.
-//x is tranformation from beta elements used to lamnbda that does not involve theta.
-//c is transformation from beta elements used and theta double elements  used to lambda.
+//x is tranformation from beta elements used to lambda that does not involve theta.
+//c is transformation from beta elements used and theta double elements used to lambda.
 struct pattern
 {
-     model choice;
-     vec o;
-     mat x;
-     cube c;
+    model choice;
+    vec o;
+    mat x;
+    cube c;
 };
 // Weights and points for prior.
 struct pwr
@@ -95,14 +95,14 @@ f2v irtm (const int & order, const field<pattern> & patterns,
     int i, m, order1, q;
 //Number of elements of parameter vector.
     m=beta.n_elem;
-    //Order adjustment for Louis method.
+//Order adjustment for Louis method.
     if(order==3)
     {
-         order1=1;
+        order1=1;
     }
     else
     {
-         order1=order;
+        order1=order;
     }
     if(order>0)
     {
@@ -120,26 +120,25 @@ f2v irtm (const int & order, const field<pattern> & patterns,
     q=thetas.n_elem;
     if(q<1)
     {
-         results=genresplik(order1, patterns, patternnumber, data, dummy,
+        results=genresplik(order1, patterns, patternnumber, data, dummy,
             selectbeta, selectbetano,
             selectbetac, selectbetacno,
             selectthetai, selectthetaino,
             selectthetad, selectthetadno,
             selectthetac, selectthetacno,
             w, obssel, beta);
-         return results;
+        return results;
     }
     field<pwr> newthetas(q);
     for(i=0;i<q;i++)
     {
-         newthetas(i).theta.iresp.copy_size(thetas(1).theta.iresp);
-         newthetas(i).theta.dresp.copy_size(thetas(1).theta.dresp);
-         newthetas(i).theta.iresp=thetas(i).theta.iresp;
-         newthetas(i).theta.dresp=obsscale.v+obsscale.m*thetas(i).theta.dresp;
-         newthetas(i).weight=obsscale.s*thetas(i).weight;
-         newthetas(i).kernel=thetas(i).kernel;
+        newthetas(i).theta.iresp.copy_size(thetas(1).theta.iresp);
+        newthetas(i).theta.dresp.copy_size(thetas(1).theta.dresp);
+        newthetas(i).theta.iresp=thetas(i).theta.iresp;
+        newthetas(i).theta.dresp=obsscale.v+obsscale.m*thetas(i).theta.dresp;
+        newthetas(i).weight=obsscale.s*thetas(i).weight;
+        newthetas(i).kernel=thetas(i).kernel;
     }
-
 //Results for each prior point.  
     field<f2v> cresults(q);
     vec prob(q),weights(q);
@@ -150,7 +149,6 @@ f2v irtm (const int & order, const field<pattern> & patterns,
         if(order>0)cresults(i).grad.set_size(m);
         if(order1>1)cresults(i).hess.set_size(m,m);
         weights(i)=newthetas(i).weight/newthetas(i).kernel;
-        
         cresults(i)=genresplik(order1, patterns, patternnumber, data, newthetas(i).theta,
             selectbeta, selectbetano,
             selectbetac, selectbetacno,
@@ -176,21 +174,19 @@ f2v irtm (const int & order, const field<pattern> & patterns,
     prob=prob-avelog*ones(q);
     prob=weights%exp(prob);
     sumprob=sum(prob);
-
     if(order>0)prob=prob/sumprob;
     results.value=log(sumprob)+avelog;
     if(order>0)
     {        
-         for(i=0;i<q;i++)
-         {
-             results.grad=results.grad+prob(i)*cresults(i).grad;
-             if(order1>1)results.hess=results.hess+prob(i)*cresults(i).hess;
-         }
+        for(i=0;i<q;i++)
+        {
+            results.grad=results.grad+prob(i)*cresults(i).grad;
+            if(order1>1)results.hess=results.hess+prob(i)*cresults(i).hess;
+        }
     }
     if(order1>1)results.hess=results.hess-results.grad*results.grad.t();
     if(order==3)results.hess=-results.grad*results.grad.t();
     if(scale.adapt&&all(weights))obsscale=fitquad(cresults, newthetas, scale, obsscale);
-
     return results;
 }
 

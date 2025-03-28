@@ -20,7 +20,7 @@ struct resp
 };
 f2v berresp(const int & , const char & , const resp & , const vec & );
 f2v cumresp(const int & order, const char & transform, const resp & y,
-            const vec & beta)
+    const vec & beta)
 {
     int i,n;
     resp z, zz;
@@ -47,18 +47,18 @@ f2v cumresp(const int & order, const char & transform, const resp & y,
         gamma(0)=beta(i);
         if(i<y.iresp(0))
         {
-          resultp=berresp(order, transform, zz, gamma);
-          results.value=results.value+resultp.value;
-          if(order>0) results.grad(i)=resultp.grad(0);
-          if(order>1) results.hess(i,i)=resultp.hess(0,0);
+            resultp=berresp(order, transform, zz, gamma);
+            results.value=results.value+resultp.value;
+            if(order>0) results.grad(i)=resultp.grad(0);
+            if(order>1) results.hess(i,i)=resultp.hess(0,0);
         }
         else
         {
-          resultp= berresp(order, transform, z, gamma);
-          results.value=results.value+resultp.value;
-          if(order>0) results.grad(i)=resultp.grad(0);
-          if(order>1) results.hess(i,i)=resultp.hess(0,0);
-          break;
+            resultp= berresp(order, transform, z, gamma);
+            results.value=results.value+resultp.value;
+            if(order>0) results.grad(i)=resultp.grad(0);
+            if(order>1) results.hess(i,i)=resultp.hess(0,0);
+            break;
         }
     }
     return results;

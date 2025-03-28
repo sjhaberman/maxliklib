@@ -1,7 +1,7 @@
 //Log likelihood component and its gradient and hessian matrix
 //for logit-dirichlet model with response y and parameter vector beta
-//of dimennsion q = r+1, where r is the dimension of the observed vector
-//y.dresp.  All elements of beta are positive.  For a vector u is a vector of dimension
+//of dimension q = r+1, where r is the dimension of the observed vector
+//y.dresp.  All elements of beta are positive.  For a vector u of dimension
 //q with a Dirichlet distribution, y(i)=log(u(i)/u(q)).  If order is 0,
 //only the function is
 //found, if order is 1, then the function and gradient are found.
@@ -20,8 +20,8 @@ struct f2v
 };
 struct resp
 {
-  ivec iresp;
-  vec dresp;
+    ivec iresp;
+    vec dresp;
 };
 f2v logitdirichlet(const int & order, const resp & y, const vec & beta)
 {
@@ -34,10 +34,10 @@ f2v logitdirichlet(const int & order, const resp & y, const vec & beta)
     if(order>1) results.hess.set_size(q,q);
     if(min(beta)<=0.0)
     {
-      results.value=datum::nan;
-      if(order>0) results.grad.fill(datum::nan);
-      if(order>1) results.hess.fill(datum::nan);
-      return results;
+        results.value=datum::nan;
+        if(order>0) results.grad.fill(datum::nan);
+        if(order>1) results.hess.fill(datum::nan);
+        return results;
     }
     zz=sum(beta);
     zzz=log(1.0+sum(exp(y.dresp)));
@@ -48,8 +48,8 @@ f2v logitdirichlet(const int & order, const resp & y, const vec & beta)
         dz=digamma(zz);
         for(i=0;i<q;i++)
         {
-              results.grad(i)=-zzz+dz-digamma(beta(i));
-              if(i<q-1)results.grad(i)=results.grad(i)+y.dresp(i);
+            results.grad(i)=-zzz+dz-digamma(beta(i));
+            if(i<q-1)results.grad(i)=results.grad(i)+y.dresp(i);
         }
     }
     if(order>1)
@@ -57,11 +57,11 @@ f2v logitdirichlet(const int & order, const resp & y, const vec & beta)
         tz=trigamma(zz);
         for(i=0;i<q;i++)
         {
-              for(j=0;j<q;j++)
-              {
-                   results.hess(i,j)=tz;
-                   if(i==j)results.hess(i,j)=results.hess(i,j)-trigamma(beta(i));
-              }
+            for(j=0;j<q;j++)
+            {
+                results.hess(i,j)=tz;
+                if(i==j)results.hess(i,j)=results.hess(i,j)-trigamma(beta(i));
+            }
         }
     }
     return results;

@@ -38,6 +38,4 @@ pw hermpw(const int & n)
     pws.weights=w;
     return pws;
 }
-            
-            
-            
+

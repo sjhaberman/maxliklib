@@ -3,6 +3,7 @@
 //size. Lower bound is b.lower and upper bound is b.upper.
 //eta<1 is used to limit changes.
 #include<armadillo>
+using namespace std;
 using namespace arma;
 struct bounds
 {
@@ -10,7 +11,7 @@ struct bounds
      double upper;
 };
 double modit(const double & eta, const double & alpha0, const double & alpha1,
-             const double & stepmax, const bounds & b)
+    const double & stepmax, const bounds & b)
 {
     double result;
     if(alpha0<alpha1)

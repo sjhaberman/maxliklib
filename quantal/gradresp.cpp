@@ -20,7 +20,7 @@ struct resp
 };
 f2v berresp(const int & , const char & , const resp & , const vec & );
 f2v gradresp(const int & order, const char & transform ,
-             const resp & y, const vec & beta)
+    const resp & y, const vec & beta)
 {
     double d,dd,e;
     f2v results, resultp, resultq;
@@ -46,13 +46,13 @@ f2v gradresp(const int & order, const char & transform ,
 //Check for unacceptable beta.
     if(n>1)
     {
-      if(max(diff(beta))>=0.0)
-      {
-        results.value=datum::nan;
-        if(order>0) results.grad.fill(datum::nan);
-        if(order>1) results.hess.fill(datum::nan);
-        return results;
-      }
+        if(max(diff(beta))>=0.0)
+        {
+            results.value=datum::nan;
+            if(order>0) results.grad.fill(datum::nan);
+            if(order>1) results.hess.fill(datum::nan);
+            return results;
+        }
     }
     results.value=0.0;
     if(order>0) results.grad.zeros();

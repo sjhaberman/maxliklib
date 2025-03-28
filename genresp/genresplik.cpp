@@ -31,20 +31,20 @@ struct f2v
 };
 struct model
 {
-  char type;
-  char transform;
+    char type;
+    char transform;
 };
 struct resp
 {
-  ivec iresp;
-  vec dresp;
+    ivec iresp;
+    vec dresp;
 };
 //all is for selection of all elements (true) or some or no elements (false).
 //If all is false, list indicates element numbers to use.
 struct xsel
 {
-  bool all;
-  uvec list;
+    bool all;
+    uvec list;
 };
 //Specify a model.
 //choice is model distribution.
@@ -53,10 +53,10 @@ struct xsel
 //c is transformation from beta elements used and theta double elements  used to lambda.
 struct pattern
 {
-     model choice;
-     vec o;
-     mat x;
-     cube c;
+    model choice;
+    vec o;
+    mat x;
+    cube c;
 };
 f2v genresp(const int & , const model &, const resp &, const vec &);
 void addsel(const int & , const xsel & , const f2v & , f2v & , const double & );
@@ -107,7 +107,7 @@ f2v genresplik(const int & order, const field<pattern> & patterns,
 //q is dimension of used part of beta.
 //qq is number of theta elements for cube.
     int dp, dp1, i, ii, ip, ip1, j, jj, jjj, k, kc, kd, ki, kk, n, nn, order0 = 0, 
-         order1, p, q, qq;
+        order1, p, q, qq;
 //Response from observation is response.
     resp response;
 //Starting value for log likelihood.
@@ -123,13 +123,13 @@ f2v genresplik(const int & order, const field<pattern> & patterns,
 //Set up results elements.
     if(order>0)
     {
-         results.grad.set_size(p);
-         results.grad.zeros();
+        results.grad.set_size(p);
+        results.grad.zeros();
     }
     if(order>1)
     {
-         results.hess.set_size(p,p);
-         results.hess.zeros();
+        results.hess.set_size(p,p);
+        results.hess.zeros();
     }
 //Order specification if Louis approach used.
     order1=order;
@@ -149,14 +149,14 @@ f2v genresplik(const int & order, const field<pattern> & patterns,
         ip1=0;
         if(ip>0)
         {
-             ki=intsel(selectthetaino,i);
-             ip1=sivecsel(selectthetai(ki),theta.iresp);
+            ki=intsel(selectthetaino,i);
+            ip1=sivecsel(selectthetai(ki),theta.iresp);
         }
         dp1=0;
         if(dp>0)
         {
-             kd=intsel(selectthetadno,i);
-             dp1=svecsel(selectthetad(kd),theta.dresp);
+            kd=intsel(selectthetadno,i);
+            dp1=svecsel(selectthetad(kd),theta.dresp);
         }
 //No theta.
         if(ip1+dp1==0)
@@ -180,31 +180,31 @@ f2v genresplik(const int & order, const field<pattern> & patterns,
         q=patterns(j).x.n_cols;
         if(q>0)
         {
-             indep.set_size(k,q);
-             indep=patterns(j).x;
-             gamma.set_size(q);
-             gamma=vecsel(selectbeta(jj),beta);
-             if(dp>0)
-             {
-                  kc=intsel(selectthetacno,i);
-                  qq=svecsel(selectthetac(kc),theta.dresp);
-                  if(qq>0)
-                  {
-                       t.set_size(qq);                
-                       t=vecsel(selectthetac(kc),theta.dresp);
-                       jjj=intsel(selectbetacno,i);
-                       if(selectbetac(jjj).all)
-                       {
-                            indep=indep+cx(patterns(j).c,t);
-                       }
-                       else
-                       {
-                           indep.cols(selectbetac(jjj).list)
-                             =indep.cols(selectbetac(jjj).list)+cx(patterns(j).c,t);
-                       }
-                   }
-             }
-             lambda=lambda+indep*gamma;
+            indep.set_size(k,q);
+            indep=patterns(j).x;
+            gamma.set_size(q);
+            gamma=vecsel(selectbeta(jj),beta);
+            if(dp>0)
+            {
+                kc=intsel(selectthetacno,i);
+                qq=svecsel(selectthetac(kc),theta.dresp);
+                if(qq>0)
+                {
+                    t.set_size(qq);
+                    t=vecsel(selectthetac(kc),theta.dresp);
+                    jjj=intsel(selectbetacno,i);
+                    if(selectbetac(jjj).all)
+                    {
+                        indep=indep+cx(patterns(j).c,t);
+                    }
+                    else
+                    {
+                        indep.cols(selectbetac(jjj).list)
+                            =indep.cols(selectbetac(jjj).list)+cx(patterns(j).c,t);
+                    }
+                }
+            }
+            lambda=lambda+indep*gamma;
         }
         if(order>0&&q>0)obsresults.grad.set_size(q);
         if(order>1&&q>0)obsresults.hess.set_size(q,q);
@@ -225,27 +225,24 @@ f2v genresplik(const int & order, const field<pattern> & patterns,
         }
         if(order>0)
         {
-             if(!is_finite(results.grad))
-             {
-                  results.value=datum::nan;
-                  results.grad.fill(datum::nan);
-                  if(order>1)results.hess.fill(datum::nan);
-                  return results;
-             }
-        
+            if(!is_finite(results.grad))
+            {
+                results.value=datum::nan;
+                results.grad.fill(datum::nan);
+                if(order>1)results.hess.fill(datum::nan);
+                return results;
+            }
         }
         if(order>1)
         {
-             if(!is_finite(results.hess))
-             {
-                  results.value=datum::nan;
-                  results.grad.fill(datum::nan);
-                  results.hess.fill(datum::nan);
-                  return results;
-             }
-        
+            if(!is_finite(results.hess))
+            {
+                results.value=datum::nan;
+                results.grad.fill(datum::nan);
+                results.hess.fill(datum::nan);
+                return results;
+            }
         }
-             
         if(q==0||order==0)
         {
             addsel(order0,selectbeta(jj),obsresults,results,w(i));

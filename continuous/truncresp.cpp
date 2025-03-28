@@ -35,23 +35,23 @@ f2v truncresp(const int & order,  const char & transform, const resp & y, const 
     if(order>1) result.hess.set_size(2,2);
     if(y.iresp(0)>0)
     {
-       gamma(0)=beta(0)+y.dresp(0)*beta(1);
-       if(order>0) remainder.grad.set_size(1);
-       if(order>1) remainder.hess.set_size(1,1);
-       remainder=berresp(order, transform, z, gamma);
-       result.value=remainder.value;
-       if(order>0)
-       {
-           result.grad(0)=remainder.grad(0);
-           result.grad(1)=beta(1)*result.grad(0);
-       }
-       if(order>1)
-       {
-           result.hess(0,0)=remainder.hess(0,0);
-           result.hess(0,1)=result.hess(0,0)*beta(1);
-           result.hess(1,0)=result.hess(0,1);
-           result.hess(1,1)=beta(1)*result.hess(1,0);
-       }
+        gamma(0)=beta(0)+y.dresp(0)*beta(1);
+        if(order>0) remainder.grad.set_size(1);
+        if(order>1) remainder.hess.set_size(1,1);
+        remainder=berresp(order, transform, z, gamma);
+        result.value=remainder.value;
+        if(order>0)
+        {
+            result.grad(0)=remainder.grad(0);
+            result.grad(1)=beta(1)*result.grad(0);
+        }
+        if(order>1)
+        {
+            result.hess(0,0)=remainder.hess(0,0);
+            result.hess(0,1)=result.hess(0,0)*beta(1);
+            result.hess(1,0)=result.hess(0,1);
+            result.hess(1,1)=beta(1)*result.hess(1,0);
+        }
     }
     else
     {

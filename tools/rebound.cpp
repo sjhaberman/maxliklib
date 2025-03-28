@@ -3,8 +3,8 @@
 //and upper bound is b.upper.
 struct bounds
 {
-     double lower;
-     double upper;
+    double lower;
+    double upper;
 };
 bounds  rebound(const double &y, const double & der, const bounds & b)
 {

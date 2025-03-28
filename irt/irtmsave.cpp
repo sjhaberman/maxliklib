@@ -14,31 +14,33 @@ struct f2v
 };
 struct model
 {
-  char type;
-  char transform;
+    char type;
+    char transform;
 };
 struct resp
 {
-  ivec iresp;
-  vec dresp;
+    ivec iresp;
+    vec dresp;
 };
 //Select elements of vector.  all indicates all elements.  list lists elements.
 struct xsel
 {
-  bool all;
-  uvec list;
+    bool all;
+    uvec list;
 };
 //Specify a model.
 //choice is model distribution.
 //o is constant vector.
-//x is tranformation from beta elements used to lamnbda that does not involve theta.
-//c is transformation from beta elements used and theta double elements  used to lambda.
+//x is tranformation from beta elements used to lamnbda
+//that does not involve theta.
+//c is transformation from beta elements used and theta double elements
+//used to lambda.
 struct pattern
 {
-     model choice;
-     vec o;
-     mat x;
-     cube c;
+    model choice;
+    vec o;
+    mat x;
+    cube c;
 };
 // Weights and points for prior.
 struct pwr
@@ -72,8 +74,9 @@ f2v genresplik(const int & , const field<pattern> & ,
     const field<xsel> & , const xsel & ,
     const vec & , const xsel & , const vec & );
 field<pwrf2v> irtmsave (const int & order, const field<pattern> & patterns, 
-    const xsel & patternnumber, const field<resp> & data, const field <pwr> & thetas,  
-    dovecmat & obsscale, 
+    const xsel & patternnumber, const field<resp> & data,
+    const field <pwr> & thetas,
+    dovecmat & obsscale,
     const field<xsel> & selectbeta, const xsel & selectbetano,
     const field<xsel> & selectbetac, const xsel & selectbetacno,
     const field<xsel> & selectthetai, const xsel & selectthetaino,
@@ -87,7 +90,6 @@ field<pwrf2v> irtmsave (const int & order, const field<pattern> & patterns,
 //Number of points.
     q=thetas.n_elem;
     field<pwrf2v> results(q);
-       
     if(q<1)return results;
     pwr newtheta;
     dp=thetas(1).theta.dresp.n_elem;
@@ -121,13 +123,13 @@ field<pwrf2v> irtmsave (const int & order, const field<pattern> & patterns,
         results(i).value=cresults.value;
         if(order>0)
         {
-             results(i).grad.set_size(m);
-             results(i).grad=cresults.grad;
+            results(i).grad.set_size(m);
+            results(i).grad=cresults.grad;
         }
         if(order>1)
         {
-             results(i).hess.set_size(m,m);
-             results(i).hess=cresults.hess;
+            results(i).hess.set_size(m,m);
+            results(i).hess=cresults.hess;
         }
     }
     return results;

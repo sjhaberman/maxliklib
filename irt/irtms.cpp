@@ -19,21 +19,22 @@ struct f2v
 };
 struct model 
 {
-  char type;
-  char transform;
+    char type;
+    char transform;
 };
 struct resp
 {
-  ivec iresp;
-  vec dresp;
+    ivec iresp;
+    vec dresp;
 };
 //Select elements of vector.  all indicates all elements.  list lists elements.
 struct xsel
 {
-  bool all;
-  uvec list;
+    bool all;
+    uvec list;
 };
-//Select elements of matrix.  all indicates all elements.  list lists elements in columns.
+//Select elements of matrix.  all indicates all elements.
+//list lists elements in columns.
 struct xselv
 {
     bool all;
@@ -42,14 +43,16 @@ struct xselv
 //Specify a model.
 //choice is model distribution.
 //o is constant vector.
-//x is tranformation from beta elements used to lambda that does not involve theta.
-//c is transformation from beta elements used and theta double elements  used to lambda.
+//x is tranformation from beta elements used for lambda
+//that does not involve theta.
+//c is transformation from beta elements used and theta double elements
+//used for lambda.
 struct pattern
 {
-     model choice;
-     vec o;
-     mat x;
-     cube c;
+    model choice;
+    vec o;
+    mat x;
+    cube c;
 };
 // Weights and points for prior.
 struct pwr
@@ -92,7 +95,8 @@ f2v irtm (const int & , const field<pattern> & ,
     const field<xsel> & , const xsel & ,
     const field<xsel> & , const xsel & ,
     const vec & , const xsel & , const vec &  );
-//order is 0 if only values are found, 1 if gradient vectors are found, 2 if Hessian
+//order is 0 if only values are found, 1 if gradient vectors are found,
+//2 if Hessian
 //matrices found, and 3 if Louis approximation is used.
 //patterns are possible response definitions.
 //patternnumber is vector of pattern numbers.
@@ -131,9 +135,11 @@ f2v irtm (const int & , const field<pattern> & ,
 //beta is the parameter vector.
 f2v irtms (const int & order, const field<pattern> & patterns, 
     const field<xsel> & patternnumber, const xsel & patno,
-    const field<field<resp>> & data, const field<field <pwr>> & thetas, const xsel & thetano, 
-    const field<adq> & scale, const xsel & scaleno, field<dovecmat> & obsscale, 
-    const field<xsel> & selectbeta, const field<xsel> & selectbetano, const xsel & selbetano,
+    const field<field<resp>> & data, const field<field <pwr>> & thetas,
+    const xsel & thetano,
+    const field<adq> & scale, const xsel & scaleno, field<dovecmat> & obsscale,
+    const field<xsel> & selectbeta, const field<xsel> & selectbetano,
+    const xsel & selbetano,
     const field<xsel> & selectbetac, const field<xsel> & selectbetacno,
     const xsel & selbetacno,
     const field<xsel> & selectthetai, const field<xsel> & selectthetaino,
@@ -142,7 +148,8 @@ f2v irtms (const int & order, const field<pattern> & patterns,
     const xsel & selthetadno,
     const field<xsel> & selectthetac, const field<xsel> & selectthetacno,
     const xsel & selthetacno,
-    const field<vec> & w, const xsel & wno, const field<xsel> & obssel, const xsel & obsselno, 
+    const field<vec> & w, const xsel & wno, const field<xsel> & obssel,
+    const xsel & obsselno,
     const vec & obsweight, const xsel & datasel,
     const field<xsel> & betasel, const xsel & betaselno, const vec &  beta)
 {
@@ -155,13 +162,11 @@ f2v irtms (const int & order, const field<pattern> & patterns,
     if(order>0)
     {
         results.grad.set_size(p);
-        
         results.grad.zeros();
     }
     if(order>1)
     {
         results.hess.set_size(p,p);
-        
         results.hess.zeros();
     }
 // Observations to use.
@@ -193,17 +198,17 @@ f2v irtms (const int & order, const field<pattern> & patterns,
              q=betasel(ibetasel).list.n_elem;
              gamma.set_size(q);
              gamma=beta.elem(betasel(ibetasel).list);
-        }     
+        }
         if(order>0)cresults.grad.set_size(q);
         if(order>1)cresults.hess.set_size(q,q);
         cresults=irtm(order, patterns, patternnumber(ipat), data(i),
-             thetas(itheta), scale(iscale), obsscale(i),
-             selectbeta,selectbetano(iselbeta),
-             selectbetac,selectbetacno(iselbetac), 
-             selectthetai,selectthetaino(iselthetai),
-             selectthetad,selectthetadno(iselthetad),
-             selectthetac,selectthetacno(iselthetac),
-             w(iw),  obssel(iobssel), gamma);
+            thetas(itheta), scale(iscale), obsscale(i),
+            selectbeta,selectbetano(iselbeta),
+            selectbetac,selectbetacno(iselbetac),
+            selectthetai,selectthetaino(iselthetai),
+            selectthetad,selectthetadno(iselthetad),
+            selectthetac,selectthetacno(iselthetac),
+            w(iw),  obssel(iobssel), gamma);
         if(!isfinite(cresults.value))
         {
             results.value=datum::nan;

@@ -23,8 +23,8 @@ struct dovecmat
 //Quadrature points, weights, and kernels.
 struct resp
 {
-  ivec iresp;
-  vec dresp;
+    ivec iresp;
+    vec dresp;
 };
 struct pwr
 {
@@ -51,7 +51,6 @@ struct adq
     xselv quadselect;
 };
 //Adaptive quadrature transformation.
-
 dovecmat fitquad(const field<f2v> & cresults, const field<pwr> & newthetas,
     const adq & scale, dovecmat & obsscale)
 {
@@ -84,37 +83,42 @@ dovecmat fitquad(const field<f2v> & cresults, const field<pwr> & newthetas,
     k=1;
 //Set matrices;
     T.col(0)=ones(u);
-    if(r>0){
-    for(i=0;i<r;i++)
+    if(r>0)
     {
-         if(scale.linselect.all)
-         {
-              j=i;
-         }
-         else
-         {
-              j=scale.linselect.list(i);
-         }
-         for(h=0;h<u;h++) T(h,k)=newthetas(h).theta.dresp(j);
-         k=k+1;
-    }}
+        for(i=0;i<r;i++)
+        {
+            if(scale.linselect.all)
+            {
+                j=i;
+            }
+            else
+            {
+                j=scale.linselect.list(i);
+            }
+            for(h=0;h<u;h++) T(h,k)=newthetas(h).theta.dresp(j);
+            k=k+1;
+        }
+    }
     for(i=0;i<s;i++)
     {
-         if(!scale.quadselect.all)g=scale.quadselect.list.col(i);
-         for(h=0;h<u;h++) T(h,k)=newthetas(h).theta.dresp(g(0))*newthetas(h).theta.dresp(g(1));
-         k=k+1;
-         if(scale.quadselect.all)
-         {
-              if(g(0)<g(1))
-              {
-                   g(0)=g(0)+1;
-              }
-              else
-              {
-                   g(0)=0;
-                   g(1)=g(1)+1;
-              }
-         }
+        if(!scale.quadselect.all)g=scale.quadselect.list.col(i);
+        for(h=0;h<u;h++)
+        {
+            T(h,k)=newthetas(h).theta.dresp(g(0))*newthetas(h).theta.dresp(g(1));
+        }
+        k=k+1;
+        if(scale.quadselect.all)
+        {
+            if(g(0)<g(1))
+            {
+                g(0)=g(0)+1;
+            }
+            else
+            {
+                g(0)=0;
+                g(1)=g(1)+1;
+            }
+        }
     }
 //Dependent variables
     for(h=0;h<u;h++)q(h)=cresults(h).value;
@@ -123,46 +127,48 @@ dovecmat fitquad(const field<f2v> & cresults, const field<pwr> & newthetas,
     if(!flag)return results;
     k=1;
 //Fit maximum and minus inverse Hessian.
-    if(r>0){
-    for(i=0;i<r;i++)
+    if(r>0)
     {
-         if(scale.linselect.all)
-         {
-              j=i;
-         }
-         else
-         {
-              j=scale.linselect.list(i);
-         }
-         lin(j)=gamma(k);
-         k=k+1;
-    }}
+        for(i=0;i<r;i++)
+        {
+            if(scale.linselect.all)
+            {
+                j=i;
+            }
+            else
+            {
+                j=scale.linselect.list(i);
+            }
+            lin(j)=gamma(k);
+            k=k+1;
+        }
+    }
     g.zeros();
     for(i=0;i<s;i++)
     {
-         if(!scale.quadselect.all)g=scale.quadselect.list.col(i);
-         if(g(0)<g(1))
-         {
-              W(g(0),g(1))=-gamma(k);
-              W(g(1),g(0))=-gamma(k);
-         }
-         else
-         {
-              W(g(0),g(0))=-2.0*gamma(k);
-         }
-         k=k+1;
-         if(scale.quadselect.all)
-         {
-              if(g(0)<g(1))
-              {
-                   g(0)=g(0)+1;
-              }
-              else
-              {
-                   g(0)=0;
-                   g(1)=g(1)+1;
-              }
-         }
+        if(!scale.quadselect.all)g=scale.quadselect.list.col(i);
+        if(g(0)<g(1))
+        {
+            W(g(0),g(1))=-gamma(k);
+            W(g(1),g(0))=-gamma(k);
+        }
+        else
+        {
+            W(g(0),g(0))=-2.0*gamma(k);
+        }
+        k=k+1;
+        if(scale.quadselect.all)
+        {
+            if(g(0)<g(1))
+            {
+                g(0)=g(0)+1;
+            }
+            else
+            {
+                g(0)=0;
+                g(1)=g(1)+1;
+            }
+        }
     }
 //If not positive definite, quit.   
     if(!(W.is_sympd()))return results;
@@ -174,6 +180,3 @@ dovecmat fitquad(const field<f2v> & cresults, const field<pwr> & newthetas,
     results.s=det(results.m);
     return results;
 }
-            
-            
-            

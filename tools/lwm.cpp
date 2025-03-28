@@ -22,8 +22,8 @@ vec lwm(const double & c, const field<vec> & p )
         cc(i)=p(i).n_elem;
     }
     maxsum=sum(cc)-n;
-    //bottom is lower bound for nonzero entries of S(k), the sum of X(j) for j from 0
-    //to k<n.  top is upper bound for nonzero entries of S(k)
+//bottom is lower bound for nonzero entries of S(k), the sum of X(j) for j from 0
+//to k<n.  top is upper bound for nonzero entries of S(k)
     bottom=0;
     top=cc(0)-1;
     dist.set_size(maxsum+1);

@@ -1,6 +1,6 @@
-//Save value, location, gradient, Hessian, asymptotic covariance matrix, and asymptotic
-//standard errors from maximization results in struct maxf2v.  fflag indicates file saving,
-//and pflag indicates printing.
+//Save value, location, gradient, Hessian, asymptotic covariance matrix,
+//and asymptotic standard errors from maximization results in struct maxf2v.
+//fflag indicates file saving, and pflag indicates printing.
 #include<armadillo>
 using namespace arma;
 using namespace std;
@@ -12,9 +12,8 @@ struct maxf2v
     mat hess;
 };
 void savmaxf2v(const int & order , const maxf2v & vlm, const string & out,
-     const bool & fflag, const bool & pflag)
+    const bool & fflag, const bool & pflag)
 {
-    
     int o=5, p, q=2;
     if(order<2)
     {
@@ -37,11 +36,10 @@ void savmaxf2v(const int & order , const maxf2v & vlm, const string & out,
         result(4)=inv_sympd(-vlm.hess);
         result(1).col(1)=sqrt(diagvec(result(4)));
     }
-
     if(fflag)
     {
-          try{result.save(out);}
-          catch(...){cout<<"Cannot save to specified file"<<endl;}
+        try{result.save(out);}
+        catch(...){cout<<"Cannot save to specified file"<<endl;}
     }
     if(pflag)result.print();
     return;

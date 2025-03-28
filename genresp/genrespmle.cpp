@@ -34,129 +34,45 @@ struct params
 };
 struct model
 {
-  char type;
-  char transform;
+    char type;
+    char transform;
 };
 struct resp
 {
-  ivec iresp;
-  vec dresp;
+    ivec iresp;
+    vec dresp;
 };
 struct xsel
 {
-  bool all;
-  uvec list;
+    bool all;
+    uvec list;
 };
-//Constant component of lambda.
-struct lcomp
-{
-    int li;
-    double value;
-};
-//Interaction of predictor and lambda.
-struct lxcomp
-{
-    int li;
-    int pi;
-    double value;
-};
-//Interaction of predictor and lambda for predictor from another variable.
-struct lxocomp
-{
-    int li;
-    int pi;
-    int ob;
-    double value;
-};
-//Interaction of theta and lambda.
-struct ltcomp
-{
-    int li;
-    int th;
-    double value;
-};
-//Interaction of beta and lambda.
-struct lbcomp
-{
-    int li;
-    int bi;
-    double value;
-};
-//Interaction of beta and predictor with lambda.
-struct lxbcomp
-{
-    int li;
-    int pi;
-    int bi;
-    double value;
-};
-//Interaction of beta and predictor with lambda for predictor from another variable.
-struct lxobcomp
-{
-    int li;
-    int pi;
-    int ob;
-    int bi;
-    double value;
-};
-//Interaction of beta and theta with lambda.
-struct ltbcomp
-{
-    int li;
-    int th;
-    int bi;
-    double value;
-};
-//Data structure.
-struct dat
-{
-    resp y;
-    vec x;
-};    
-//Specify a model.
-//choice indicates transformation and type of model.
-//dim is dimension of lambda;
-//idim is dimension of integer response.
-//ddim is dimension of do
-//bdim is dimension of used beta elements.
-//lcomps indicates constant components.
-//lxcomps indicates components only dependent on the predictors.
-//lxocomps indicates components only dependent on predictors from other variables.
-//ltcomps indicates components only dependent on theta.
-//lxbcomps indicates components dependent on predictors and parameters.
-//lxobcomps indicates components dependent on predictors from other variables and parameters.
-//ltbcompes indicates components dependent on theta and parameters.
-//ithetas are integer elements from theta in response.
-//dthetas are double elements from theta in response.
 struct pattern
 {
-     model choice;
-     int dim;
-     int idim;
-     int ddim;
-     field<lcomp> lcomps;
-     field<lxcomp>lxcomps;
-     field<lxocomp>lxocomps;
-     field<ltcomp>ltcomps;
-     field<lbcomp>lbcomps;
-     field<lxbcomp>lxbcomps;
-     field<lxobcomp>lxobcomps;
-     field<ltbcomp>ltbcomps;
-     uvec ithetas;
-     uvec dthetas;
+    model choice;
+    vec o;
+    mat x;
+    cube c;
 };
-
 maxf2v maxselect(const int &, const params & , const char & , const vec & ,
-           const function<f2v(const int & , const vec & )> f);
-f2v genresplik(const int & , const field<pattern> & , const uvec & , const field<uvec> & , 
-    const resp & , const field<dat> &  , 
-    const field<xsel> & ,const uvec & ,
+    const function<f2v(const int & , const vec & )> f);
+f2v genresplik(const int & , const field<pattern> & ,
+    const xsel & , const field<resp> & , const resp & ,
+    const field<xsel> & , const xsel & ,
+    const field<xsel> & , const xsel & ,
+    const field<xsel> & , const xsel & ,
+    const field<xsel> & , const xsel & ,
+    const field<xsel> & , const xsel & ,
     const vec & , const xsel & , const vec & );
 maxf2v genrespmle(const int & order, const params & mparams,
-    const char & algorithm, const field<pattern> & patterns, const uvec & patternnumber,
-    const field<uvec> & selectobs, const resp & theta, const field<dat> & data,
-    const field<xsel> & selectbeta, const uvec & betanumber, const vec & w, const xsel & obssel,
-    const vec & start)
+    const char & algorithm, const field<pattern> & patterns,
+    const xsel & patternnumber, const field<resp> & data, const resp & theta,
+    const field<xsel> & selectbeta, const xsel & selectbetano,
+    const field<xsel> & selectbetac, const xsel & selectbetacno,
+    const field<xsel> & selectthetai, const xsel & selectthetaino,
+    const field<xsel> & selectthetad, const xsel & selectthetadno,
+    const field<xsel> & selectthetac, const xsel & selectthetacno,
+    const vec & w, const xsel & obssel, const vec & start)
 {
     maxf2v results;
     int p;
@@ -164,11 +80,20 @@ maxf2v genrespmle(const int & order, const params & mparams,
     results.locmax.set_size(p);
     results.grad.set_size(p);
     const function<f2v(const int & order,const vec & start)>f=
-        [&patterns,&patternnumber,&selectobs,&theta,&data,
-        &selectbeta,&betanumber,&w,&obssel]
+        [&patterns,&patternnumber,&data,&theta,
+        &selectbeta,&selectbetano,&selectbetac,&selectbetacno,
+        &selectthetai,&selectthetaino,&selectthetad,&selectthetadno,
+        &selectthetac,&selectthetacno,
+        &w,&obssel]
         (const int & order,const vec & start)
-        {return genresplik(order,patterns,patternnumber,selectobs,theta,
-        data,selectbeta,betanumber, w,obssel,start);};
+        {return genresplik(order, patterns,
+        patternnumber, data, theta,
+        selectbeta, selectbetano,
+        selectbetac, selectbetacno,
+        selectthetai, selectthetaino,
+        selectthetad, selectthetadno,
+        selectthetac, selectthetacno,
+        w, obssel, start);};
     results=maxselect(order, mparams, algorithm, start, f);
     return results;
 }

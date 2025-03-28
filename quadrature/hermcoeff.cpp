@@ -21,7 +21,6 @@ vec hermcoeff(const int & n)
         for(i=1;i<n;i++)
         {
             x=double(i);
-            
             coeff(0,i+1)=-x*coeff(0,i-1);
             for(k=1;k<i;k++)
             {

@@ -1,5 +1,7 @@
-//Value and first two derivatives of the logarithm of the standard minimum Gumbel density at z.
-//Value returned if order is 0, value and derivative returned if order is 1, and value,
+//Value and first two derivatives of the logarithm
+//of the standard minimum Gumbel density at z.
+//Value returned if order is 0, value and derivative returned if order is 1,
+//and value,
 //derivative, and second derivative returned if order is at least 2.
 #include<armadillo>
 using namespace arma;

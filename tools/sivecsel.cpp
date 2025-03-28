@@ -12,11 +12,11 @@ int sivecsel(const xsel & xselect, const ivec & y)
     int d;
     if(xselect.all)
     {
-         d = y.n_elem;
+        d = y.n_elem;
     }
     else
     {
-         d = xselect.list.n_elem;
+        d = xselect.list.n_elem;
     }
     return d;
 }

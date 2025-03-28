@@ -2,8 +2,9 @@
 //derivative g0 at x0.  Here f0 is not less than f1.
 //Stepmax controls step size.
 #include <cmath>
-double maxquad(const double & x0, const double & x1, const double & f0, const double & f1,
-  const double & g0, const double & stepmax)
+double maxquad(const double & x0, const double & x1, const double & f0,
+    const double & f1,
+    const double & g0, const double & stepmax)
 {
     double c,d,diff;
     diff=x1-x0;

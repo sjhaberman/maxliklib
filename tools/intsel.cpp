@@ -13,11 +13,11 @@ int intsel(const xsel & xselect, const int & i)
     int d;
     if(xselect.all)
     {
-         d = i;
+        d = i;
     }
     else
     {
-         d = xselect.list(i);
+        d = xselect.list(i);
     }
     return d;
 }

@@ -1,5 +1,6 @@
 //Inverse cumulative model for Gumbel, logistic, and normal cases.
-//cdf is 'G'for Gumbel, 'L' for logistic, and 'N' for normal.
+//cdf is 'G'for minimum Gumbel, 'H' for maximum Gumbel, 'L' for logistic,
+//and 'N' for normal.
 #include<armadillo>
 #define STATS_ENABLE_ARMA_WRAPPERS
 #include "stats.hpp"
@@ -25,23 +26,23 @@ f1v invcum(const char & cdf, const vec & probs)
          rr(i)=s/r;   
          switch (cdf)
          {
-            case 'G':
+             case 'G':
                  result.values(i)=log(-log(rr(i)));
                  ders(i)=rr(i)*exp(result.values(i));
                  continue;
 
-            case 'H':
+             case 'H':
                  q=1.0-rr(i);
                  result.values(i)=-log(-log(q));
                  ders(i)=q*exp(-result.values(i));
                  continue;
 
-            case 'N':
+             case 'N':
                  result.values(i)=stats::qnorm(rr(i),0.0,1.0);
                  ders(i)=normpdf(result.values(i));
                  continue;
 
-            default:
+             default:
                  q=1.0-rr(i);
                  result.values(i)=log(q/rr(i));
                  ders(i)=rr(i)*q;

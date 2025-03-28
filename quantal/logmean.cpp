@@ -14,8 +14,8 @@ struct f2v
 };
 struct resp
 {
-  ivec iresp;
-  vec dresp;
+    ivec iresp;
+    vec dresp;
 };
 f2v logmean(const int & order, const resp & y, const vec & beta)
 {

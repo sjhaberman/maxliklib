@@ -20,8 +20,8 @@ struct f2v
 };
 struct resp
 {
-  ivec iresp;
-  vec dresp;
+    ivec iresp;
+    vec dresp;
 };
 f2v loggamma(const int & order, const resp & y, const vec & beta)
 {
@@ -31,10 +31,10 @@ f2v loggamma(const int & order, const resp & y, const vec & beta)
     if(order>1) results.hess.set_size(2,2);
     if(min(beta)<=0.0)
     {
-      results.value=datum::nan;
-      if(order>0) results.grad.fill(datum::nan);
-      if(order>1) results.hess.fill(datum::nan);
-      return results;
+        results.value=datum::nan;
+        if(order>0) results.grad.fill(datum::nan);
+        if(order>1) results.hess.fill(datum::nan);
+        return results;
     }
     z=y.dresp(0);
     zz=exp(z);

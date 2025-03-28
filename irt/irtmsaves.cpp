@@ -13,31 +13,33 @@ struct f2v
 };
 struct model 
 {
-  char type;
-  char transform;
+    char type;
+    char transform;
 };
 struct resp
 {
-  ivec iresp;
-  vec dresp;
+    ivec iresp;
+    vec dresp;
 };
 //Select elements of vector.  all indicates all elements.  list lists elements.
 struct xsel
 {
-  bool all;
-  uvec list;
+    bool all;
+    uvec list;
 };
 //Specify a model.
 //choice is model distribution.
 //o is constant vector.
-//x is tranformation from beta elements used to lambda that does not involve theta.
-//c is transformation from beta elements used and theta double elements  used to lambda.
+//x is tranformation from beta elements used for
+//lambda that does not involve theta.
+//c is transformation from beta elements used and theta double elements
+//used for lambda.
 struct pattern
 {
-     model choice;
-     vec o;
-     mat x;
-     cube c;
+    model choice;
+    vec o;
+    mat x;
+    cube c;
 };
 // Weights and points for prior.
 struct pwr
@@ -61,7 +63,6 @@ struct pwrf2v
     double value;
     vec grad;
     mat hess;
-   
 };
 int intsel(const xsel & , const int & );
 int sintsel(const xsel & , const int & );
@@ -75,8 +76,8 @@ field<pwrf2v> irtmsave (const int & , const field<pattern> & ,
     const field<xsel> & , const xsel & ,
     const field<xsel> & , const xsel & ,
     const vec & , const xsel & , const vec & );
-//order is 0 if only values are found, 1 if gradient vectors are found, 2 if Hessian
-//matrices found.
+//order is 0 if only values are found, 1 if gradient vectors are found,
+//2 if Hessian matrices found.
 //patterns are possible response definitions.
 //patternnumber is vector of pattern numbers.
 //ipatno is number patno of patternnumber vector for observation i.
@@ -112,11 +113,14 @@ field<pwrf2v> irtmsave (const int & , const field<pattern> & ,
 //betasel is selection pattern of the parameter beta.
 //betaselno is the selection pattern of beta for observation i.
 //beta is the parameter vector.
-field<field<pwrf2v>> irtmsaves (const int & order, const field<pattern> & patterns, 
+field<field<pwrf2v>> irtmsaves (const int & order,
+    const field<pattern> & patterns,
     const field<xsel> & patternnumber, const xsel & patno,
-    const field<field<resp>> & data, const field<field <pwr>> & thetas, const xsel & thetano, 
-    field<dovecmat> & obsscale, 
-    const field<xsel> & selectbeta, const field<xsel> & selectbetano, const xsel & selbetano,
+    const field<field<resp>> & data, const field<field <pwr>> & thetas,
+    const xsel & thetano,
+    field<dovecmat> & obsscale,
+    const field<xsel> & selectbeta, const field<xsel> & selectbetano,
+    const xsel & selbetano,
     const field<xsel> & selectbetac, const field<xsel> & selectbetacno,
     const xsel & selbetacno,
     const field<xsel> & selectthetai, const field<xsel> & selectthetaino,
@@ -125,21 +129,21 @@ field<field<pwrf2v>> irtmsaves (const int & order, const field<pattern> & patter
     const xsel & selthetadno,
     const field<xsel> & selectthetac, const field<xsel> & selectthetacno,
     const xsel & selthetacno,
-    const field<vec> & w, const xsel & wno, const field<xsel> & obssel, const xsel & obsselno, 
+    const field<vec> & w, const xsel & wno, const field<xsel> & obssel,
+    const xsel & obsselno,
     const vec & obsweight, const xsel & datasel,
     const field<xsel> & betasel, const xsel & betaselno, const vec &  beta)
 {
     int dp, i, ibetasel, ii, iobssel, ip, ipat, iselbeta,
-        iselbetac, iselthetai, iselthetad, iselthetac, itheta, iw, m, n, nn, p, q, qq;
+        iselbetac, iselthetai, iselthetad, iselthetac, itheta, iw,
+        m, n, nn, p, q, qq;
     vec gamma;
     p=beta.n_elem;
     n=data.n_elem;
     nn=sintsel(datasel,n);
     field<field<pwrf2v>> results(nn);
     if(nn==0) return results;
-    
 // Observations to use.
-    
 //Enter individual observations and add.
     for(ii=0;ii<nn;ii++)
     {

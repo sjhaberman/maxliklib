@@ -21,11 +21,11 @@ vec pack(const vecmat & u)
         {
             if(j==i)
             {
-                 result(k)=u.m(i,j);
+                result(k)=u.m(i,j);
             }
             else
             {
-                 result(k)=2.0*u.m(i,j);
+                result(k)=2.0*u.m(i,j);
             }
             k=k+1;
         }

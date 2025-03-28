@@ -12,11 +12,11 @@ int sintsel(const xsel & xselect, const int & n)
     int d;
     if(xselect.all)
     {
-         d = n;
+        d = n;
     }
     else
     {
-         d = xselect.list.n_elem;
+        d = xselect.list.n_elem;
     }
     return d;
 }

@@ -32,12 +32,12 @@ pw qnormpwe(const int & n)
         {
             if(i==n1)
             {
-                 pws.points(n1)=z/xn;
-                 break;
+                pws.points(n1)=z/xn;
+                break;
             }
             else
             {
-                 pws.points(i)=(z-y)/xn;
+                pws.points(i)=(z-y)/xn;
             }
         }
         z=y;

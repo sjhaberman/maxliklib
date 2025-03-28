@@ -50,10 +50,10 @@ struct params
 };
 maxf2v maxf2vvar(const int & , const vec &,const f2v &);
 double modit(const double &, const double &, const double &,
-             const double &, const bounds & );
+    const double &, const bounds & );
 bounds rebound(const double &, const double &, const bounds & );
 double maxquad(const double & , const double & , const double & , const double & ,
-     const double & , const double & );
+    const double & , const double & );
 maxf2v maxlinq2(const int & order, const params & mparams, const vec & v,
     const maxf2v & vary0, const function<f2v(const int &, const vec &)>f)
 {

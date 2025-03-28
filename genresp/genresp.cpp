@@ -33,13 +33,13 @@ struct f2v
 };
 struct model
 {
-  char type;
-  char transform;
+   char type;
+   char transform;
 };
 struct resp
 {
-  ivec iresp;
-  vec dresp;
+   ivec iresp;
+   vec dresp;
 };
 f2v berresp(const int & , const char &, const resp &, const vec & );
 f2v contresp(const int & , const char & , const resp & , const vec & );
