@@ -8,15 +8,8 @@
 //of the Louis method.
 //patterns indicates full specification of models used for responses.
 //patternnumber connects data to model pattern.
-//theta provides supplemental variables often used in latent structure models.
 //selectbeta connects beta elements to matrix x of patterns.
 //selectbetano connects data to selectbeta elements.
-//selectbetac connects beta elements to cube c of patterns.
-//selectbetacno connects data to selectbetac elements.
-//selecttheta connects theta elements to response.
-//selectthetano connects data to selecttheta elements.
-//selectthetac connects theta elements to cube c of patterns.
-//selectthetacno connects data to selecttheta elements.
 //Weight w is used.
 //obssel indicates which observations to consider.
 //beta is parameter vector.
@@ -56,7 +49,6 @@ struct pattern
     model choice;
     vec o;
     mat x;
-    cube c;
 };
 f2v genresp(const int & , const model &, const resp &, const vec &);
 void addsel(const int & , const xsel & , const f2v & , f2v & , const double & );
@@ -67,14 +59,9 @@ vec vecsel(const xsel & , const vec & );
 int sintsel(const xsel & , const int & );
 int sivecsel(const xsel & , const ivec & );
 int svecsel(const xsel & , const vec & );
-mat cx(const cube & , const vec & );
 f2v genresplik(const int & order, const field<pattern> & patterns,
-    const xsel & patternnumber, const field<resp> & data, const resp & theta,
+    const xsel & patternnumber, const field<resp> & data,
     const field<xsel> & selectbeta, const xsel & selectbetano,
-    const field<xsel> & selectbetac, const xsel & selectbetacno,
-    const field<xsel> & selectthetai, const xsel & selectthetaino,
-    const field<xsel> & selectthetad, const xsel & selectthetadno,
-    const field<xsel> & selectthetac, const xsel & selectthetacno,
     const vec & w, const xsel & obssel, const vec & beta)
 {
 //Linear model parameter is gamma.
@@ -86,38 +73,23 @@ f2v genresplik(const int & order, const field<pattern> & patterns,
 //Log likelihood, gradient, and Hessian.
     f2v obsresults, linresults, results;
 //Counters and sizes.
-//dp is number of elements of theta.dresp.
-//dp1 is number of elements of theta.dresp to use.
 //i locates observations,
 //ii counts observations.
-//ip is number of elements of theta.iresp.
-//ip1 is number of elements of theta.iresp to use.
 //j locates patterns.
 //jj locates beta selections.
-//jjj locates beta selections for cubes.
 //k is dimension of lambda.
-//kc locates thetas for cubes.
-//kd locates double thetas.
-//ki locates int thetas.
 //n is total observation count.
 //nn counts observations  used.
 //order0 is for only values.
 //order1 is for values and gradients.
 //p is dimension of beta.
 //q is dimension of used part of beta.
-//qq is number of theta elements for cube.
-    int dp, dp1, i, ii, ip, ip1, j, jj, jjj, k, kc, kd, ki, kk, n, nn, order0 = 0, 
+    int i, ii, j, jj, k, kk, n, nn, order0 = 0,
         order1, p, q, qq;
-//Response from observation is response.
-    resp response;
 //Starting value for log likelihood.
     results.value = 0.0;
 //Number of elements of beta.
     p=beta.n_elem;
-//Number of elements of theta.iresp.
-    ip=theta.iresp.n_elem;
-//Number of elements of theta.dresp.
-    dp=theta.dresp.n_elem;
 //Number of observations.
     n=data.n_elem;
 //Set up results elements.
@@ -146,33 +118,6 @@ f2v genresplik(const int & order, const field<pattern> & patterns,
         j=intsel(patternnumber,i);
 //Beta selection to use.
         jj=intsel(selectbetano,i);
-        ip1=0;
-        if(ip>0)
-        {
-            ki=intsel(selectthetaino,i);
-            ip1=sivecsel(selectthetai(ki),theta.iresp);
-        }
-        dp1=0;
-        if(dp>0)
-        {
-            kd=intsel(selectthetadno,i);
-            dp1=svecsel(selectthetad(kd),theta.dresp);
-        }
-//No theta.
-        if(ip1+dp1==0)
-        {
-            response.iresp.copy_size(data(i).iresp);
-            response.iresp=data(i).iresp;
-            response.dresp.copy_size(data(i).dresp);
-            response.dresp=data(i).dresp;
-        }
-        else
-        {
-            response.iresp.set_size(ip1);
-            response.dresp.set_size(dp1);
-            if(ip1>0)response.iresp=ivecsel(selectthetai(ki),theta.iresp);
-            if(dp1>0)response.dresp=vecsel(selectthetad(kd),theta.dresp);
-        }
 //Now for predictors.
         k=patterns(j).o.n_elem;
         lambda.set_size(k);
@@ -180,41 +125,19 @@ f2v genresplik(const int & order, const field<pattern> & patterns,
         q=patterns(j).x.n_cols;
         if(q>0)
         {
-            indep.set_size(k,q);
-            indep=patterns(j).x;
             gamma.set_size(q);
             gamma=vecsel(selectbeta(jj),beta);
-            if(dp>0)
-            {
-                kc=intsel(selectthetacno,i);
-                qq=svecsel(selectthetac(kc),theta.dresp);
-                if(qq>0)
-                {
-                    t.set_size(qq);
-                    t=vecsel(selectthetac(kc),theta.dresp);
-                    jjj=intsel(selectbetacno,i);
-                    if(selectbetac(jjj).all)
-                    {
-                        indep=indep+cx(patterns(j).c,t);
-                    }
-                    else
-                    {
-                        indep.cols(selectbetac(jjj).list)
-                            =indep.cols(selectbetac(jjj).list)+cx(patterns(j).c,t);
-                    }
-                }
-            }
-            lambda=lambda+indep*gamma;
+            lambda=lambda+patterns(j).x*gamma;
         }
         if(order>0&&q>0)obsresults.grad.set_size(q);
         if(order>1&&q>0)obsresults.hess.set_size(q,q);
         if(q>0)
         {    
-            obsresults=genresp(order1, patterns(j).choice, response, lambda);
+            obsresults=genresp(order1, patterns(j).choice, data(i), lambda);
         }
         else
         {
-            obsresults=genresp(order0, patterns(j).choice, response, lambda);
+            obsresults=genresp(order0, patterns(j).choice, data(i), lambda);
         }
         if(!isfinite(obsresults.value))
         {
@@ -225,7 +148,7 @@ f2v genresplik(const int & order, const field<pattern> & patterns,
         }
         if(order>0)
         {
-            if(!is_finite(results.grad))
+            if(!results.grad.is_finite())
             {
                 results.value=datum::nan;
                 results.grad.fill(datum::nan);
@@ -235,7 +158,7 @@ f2v genresplik(const int & order, const field<pattern> & patterns,
         }
         if(order>1)
         {
-            if(!is_finite(results.hess))
+            if(!results.hess.is_finite())
             {
                 results.value=datum::nan;
                 results.grad.fill(datum::nan);
@@ -252,8 +175,8 @@ f2v genresplik(const int & order, const field<pattern> & patterns,
             if(order>2)obsresults.hess=-obsresults.grad*obsresults.grad.t();
             linresults.grad.set_size(q);
             if(order>1) linresults.hess.set_size(q,q);
-            linresults=linsel(order,obsresults,indep);
-            addsel(order,selectbeta(jj),linresults,results,w(i));  
+            linresults=linsel(order,obsresults,patterns(j).x);
+            addsel(order,selectbeta(jj),linresults,results,w(i));
         }
     }
     return results;

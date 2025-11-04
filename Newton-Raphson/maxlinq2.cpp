@@ -14,7 +14,7 @@
 //The maximum fraction of a step toward a boundary is
 //mparams.eta.
 //For secondary iterations, the improvement check
-//is mparams.gamma1<1.
+//is mparams.gamma1>1.
 //The largest permitted step length is mparams.kappa>0.
 #include<armadillo>
 using namespace std;

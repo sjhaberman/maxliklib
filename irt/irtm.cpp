@@ -72,11 +72,7 @@ struct dovecmat
 dovecmat fitquad(const field<f2v> & , const field<pwr> & , 
     const adq & , dovecmat & );
 f2v genresplik(const int & , const field<pattern> & ,
-    const xsel & , const field<resp> & , const resp & ,
-    const field<xsel> & , const xsel & ,
-    const field<xsel> & , const xsel & ,
-    const field<xsel> & , const xsel & ,
-    const field<xsel> & , const xsel & ,
+    const xsel & , const field<resp> & ,
     const field<xsel> & , const xsel & ,
     const vec & , const xsel & , const vec & );
 f2v irtm (const int & order, const field<pattern> & patterns, 
@@ -120,12 +116,8 @@ f2v irtm (const int & order, const field<pattern> & patterns,
     q=thetas.n_elem;
     if(q<1)
     {
-        results=genresplik(order1, patterns, patternnumber, data, dummy,
+        results=genresplik(order1, patterns, patternnumber, data,
             selectbeta, selectbetano,
-            selectbetac, selectbetacno,
-            selectthetai, selectthetaino,
-            selectthetad, selectthetadno,
-            selectthetac, selectthetacno,
             w, obssel, beta);
         return results;
     }
@@ -149,12 +141,9 @@ f2v irtm (const int & order, const field<pattern> & patterns,
         if(order>0)cresults(i).grad.set_size(m);
         if(order1>1)cresults(i).hess.set_size(m,m);
         weights(i)=newthetas(i).weight/newthetas(i).kernel;
-        cresults(i)=genresplik(order1, patterns, patternnumber, data, newthetas(i).theta,
+        cresults(i)=genresplik(order1, patterns, patternnumber, data,
             selectbeta, selectbetano,
             selectbetac, selectbetacno,
-            selectthetai, selectthetaino,
-            selectthetad, selectthetadno,
-            selectthetac, selectthetacno,
             w, obssel, beta);
         if(!isfinite(cresults(i).value))
         {

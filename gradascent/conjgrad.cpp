@@ -13,8 +13,8 @@
 //The maximum fraction of a step toward a boundary is
 //mparams.eta.
 //For secondary iterations, the improvement check
-//is mparams.gamma1<1.
-//The cosine check is mparams.gamma2<1.
+//is mparams.gamma2>1.
+//The cosine check is mparams.gamma1<1.
 //The largest permitted step length is mparams.kappa>0.
 //If a main iteration leads to a change of the function f less
 //than mparams.tol, then iterations cease.
@@ -84,7 +84,7 @@ maxf2v conjgrad(const int & order, const params & mparams, const vec & start, co
         if(!any(v1)) return vary0;
         if(i>0)
         {
-            tau=dot(v1-v2,v1)/dot(v1,v1);
+            tau=dot(v1-v2,v1)/dot(v2,v2);
             v=v1+tau*v;
 // Check for acceptable direction.
             if(dot(v,v1)<mparams.gamma2*norm(v,2)*norm(v1,2))v=v1;

@@ -21,8 +21,8 @@
 //The maximum fraction of a step toward a boundary is
 //mparams.eta.
 //For secondary iterations, the improvement check
-//is mparams.gamma1<1.
-//The cosine check is mparams.gamma2<1.
+//is mparams.gamma2>1.
+//The cosine check is mparams.gamma1<1.
 //The largest permitted step length is mparams.kappa>0.
 //If a main iteration leads to a change of the function f less
 //than mparams.tol, then iterations cease.

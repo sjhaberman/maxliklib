@@ -1,7 +1,16 @@
-//Produce vectors of missing data.
+//Produce vectors of available observations.
+//dataf gives observations.
+//vltab gives basic data on individual variables,
+//and vardefs gives data on final variables for analysis.
+//observed variables are used.
 #include<armadillo>
 using namespace arma;
 using namespace std;
+struct xsel
+{
+    bool all;
+    uvec list;
+};
 struct vn
 {
     vector<string>varnames;
@@ -9,122 +18,185 @@ struct vn
 };
 struct varlocs
 {
-    vector<string>catnames;
     vector<int> forms;
-    vec offset;
     vector<int> positions;
-    vector<string> preds;
-    char type;
-    char transform;
-    mat transition;
     string varname;
 };
-//Result is vector of vectors of integers with one vector of integers equal 0 or 1
-//for each observation, and that vector of integers with one element for each
-//variable used, with 0 for missing and 1 for present.
-vector<vector<int>>obspat(const vector<vn>&dataf,const vector<varlocs>&vartab,
-    const vector<int> & obsvar )
+struct vardef
+{
+    vector<string>catnames;
+    xsel constant;
+    xsel deg1;
+    xsel full;
+    vec o;
+    bool obs;
+    vector<string> preds;
+    vector<vector<varlocs>::iterator> predits;
+    char transform;
+    char type;
+    string vardefname;;
+    vector<string>varname;
+    vector<vector<varlocs>::iterator> varnameit;
+};
+bool vdefsort(pair<vector<vardef>::const_iterator,bool> & a,
+    pair<vector<vardef>::const_iterator,bool> & b) {return ((a.first)->vardefname<(b.first)->vardefname);};
+bool validitycheck(const vardef & , const vector<double> & );
+//Result is vector of pairs with first element a vector that provides the
+//sequence numbers of variables presented and the the second element the sequence number of the observation.
+vector<pair<vector<int>,int>> obspat(const vector<vn> & dataf, const vector<varlocs> & vltab, const vector<vardef> & vardefs)
 {
 //n is number of observations.
-//m is number of variables.
+//m is number of observed variables.
+//mm ia maximum  possible number of variables on a form.
 //f is number of forms.
 //i is an index for observations.
 //j is an index for variables.
-//k is an index for forms.
+//k is an index for position.
 //q is an index for observations within forms.
-//h is a variable position.
-//r is a number of categories.
-    int f, h, i, j, k, m, n, q, r;
-//Result is vector of vectors of integers with 0 for missing and 1 for present.
-    m=vartab.size();
-    n=0;
+//r is an index for index within forms vector.
+//s and t are distance measures
+    int formno=0, f, h, i, j, k, m, n=0, q, r, s, t;
+    vector<vardef>::const_iterator vardefit, vardefit1;
+    pair<vector<pair<vector<vardef>::const_iterator,bool>>::iterator,
+        vector<pair<vector<vardef>::const_iterator,bool>>::iterator> resultedp;
+    vector<varlocs>::iterator vartabit;
+    vector<vector<varlocs>::iterator>::const_iterator vartabit1;
+//Maximum variable count on a form.
     f=dataf.size();
+//mm is maximum possible number of observed variables on a form.
+    vector<int>mm(f,0);
+//mmit is used to iterate over mm.
+    vector<int>::iterator mmit;
+//formit iterates over forms within a variable table.
+    vector<int>::const_iterator formit;
+//vtabdef provides a mapping from vartab  to vardefs for observed variables.
+    map<vector<varlocs>::iterator,vector<vardef>::const_iterator> vtabdef;
+    for(vardefit=vardefs.cbegin();vardefit!=vardefs.cend();++vardefit)
+    {
+        vartabit=*vardefit->varnameit.cbegin();
+        for(vartabit1=vardefit->varnameit.cbegin();vartabit1!=vardefit->varnameit.cend();++vartabit1)
+            vtabdef.insert({*vartabit1,vardefit});
+        if((vardefit->obs)&(vardefit->transform!='W')&(vardefit->transform!='I'))
+        {
+            for(formit=vartabit->forms.cbegin();formit!=vartabit->forms.cend();++formit)mm[*formit]++;
+        }
+        else{
+            for(mmit=mm.begin();mmit!=mm.end();++mmit)(*mmit)++;
+        }
+    }
+//datafit is used to iterate over forms.
     vector<vn>::const_iterator datafit;
     for(datafit=dataf.cbegin();datafit!=dataf.cend();++datafit)n+=datafit->vars.n_rows;
-    vector<vector<int>> result(n);
-    vector<vector<int>>::iterator resultit;
-    vector<varlocs>::const_iterator vartabit;
-    vector<int>::const_iterator obsvarit;
-    vector<int>::const_iterator formit;
-    vector<int>::const_iterator posit;
-    vector<int>::iterator presentit;
-    vector<vector<int>>formtable(m),postable(m);
-    vector<vector<int>>::iterator formtableit,postableit;
-    string name;
-    double x;
-//Go over forms.
-    formtableit=formtable.begin();
-    postableit=postable.begin();
-    obsvarit=obsvar.cbegin();
-    for(vartabit=vartab.begin();vartabit!=vartab.end();++vartabit)
+//result contains results of analysis.
+    vector<pair<vector<int>,int>> result(n);
+//resultit is used to iterate over result.
+    vector<pair<vector<int>,int>>::iterator resultit;
+//resulted is used for tentative results.
+    vector<pair<vector<vardef>::const_iterator,bool>> resulted;
+    pair<vector<vardef>::const_iterator,bool> resulted1;
+    vector<pair<vector<vardef>::const_iterator,bool>>:: iterator resultedit, resultedit1;
+    i=0;
+    for(resultit=result.begin();resultit!=result.end();++resultit)
     {
-        formtableit->resize(f);
-        postableit->resize(f);
-        std::fill(formtableit->begin(),formtableit->end(),0);
-        posit=vartabit->positions.cbegin();
-        for(formit=vartabit->forms.cbegin();formit!=vartabit->forms.cend();++formit)
-        {
-            (*formtableit)[*formit]=*obsvarit;
-            (*postableit)[*formit]=*posit;
-            ++posit;
-        }
-        ++formtableit;
-        ++postableit;
-        ++obsvarit;
+        resultit->second=i;
+        i++;
     }
-    k=0;
+//resultit1 iterates over first component of result.
+    vector<int>::iterator resultit1;
+//Variable name used in search.
+    string name;
+//Value of observed variable.
+    vector<double> x;
+    vector<double>::iterator xit;
+//Control flags.
+    bool flag, flag1;
+//Go over observations to indicate which variables are observed and valid.
     resultit=result.begin();
-    i=0;        
+    pair<vector<int>::const_iterator,vector<int>::const_iterator> formp;
+//Loop over forms.
+    mmit=mm.begin();
     for(datafit=dataf.cbegin();datafit!=dataf.cend();++datafit)
     {
-//Skip if form has no data.
-        if(datafit->vars.n_rows==0)continue;
-//Within forms, go over observations.
+//Within forms, go over observations.  q is position of observation within form.
         for(q=0;q<datafit->vars.n_rows;q++)
         {
-            resultit->resize(m+1); 
-//Initialize as all zeros.
-            std::fill(resultit->begin(),resultit->end(),0);
-//Add observation number.
-            (*resultit)[m]=i;
-//Set if item on form and used.
-            formtableit=formtable.begin();
-            postableit=postable.begin();
-            presentit=resultit->begin();
-            j=0;
-            for(vartabit=vartab.cbegin();vartabit!=vartab.cend();++vartabit)
+//Maximum number of observations on form.
+            resulted.resize(*mmit);
+            resultedit=resulted.begin();
+            for(vardefit=vardefs.cbegin();vardefit!=vardefs.cend();++vardefit)
             {
-                if((*formtableit)[k]==1)
+                if((vardefit->transform=='I')|(vardefit->transform=='W'))continue;
+                if(vardefit->obs)
                 {
-                    h=(*postableit)[k];
-//If item on form and used, see if observed and valid.
-                    x=datafit->vars(q,h);
-//First issue is whether item observed at all.
-                    if(isfinite(x))
+                    vartabit=*vardefit->varnameit.cbegin();
+                    formp=equal_range(vartabit->forms.cbegin(),vartabit->forms.cend(),formno);
+                    if(formp.first<vartabit->forms.cend())
                     {
-//See if item is categorical but not within bounds.
-                        r=vartabit->catnames.size();
-                        if(r==0||(x==floor(x)&&x<(double)r&&x>=0.0))
+                        r=distance(vartabit->forms.cbegin(),formp.first);
+                        x.resize(vardefit->varnameit.size());
+                        xit=x.begin();
+                        for(vartabit1=vardefit->varnameit.cbegin();vartabit1!=vardefit->varnameit.cend();++vartabit1)
                         {
-//See if item is Poisson but not a nonnegative integer.
-                            if(vartabit->type!='P'||(x==floor(x)&&x>=0.0))
-                            {
-//Mark item as observed and valid.
-                                *presentit=1;
-                            }
+                            vartabit=*vartabit1;
+                            k=vartabit->positions[r];
+                            *xit=datafit->vars(q,k);
+                            ++xit;
+                        }
+                        flag=validitycheck(*vardefit, x);
+//Break if any component invalid.
+                        if(!flag)continue;
+                    }
+                }
+                (*resultedit).first=vardefit;
+                (*resultedit).second=true;
+                ++resultedit;
+            }
+            s=distance(resulted.begin(),resultedit);
+            resulted.resize(s);
+//Eliminate variables with missing predictors.
+            for(j=0;j<=s;j++)
+            {
+                flag1=true;
+                t=0;
+                for(resultedit=resulted.begin();resultedit!=resulted.end();++resultedit)
+                {
+                    vardefit=(*resultedit).first;
+                    if((*resultedit).second)t++;
+                    if(!vardefit->predits.empty()&(*resultedit).second)
+                    {
+                        for(vartabit1=vardefit->predits.cbegin();vartabit1!=vardefit->predits.cend();++vartabit1)
+                        {
+                            vardefit1=vtabdef[*vartabit1];
+                            resulted1.first=vardefit1;
+                            resulted1.second=true;
+                            if(binary_search(resulted.begin(),resulted.end(),resulted1))continue;
+                            (*resultedit).second=false;
+                            flag1=false;
+                            break;
                         }
                     }
-                }                    
-                ++presentit;
-                ++formtableit;
-                ++postableit;
-                j++;     
+                }
+                ++resultedit;
+                if(flag1)break;
             }
-//Update observation.
+//All is stable.
+            resultit->first.resize(t);
+            if(t>0)
+            {
+                resultit1=resultit->first.begin();
+                for(resultedit=resulted.begin();resultedit!=resulted.end();++resultedit)
+                {
+                    vardefit=(*resultedit).first;
+                    if((*resultedit).second)
+                    {
+                        *resultit1=distance(vardefs.cbegin(),vardefit);
+                        ++resultit1;
+                    }
+                }
+            }
             ++resultit;
-            i++;
         }
-        k++;
+        ++mmit;
     }
     return result;
 }

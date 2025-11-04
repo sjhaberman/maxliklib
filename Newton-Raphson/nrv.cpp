@@ -12,8 +12,8 @@
 //The maximum fraction of a step toward a boundary is
 //mparams.eta.
 //For secondary iterations, the improvement check
-//is mparams.gamma1<1.
-//The cosine check  is mparams.gamma2.
+//is mparams.gamma2>1.
+//The cosine check  is mparams.gamma1<1.
 //The largest permitted step length is mparams.kappa>0.
 //If a main iteration leads to a change of the function f less
 //than mparams.tol, then iterations cease.
@@ -70,7 +70,7 @@ maxf2v nrv(const int & order, const params & mparams, const vec & start,
     fy0=f(order, v);
     vary0=maxf2vvar(order, v, fy0);
 // Return if starting impossible.
-    if(isnan(vary0.max)||mparams.maxit<=0) return vary0;
+    if(!isfinite(vary0.max)||mparams.maxit<=0) return vary0;
 // Iterations.
     for(i=0;i<mparams.maxit;i++)
     {
@@ -80,7 +80,7 @@ maxf2v nrv(const int & order, const params & mparams, const vec & start,
         if ((-vary0.hess).is_sympd())
         {
             v=solve(-vary0.hess,vary0.grad);
-            if(dot(v,vary0.grad)<mparams.gamma1*norm(v,2)*norm(vary0.grad,2))v=vary0.grad;
+            if(dot(v,vary0.grad)<mparams.gamma2*norm(v,2)*norm(vary0.grad,2))v=vary0.grad;
         }
         else
         {

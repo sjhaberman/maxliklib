@@ -33,11 +33,12 @@ f2 normal(const int & , const double & );
 f2v contresp(const int & order, const char & transform, const resp & y,
     const vec &  beta)
 {
-    double z,zz;
+    double z,zz,z1,z2;
     f2 result;
     f2v results;
     zz=exp(beta(1));
-    z=beta(0)+zz*y.dresp(0);
+    z1=zz*y.dresp(0);
+    z=beta(0)+z1;
     if(order>0) results.grad.set_size(2);
     if(order>1) results.hess.set_size(2,2);
     switch (transform)
@@ -57,14 +58,15 @@ f2v contresp(const int & order, const char & transform, const resp & y,
     if(order>0)
     {
         results.grad(0)=result.der;
-        results.grad(1)=zz*y.dresp(0)*result.der+1.0;
+        z2=z1*result.der;
+        results.grad(1)=z2+1.0;
     }
     if(order>1)
     {
         results.hess(0,0)=result.der2;
-        results.hess(1,0)=zz*y.dresp(0)*result.der2;
+        results.hess(1,0)=z1*result.der2;
         results.hess(0,1)=results.hess(1,0);
-        results.hess(1,1)=zz*y.dresp(0)*(result.der+results.hess(0,1));
+        results.hess(1,1)=z2+z1*results.hess(0,1);
     }
     return results;
 }

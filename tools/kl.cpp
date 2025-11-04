@@ -1,6 +1,7 @@
 //Function to maximize when finding minimum discriminant information
 //adjustment of a polytomous variable with vector p of s positive probabilities
-//to a vector q with s positive probabilities such that u=sum(T*q) for an r by s matrix T
+//to a vector q with s positive probabilities such that u=sum(T*q)
+//for an r by s matrix T
 //and a given vector u of dimension r.
 #include<armadillo>
 using namespace arma;

@@ -52,26 +52,17 @@ struct pattern
     model choice;
     vec o;
     mat x;
-    cube c;
 };
 maxf2v maxselect(const int &, const params & , const char & , const vec & ,
     const function<f2v(const int & , const vec & )> f);
 f2v genresplik(const int & , const field<pattern> & ,
-    const xsel & , const field<resp> & , const resp & ,
-    const field<xsel> & , const xsel & ,
-    const field<xsel> & , const xsel & ,
-    const field<xsel> & , const xsel & ,
-    const field<xsel> & , const xsel & ,
+    const xsel & , const field<resp> & ,
     const field<xsel> & , const xsel & ,
     const vec & , const xsel & , const vec & );
 maxf2v genrespmle(const int & order, const params & mparams,
     const char & algorithm, const field<pattern> & patterns,
-    const xsel & patternnumber, const field<resp> & data, const resp & theta,
+    const xsel & patternnumber, const field<resp> & data,
     const field<xsel> & selectbeta, const xsel & selectbetano,
-    const field<xsel> & selectbetac, const xsel & selectbetacno,
-    const field<xsel> & selectthetai, const xsel & selectthetaino,
-    const field<xsel> & selectthetad, const xsel & selectthetadno,
-    const field<xsel> & selectthetac, const xsel & selectthetacno,
     const vec & w, const xsel & obssel, const vec & start)
 {
     maxf2v results;
@@ -80,19 +71,13 @@ maxf2v genrespmle(const int & order, const params & mparams,
     results.locmax.set_size(p);
     results.grad.set_size(p);
     const function<f2v(const int & order,const vec & start)>f=
-        [&patterns,&patternnumber,&data,&theta,
-        &selectbeta,&selectbetano,&selectbetac,&selectbetacno,
-        &selectthetai,&selectthetaino,&selectthetad,&selectthetadno,
-        &selectthetac,&selectthetacno,
+        [&patterns,&patternnumber,&data,
+        &selectbeta,&selectbetano,
         &w,&obssel]
         (const int & order,const vec & start)
         {return genresplik(order, patterns,
-        patternnumber, data, theta,
+        patternnumber, data,
         selectbeta, selectbetano,
-        selectbetac, selectbetacno,
-        selectthetai, selectthetaino,
-        selectthetad, selectthetadno,
-        selectthetac, selectthetacno,
         w, obssel, start);};
     results=maxselect(order, mparams, algorithm, start, f);
     return results;
