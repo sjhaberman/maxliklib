@@ -35,7 +35,7 @@ f2v gammad(const int & order, const resp & y, const vec & beta)
     if(order>1) results.hess.set_size(2,2);
     z=log(y.dresp(0));
     zz=y.dresp(0);
-    results.value=g(1)*(z+beta(0))-g(0)*zz-lgamma(g(1));
+    results.value=g(1)*(z+beta(0))-z-g(0)*zz-lgamma(g(1));
     if(order>0)
     {
         results.grad(0)=g(1)-g(0)*zz;

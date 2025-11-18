@@ -34,7 +34,7 @@ f2v dirichlet(const int & order, const resp & y, const vec & beta)
     if(order>0) results.grad.set_size(q);
     if(order>1) results.hess.set_size(q,q);
     zz=sum(z);
-    results.value=dot(z,yy)+lgamma(zz);
+    results.value=dot(z,yy)-sum(yy)+lgamma(zz);
     for(i=0;i<q;i++) results.value=results.value-lgamma(z(i));
     if(order>0)
     {

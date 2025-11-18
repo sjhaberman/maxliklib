@@ -139,7 +139,7 @@ f2v genresplik(const int & order, const field<pattern> & patterns,
         {
             obsresults=genresp(order0, patterns(j).choice, data(i), lambda);
         }
-        if(!isfinite(obsresults.value))
+        if(isnan(obsresults.value))
         {
             results.value=datum::nan;
             if(order>0)results.grad.fill(datum::nan);

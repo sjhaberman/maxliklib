@@ -18,7 +18,9 @@ struct resp
     ivec iresp;
     vec dresp;
 };
-mat lscore(const int & );
+mat ldscore(const int & );
+f2v linsel(const int & , const f2v & , const mat & );
+f2v nanf2v(const int & , const f2v & );
 f2v gradresp(const int & , const char & t, const resp & , const vec & );
 f2v lgradresp(const int & order, const char & transform ,
              const resp & y, const vec & beta)
@@ -28,7 +30,7 @@ f2v lgradresp(const int & order, const char & transform ,
     r=beta.n_elem;
     vec gamma(r-1);
     mat ls(r-1,r);
-    ls=lscore(r);
+    ls=ldscore(r);
     gamma=ls*beta;
     if(order>0)
     {
@@ -40,9 +42,15 @@ f2v lgradresp(const int & order, const char & transform ,
         results.hess.set_size(r,r);
         result.hess.set_size(r-1,r-1);
     }
-    result=gradresp(order,transform, y, gamma);
-    results.value=result.value;
-    if(order>0)results.grad=ls.t()*result.grad;
-    if(order>1)results.hess=ls.t()*result.hess*ls;
+//Check for unacceptable gamma.
+    if(r>2)
+    {
+        if(max(diff(gamma))>=0.0){
+            results=nanf2v(order,results);
+            return results;
+        }
+    }
+    result=gradresp(order,transform,y,gamma);
+    results=linsel(order,result,ls);
     return results;
 }

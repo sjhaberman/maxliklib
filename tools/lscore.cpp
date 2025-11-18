@@ -1,4 +1,4 @@
-//Matrix for intercepts and slope.  Key is input dimension.
+//Matrix for intercepts and slope.  k is input dimension.
 #include<armadillo>
 using namespace arma;
 mat lscore(const int & k)

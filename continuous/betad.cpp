@@ -32,7 +32,7 @@ f2v betad(const int & order, const resp & y, const vec & beta)
     z0=exp(beta(0));
     z1=exp(beta(1));
     zz=z0+z1;
-    results.value=z0*y0+z1*y1+lgamma(zz)-lgamma(z0)-lgamma(z1);
+    results.value=(z0-1.0)*y0+(z1-1.0)*y1+lgamma(zz)-lgamma(z0)-lgamma(z1);
     if(order>0)
     {
        dz=digamma(zz);
