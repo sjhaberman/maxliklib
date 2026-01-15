@@ -1,5 +1,6 @@
 //Log likelihood component, gradient, and Hessian
-//for cumulative model with response y and parameter beta.
+//for cumulative model with response y<=n  and parameter beta with
+//elements beta(j) for j<n.
 //Choice of tranformation is determined by transform, with 'G' for
 //complementary log-log, 'H' for log-log,
 //'L' for logit, and 'N' for probit.  If order is 0, only the function is
@@ -32,14 +33,12 @@ f2v cumresp(const int & order, const char & transform, const resp & y,
     results.value=0.0;
     if(order>0)
     {
-        results.grad.set_size(n);
-        results.grad.zeros();
+        results.grad.zeros(n);
         resultp.grad.set_size(1);
     }
     if(order>1)
     {
-        results.hess.set_size(n,n);
-        results.hess.zeros();
+        results.hess.zeros(n,n);
         resultp.hess.set_size(1,1);
     }
     for(i=0;i<n;i++)

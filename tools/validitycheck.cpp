@@ -16,13 +16,11 @@ struct varlocs
 struct vardef
 {
     vector<string>catnames;
-    xsel constant;
-    xsel deg1;
-    xsel full;
     vec o;
     bool obs;
-    vector<string> preds;
     vector<vector<varlocs>::iterator> predits;
+    vector<string> preds;
+    vector<mat> predweights;
     char transform;
     char type;
     string vardefname;

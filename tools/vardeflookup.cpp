@@ -16,28 +16,26 @@ struct varlocs
 struct vardef
 {
     vector<string>catnames;
-    xsel constant;
-    xsel deg1;
-    xsel full;
     vec o;
     bool obs;
-    vector<string> preds;
     vector<vector<varlocs>::iterator> predits;
+    vector<string> preds;
+    vector<mat> predweights;
     char transform;
     char type;
-    string vardefname;;
+    string vardefname;
     vector<string>varname;
     vector<vector<varlocs>::iterator> varnameit;
 };
 bool vdefsort(const vardef & a,const vardef & b);
-vector<vardef>::const_iterator vardeflookup(const string & name,
-    const vector<vardef>&vardefs)
+vector<vardef>::iterator vardeflookup(const string & name,
+    vector<vardef>&vardefs)
 {
     vardef vaname;
     vaname.vardefname=name;
-    pair<vector<vardef>::const_iterator,vector<vardef>::const_iterator> it;
-    it=equal_range(vardefs.cbegin(),vardefs.cend(),vaname,vdefsort);
-    if(it.first==vardefs.cend()) return it.first;
-    if(next(it.first,1)!=it.second) return vardefs.cend();
+    pair<vector<vardef>::iterator,vector<vardef>::iterator> it;
+    it=equal_range(vardefs.begin(),vardefs.end(),vaname,vdefsort);
+    if(it.first==vardefs.end()) return it.first;
+    if(next(it.first,1)!=it.second) return vardefs.end();
     return it.first;
 }

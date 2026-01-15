@@ -52,28 +52,15 @@ maxf2v gradascent(const int & order, const params & mparams, const vec & start,
     const function<f2v(const int &, const vec &)> f)
 {
     f2v fy0;
-    int i, p;
+    int i;
     maxf2v vary0, vary1;
     vec v;
-    p=start.n_elem;
-    fy0.grad.set_size(p);
-    vary0.grad.set_size(p);
-    vary0.locmax.set_size(p);
-    vary1.grad.set_size(p);
-    vary1.locmax.set_size(p);
-    if(order>1)
-    {
-        fy0.hess.set_size(p,p);
-        vary0.hess.set_size(p,p);
-        vary1.hess.set_size(p,p);
-    }
-    v.set_size(p);
     v=start;
 // Function settings at start.
     fy0=f(order, v);
     vary0=maxf2vvar(order, start, fy0);
 // Return if starting impossible.
-    if(!isfinite(vary0.max)||mparams.maxit<=0) return vary0;
+    if(isnan(vary0.max)||mparams.maxit<=0) return vary0;
 // Iterations.
     for(i=0;i<mparams.maxit;i++)
     {

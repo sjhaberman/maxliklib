@@ -74,26 +74,13 @@ maxf2v maxlinq2(const int & order, const params & mparams, const vec & v,
     vec y0, y1, y2, y3;
     maxf2v  vary1, vary2, vary3;
 //  i counts secondary iterations.
-    int i,p;
-    p=v.n_elem;
-    y0.set_size(p);
-    y1.set_size(p);
-    y2.set_size(p);
-    y3.set_size(p);
-    vary1.locmax.set_size(p);
-    vary1.grad.set_size(p);
-    if(order>1) vary1.hess.set_size(p,p);
+    int i;
     vary1.max=vary0.max;
     vary1.locmax=vary0.locmax;
     vary1.grad=vary0.grad;
     if(order>1) vary1.hess=vary0.hess;
-    vary2.locmax.set_size(p);
-    vary2.grad.set_size(p);
-    if(order>1) vary2.hess.set_size(p,p);
-    fy2.grad.set_size(p);
-    if(order>1) fy2.hess.set_size(p,p);
 // Stuck if starting value out of domain.
-    if(!isfinite(vary0.max)) return vary1;
+    if(isnan(vary0.max)) return vary1;
 //  Start at 0 and 1.
     alpha1=0.0;
 // Find maximum step size stepmax for line.
@@ -109,7 +96,7 @@ maxf2v maxlinq2(const int & order, const params & mparams, const vec & v,
 // b.upper is upper bound for location of maximum.
     b.upper=INFINITY;
 // modify bounds if needed so that alpha2 in range.
-    while(!isfinite(fy2.value))
+    while(isnan(fy2.value))
     {
         b.upper=alpha2;
         alpha2=(1.0-mparams.eta)*alpha1+mparams.eta*alpha2;

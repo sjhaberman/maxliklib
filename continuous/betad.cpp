@@ -1,6 +1,6 @@
 //Log likelihood component and its gradient and hessian matrix
-//for beta model with response y and parameter vector beta
-//with elements beta(0) and beta(1).  If order is 0,
+//for beta model with response y and parameter vector
+//with elements exp(beta(0)) and exp(beta(1)).  If order is 0,
 //only the function is
 //found, if order is 1, then the function and gradient are found.
 //If order is 2,

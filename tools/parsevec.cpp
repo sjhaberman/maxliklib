@@ -1,23 +1,24 @@
-//Divide r-separated string into string components.
+//Divide r-separated string into double-precision components.
 #include<armadillo>
 #include<string.h>
 using namespace std;
 using namespace arma;
-vector<string>parse(const string & v, const char & r)
+vec parsevec(const string & v, const char & r)
 {
-    vector<string> results;
+    vector<double> results;
     size_t fcount, m;
     string v1;
     fcount=count(v.begin(),v.end(),r);
     results.resize(fcount+1);
-    vector<string>::iterator resultsit;
+    vector<double>::iterator resultsit;
     v1=v;
     for(resultsit=results.begin();resultsit!=results.end();++resultsit)
     {
         m=v1.find(r);
         if(m==string::npos)
         {
-            *resultsit=v1;
+            try{*resultsit=stod(v1);}
+            catch(...){*resultsit=datum::nan;}
         }
         else
         {
@@ -27,7 +28,8 @@ vector<string>parse(const string & v, const char & r)
                 results.clear();
                 return results;
             }
-            *resultsit=v1.substr(0,m);
+            try{*resultsit=stod(v1.substr(0,m));}
+            catch(...){*resultsit=datum::nan;};
             v1=v1.substr(m+1);
         }
     }

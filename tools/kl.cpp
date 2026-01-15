@@ -25,13 +25,7 @@ f2v kl(const int & order, const vec & p, const mat & T, const vec & u, const vec
 {
     f2v results;
     double c;
-    int r, s;
-    r=p.n_elem;
-    s=gamma.n_elem;
-    if(order>0) results.grad.set_size(s);
-    if(order>1) results.hess.set_size(s,s);
-    vec q(r);
-    q=T*gamma;
+    vec q=T*gamma;
     q=p%exp(q);
     c=sum(q);
     q=q/c;
@@ -39,12 +33,8 @@ f2v kl(const int & order, const vec & p, const mat & T, const vec & u, const vec
     if(order>0)
     {
         vecmat wx,wy;
-        wx.v.set_size(r);
         wx.v=q;
-        wy.v.set_size(s);
-        wx.m.set_size(r,s);
         wx.m=T;
-        if(order>1)wy.m.set_size(s,s);
         wy=wmc(order,wx);
         results.grad=u-wy.v;
         if(order>1)results.hess=-wy.m;

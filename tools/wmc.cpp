@@ -16,14 +16,12 @@ vecmat wmc(const int & order, const vecmat & wx)
     n=wx.m.n_cols;
     vecmat result;
 //Column vector of weighted means;
-    result.v.set_size(n);  
     result.v=trans(wx.m)*wx.v;
     if(order>1)
     {
-        result.m.set_size(n,n);
 //t is matrix of residuals.
 //u is matrix of residuals by weights.
-        mat t(m,n),u(m,n);
+        mat t(size(wx.m)),u(size(t));
         t=wx.m.each_row()-trans(result.v);
         u=wx.v%t.each_col();
 //Weighted covariance matrix.

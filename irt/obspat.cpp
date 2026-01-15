@@ -25,21 +25,17 @@ struct varlocs
 struct vardef
 {
     vector<string>catnames;
-    xsel constant;
-    xsel deg1;
-    xsel full;
     vec o;
     bool obs;
-    vector<string> preds;
     vector<vector<varlocs>::iterator> predits;
+    vector<string> preds;
+    vector<mat> predweights;
     char transform;
     char type;
-    string vardefname;;
+    string vardefname;
     vector<string>varname;
     vector<vector<varlocs>::iterator> varnameit;
 };
-bool vdefsort(pair<vector<vardef>::const_iterator,bool> & a,
-    pair<vector<vardef>::const_iterator,bool> & b) {return ((a.first)->vardefname<(b.first)->vardefname);};
 bool validitycheck(const vardef & , const vector<double> & );
 //Result is vector of pairs with first element a vector that provides the
 //sequence numbers of variables presented and the the second element the sequence number of the observation.

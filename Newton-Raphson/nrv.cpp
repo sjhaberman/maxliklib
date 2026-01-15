@@ -52,25 +52,14 @@ maxf2v nrv(const int & order, const params & mparams, const vec & start,
     const function<f2v(const int &, const vec &)> f)
 {
     f2v fy0;
-    int i, p;
-    p=start.n_elem;
-    fy0.grad.set_size(p);
-    fy0.hess.set_size(p,p);
+    int i;
     maxf2v vary0,vary1;
-    vary0.grad.set_size(p);
-    vary0.locmax.set_size(p);
-    vary0.hess.set_size(p,p);
-    vary1.grad.set_size(p);
-    vary1.locmax.set_size(p);
-    vary1.hess.set_size(p,p);
-    vec v;
-    v.set_size(p);
 // Function settings at start.
-    v=start;
+    vec v=start;
     fy0=f(order, v);
     vary0=maxf2vvar(order, v, fy0);
 // Return if starting impossible.
-    if(!isfinite(vary0.max)||mparams.maxit<=0) return vary0;
+    if(isnan(vary0.max)||mparams.maxit<=0) return vary0;
 // Iterations.
     for(i=0;i<mparams.maxit;i++)
     {

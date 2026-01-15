@@ -4,21 +4,19 @@ using namespace arma;
 using namespace std;
 struct varlocs
 {
-    vector<string>catnames;
     vector<int> forms;
-    vec offset;
     vector<int> positions;
-    vector<string> preds;
-    char type;
-    char transform;
-    mat transition;
     string varname;
 };
-vector<varlocs>::iterator varlookup(const string & name, vector<varlocs>&vartab)
+bool varlocsort(const varlocs & a, const varlocs & b);
+vector<varlocs>::iterator varlookup(const string & name,
+    vector<varlocs>&vartab)
 {
-    const function <bool(const varlocs & v)>f=[&name](const varlocs & v)
-       {return (v.varname==name);};
-    vector<varlocs>::iterator it;
-    it=find_if(vartab.begin(),vartab.end(),f);
-    return it;
+    varlocs vaname;
+    vaname.varname=name;
+    pair<vector<varlocs>::iterator,vector<varlocs>::iterator> it;
+    it=equal_range(vartab.begin(),vartab.end(),vaname,varlocsort);
+    if(it.first==vartab.end()) return it.first;
+    if(next(it.first,1)!=it.second) return vartab.end();
+    return it.first;
 }

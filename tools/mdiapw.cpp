@@ -13,6 +13,7 @@ struct maxf2v
 {
     vec locmax;
     double max;
+    
     vec grad;
     mat hess;
 };
@@ -27,24 +28,16 @@ struct params
     double kappa;
     double tol;
 };
-maxf2v mdia(const vec & p, const mat & T, const vec & u, const params & mparams);
+maxf2v mdia(const vec & , const mat & , const vec & , const params & );
 pw mdiapw(const pw & pws, const mat & T, const vec & u, const params & mparams)
 {
-    int d,n,order=2;
-    d=u.n_elem;
+    int order=2;
     double s;
     maxf2v result;
-    result.grad.set_size(d);
-    result.hess.set_size(d,d);
-    result.locmax.set_size(d);
-    vec start(d,fill::zeros),q(d);
     result=mdia(pws.weights,T,u,mparams);
     pw results;
-    n=pws.weights.n_elem;
-    results.weights.set_size(n);
-    results.points.set_size(n);
     results.points=pws.points;
-    q=T*result.locmax;
+    vec q=T*result.locmax;
     results.weights=pws.weights%exp(q);
     s=sum(results.weights);
     results.weights=results.weights/s;                                    

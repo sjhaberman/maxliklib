@@ -9,31 +9,18 @@ struct pw
 };
 pw hermpw(const int & n)
 {
-    double x;
-    int i;
-    vec p(n),w(n);
-    mat J(n,n,fill::zeros),K(n,n);
+    vec p,w;
+    mat J(n,n,fill::zeros),K;
     pw pws;
-    pws.points.set_size(n);
-    pws.weights.set_size(n);
 //Set up matrix for eigenvalue computation.
-    if(n>1)
-    {
-        for(i=1;i<n;i++)
-        {
-            x=double(i);
-            J(i-1,i)=sqrt(x);
-            J(i,i-1)=J(i-1,i);
-        }
+    if(n>1){
+        J.diag(1)=sqrt(regspace(1,n-1));
+        J.diag(-1)=J.diag(1);
     }
 //Eigenvalues and eigenvectors.
     eig_sym(p,K,J);
 //Get weights.
-    for(i=0;i<n;i++)
-    {
-        x=K(0,i);
-        w(i)=x*x;
-    }
+    w=square(trans(K.row(0)));
     pws.points=p;
     pws.weights=w;
     return pws;

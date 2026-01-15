@@ -26,8 +26,6 @@ f2v berresp(const int & order, const char & transform, const resp & y,
     const vec & beta)
 {
     f2v result;
-    if(order>0) result.grad.set_size(1);
-    if(order>1) result.hess.set_size(1,1);
     switch(transform)
     {
         case 'G': return loglogl(order, y, beta);
