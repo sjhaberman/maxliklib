@@ -20,29 +20,19 @@ struct params
     double tol;
 };
 pw mdiapw(const pw & , const mat & , const vec & , const params & );
-pw mdia4(const pw & pws)
+vec hermpoly(const int & ,const double & );
+pw mdia4(const pw & pws, const params & mparams)
 {
     pw results;
-    params mparams;
-    mparams.print=true;
-    mparams.maxit=100;
-    mparams.maxits=10;
-    mparams.eta=0.5;
-    mparams.gamma1=0.1;
-    mparams.gamma2=0.1;
-    mparams.kappa=3.0;
-    mparams.tol=0.000001;
-    int n,order=2;
-    n=pws.points.n_elem;  
-    results.points.set_size(n);
-    results.weights.set_size(n);
-    vec start(2,fill::zeros);
-    mat T(n,2);
-    T.col(0)=square(pws.points);
-    T.col(1)=square(T.col(0));
+    int i, k=4, order=2;
+    vec f={1.0,1.0,1.0/sqrt(2.0),1.0/sqrt(6.0),1.0/sqrt(24.0)},h;
+    mat T(pws.points.n_elem,2);
+    for(i=0;i<pws.points.n_elem;i++){
+        h=f%hermpoly(k,pws.points(i));
+        T(i,0)=h(2);
+        T(i,1)=h(4);
+    }
     vec u(2);
-    u(0)=1.0;
-    u(1)=3.0;
     results=mdiapw(pws,T,u,mparams);
     return results;
 }

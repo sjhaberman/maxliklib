@@ -65,11 +65,6 @@ maxf2v maxselect(const int & order, const params & mparams,
 {
     
     maxf2v results;
-    int p;
-    p=start.n_elem;
-    results.locmax.set_size(p);
-    results.grad.set_size(p);
-    if(order>1)results.hess.set_size(p,p);
     if(algorithm=='N'||algorithm=='L')results=nrv(order, mparams, start, f);
     if(algorithm=='C')results=conjgrad(order, mparams, start, f);
     if(algorithm=='G')results=gradascent(order, mparams, start, f);

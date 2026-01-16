@@ -22,17 +22,9 @@ struct resp
 f2v multlogit(const int & order, const resp & y, const vec & beta)
 {
     double s;
-    int i, r,z;
-    vec e;
-    r=beta.n_elem;
+    int i, z;
+    vec e=exp(beta);
     f2v results;
-    if(order>0) results.grad.set_size(r);
-    if(order>1) results.hess.set_size(r,r);
-    e.set_size(r);
-    for(i=0;i<r;i++)
-    {
-        e(i)=exp(beta(i));
-    }
     s=1.0+sum(e);
     results.value=-log(s);
     if(order>0) results.grad=-e/s;

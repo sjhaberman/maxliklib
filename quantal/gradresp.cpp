@@ -19,7 +19,6 @@ struct resp
     vec dresp;
 };
 f2v berresp(const int & , const char & , const resp & , const vec & );
-f2v nanf2v(const int & , const f2v & );
 f2v gradresp(const int & order, const char & transform ,
     const resp & y, const vec & beta)
 {
@@ -47,7 +46,10 @@ f2v gradresp(const int & order, const char & transform ,
 //Check for unacceptable beta.
     if(n>1)
     {
-        if(max(diff(beta))>=0.0)return nanf2v(order,results);
+        if(max(diff(beta))>=0.0){
+            results.value=datum::nan;
+            return results;
+        }
     }
     results.value=0.0;
     if(y.iresp(0)==n)

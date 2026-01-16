@@ -1,4 +1,5 @@
-//Compute points and weights for normal scores quadrature of given order.  Use conditional 
+//Compute points and weights for normal scores quadrature of given order.
+// Use conditional 
 //expectations.
 //Order is n.
 #include<armadillo>
