@@ -3,7 +3,7 @@
 //vector beta. The struct variable choice governs the model selection
 //choice.type='B' yields a beta model.
 //choice.type='C' yields a cumulative model, choice.type='D'
-//yields a continuous model, choice.type='E' yields a dirichlet model,
+//yields a continuous model, choice.type='E' yields a Dirichlet model,
 //choice.type='G' yields
 //a graded model, choice.type='H' yields a gamma model,
 //choice.type='L' yields a multinomial logit model,

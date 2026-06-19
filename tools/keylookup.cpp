@@ -2,13 +2,17 @@
 #include<armadillo>
 using namespace arma;
 using namespace std;
-string keylookup(const string & name, const vector<vector<string>> & controlvec)
+bool vssort(const pair<string,string> & a,const pair<string,string> & b)
+   {return(a.first<b.first);};
+string keylookup(const string & name, const vector<pair<string,string>> & vect)
 {
-    vector<vector<string>>::const_iterator it;
-    const function <bool(const vector<string> & v)>f=[&name]
-        (const vector<string> & v)
-        {return (v[0]==name);};
-    it=find_if(controlvec.cbegin(),controlvec.cend(),f);
-    if(it==controlvec.cend()) return "";
-    return (*it)[1];
+    pair<vector<pair<string,string>>::const_iterator,
+        vector<pair<string,string>>::const_iterator> it;
+    pair<string,string>vname;
+    vname.first=name;
+    vname.second=" ";
+    it=equal_range(vect.cbegin(),vect.cend(),vname,vssort);
+    if(it.first==vect.cend()) return "";
+    if(next(it.first,1)!=it.second) return "";
+    return (it.first->second);
 }

@@ -37,8 +37,8 @@ struct maxf2v
 struct params
 {
     bool print;
-    int maxit;
-    int maxits;
+    uword maxit;
+    uword maxits;
     double eta;
     double gamma1;
     double gamma2;
@@ -52,7 +52,7 @@ maxf2v conjgrad(const int & order, const params & mparams, const vec & start, co
 {
     double tau;
     f2v fy0;
-    int i;
+    uword i;
     maxf2v vary0, vary1;
     vec v, v1, v2;
     v=start;
@@ -78,7 +78,7 @@ maxf2v conjgrad(const int & order, const params & mparams, const vec & start, co
         {
             v=v1;
         }
-        if(norm(v,2)>mparams.kappa)v=(mparams.kappa/norm(v,2))*v;
+        if(norm(v)>mparams.kappa)v=(mparams.kappa/norm(v))*v;
 // Line search.
         vary1 = maxlinq2(order, mparams, v, vary0, f);
         if(mparams.print)cout<<"Iteration="<<i<<", Function="<<vary1.max<<endl;

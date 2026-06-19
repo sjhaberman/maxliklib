@@ -25,7 +25,7 @@ struct resp
 f2v dirichlet(const int & order, const resp & y, const vec & beta)
 {
     double dz,tz,zz,zzz;
-    int i,j,q;
+    uword i,j,q;
     f2v results;
     q=beta.n_elem;
     vec yy(q),z(q);

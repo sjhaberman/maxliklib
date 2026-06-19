@@ -16,7 +16,7 @@ struct vecmat
 vecmat genprods(const imat & indices, const field<pw> & pws)
 {
     double w;
-    int i,j;
+    uword i,j;
     vecmat results;
     results.v.set_size(indices.n_cols);
     results.m.set_size(indices.n_rows,indices.n_cols);

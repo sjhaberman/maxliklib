@@ -1,5 +1,6 @@
 //Log likelihood component, gradient, and Hessian matrix
-//for Bernoulli response model with response y and one-dimensional parameter beta.
+//for Bernoulli response model with response y and
+//one-dimensional parameter beta.
 //Choice of tranformation is determined by transform, with 'G' for
 //complementary log-log, 'H' for log-log, 'L' for logit, and 'N' for probit.
 //If order is 0, only the function is

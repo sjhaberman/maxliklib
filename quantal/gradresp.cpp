@@ -38,7 +38,7 @@ f2v berresp(const int & , const char & , const resp & , const vec & );
 f2v gradresp(const int & order, const char & transform ,
     const resp & y, const vec & beta)
 {
-    int n;
+    uword n;
     n=beta.n_elem;
 //Bernoulli case.
     if(n==1)return berresp(order, transform, y, beta);
@@ -48,14 +48,14 @@ f2v gradresp(const int & order, const char & transform ,
     f2v result, result1, results;
     if(order>0)results.grad.zeros(n);
     if(order>1)results.hess.zeros(n,n);
-    int k;
+    uword k;
     k=n-y.iresp(0);
     resp z;
     z.iresp={1};
 //lb and ub give bounds used for t(k) if k<n is not q, while lb1 and ub1 are for
 //bounds used for t(k-1) if k>0 is not q+1.
 //Bounds are 0 if not used.  sp is a range variable.
-    int lb=0, lb1=0, q, sp, ub=0, ub1=0;
+    uword lb=0, lb1=0, q, sp, ub=0, ub1=0;
     q=n/2;
 //gamma is the parameter vector for t(k).
 //gamma1 is the parameter vector for t(k-1).

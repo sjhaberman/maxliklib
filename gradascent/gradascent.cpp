@@ -37,8 +37,8 @@ struct maxf2v
 struct params
 {
     bool print;
-    int maxit;
-    int maxits;
+    uword maxit;
+    uword maxits;
     double eta;
     double gamma1;
     double gamma2;
@@ -52,7 +52,7 @@ maxf2v gradascent(const int & order, const params & mparams, const vec & start,
     const function<f2v(const int &, const vec &)> f)
 {
     f2v fy0;
-    int i;
+    uword i;
     maxf2v vary0, vary1;
     vec v;
     v=start;

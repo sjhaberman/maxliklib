@@ -55,7 +55,7 @@ dovecmat fitquad(const field<f2v> & cresults, const field<pwr> & newthetas,
     const adq & scale, dovecmat & obsscale)
 {
     bool flag;
-    int h, i, j, k, n, r, rr, s, t, u;
+    uword h, i, j, k, n, r, rr, s, t, u;
     uvec g(2,fill::zeros);
     dovecmat results;
     rr = newthetas(0).theta.dresp.n_elem;

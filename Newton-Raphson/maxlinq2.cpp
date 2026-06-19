@@ -40,8 +40,8 @@ struct maxf2v
 struct params
 {
     bool print;
-    int maxit;
-    int maxits;
+    uword maxit;
+    uword maxits;
     double eta;
     double gamma1;
     double gamma2;
@@ -74,7 +74,7 @@ maxf2v maxlinq2(const int & order, const params & mparams, const vec & v,
     vec y0, y1, y2, y3;
     maxf2v  vary1, vary2, vary3;
 //  i counts secondary iterations.
-    int i;
+    uword i;
     vary1.max=vary0.max;
     vary1.locmax=vary0.locmax;
     vary1.grad=vary0.grad;

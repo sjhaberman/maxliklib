@@ -17,71 +17,78 @@ struct vn
     vector<string>varnames;
     mat vars;
 };
-vector<string>parse(const string & , const char & );
-vector<vn>getfiles(const vector<vector<string>> & datafiles)
-{
+string keylookup(const string & , const vector<pair<string,string>> & );
+vector<string>fstvs(const field<string> & );
+vector<vn>getfiles(const vector<vector<pair<string,string>>> & datafiles){
 //fl locates delimiters, i and j are counters, and nd is the number of data files.
     bool flag, prev=false;
     vector<vn> results(datafiles.size());
-    int j;
+    string dataf, varf;
     vector<vn>::iterator resultsit;
-    vector<vector<string>>::const_iterator datafilesit;
-    vector<string>::const_iterator datafilesit1,datafilesit2;
+    vector<vector<pair<string,string>>>::const_iterator datafilesit;
     field<string>names;
     datafilesit=datafiles.begin();
     for(resultsit=results.begin();resultsit!=results.end();++resultsit)
     {
-        datafilesit1=++datafilesit->begin();
-        if(datafilesit->size()==2)
+        dataf=keylookup("data",*datafilesit);
+        if(dataf==""){
+            results.clear();
+            return results;
+        }
+        varf=keylookup("variables",*datafilesit);
+        if(varf=="")
         {
-            flag=resultsit->vars.load(csv_name(*datafilesit1,
+            flag=resultsit->vars.load(csv_name(dataf,
                 names,csv_opts::strict));
             if(!flag)
             {
-                cout<<*datafilesit1<<" not read successfully"<<endl;
+                cout<<dataf<<" not read successfully"<<endl;
                 results.clear();
                 return results;
             }
             if(resultsit->vars.n_cols!=names.n_elem)
             {
-                cout<<*datafilesit1<<" data and labels do not match."<<endl;
+                cout<<dataf<<" data and labels do not match."<<endl;
                 results.clear();
                 return results;
             }
-            if(resultsit->vars.n_cols==0)
+            if(resultsit->vars.n_rows==0)
             {
-                cout<<*datafilesit1<<" has no content."<<endl;
+                cout<<dataf<<" has no content."<<endl;
                 results.clear();
                 return results;
             }
-            resultsit->varnames.resize(names.n_elem);
-            for(j=0;j<names.n_elem;j++)resultsit->varnames[j]=names(j);
+            resultsit->varnames=fstvs(names);
         }
         else
         {
-            flag=resultsit->vars.load(*datafilesit1);
+            flag=resultsit->vars.load(dataf);
             if(!flag)
             {
-                cout<<*datafilesit1<<" not read successfully"<<endl;
+                cout<<dataf<<" not read successfully"<<endl;
                 results.clear();
                 return results;
             }
-            datafilesit2=next(datafilesit->begin(),3);
-            flag=names.load(*datafilesit2);
+            if(resultsit->vars.n_rows==0)
+            {
+                cout<<dataf<<" has no content."<<endl;
+                results.clear();
+                return results;
+            }
+            flag=names.load(varf);
             if(!flag)
             {
-                cout<<*datafilesit2<<" not read successfully"<<endl;
+                cout<<varf<<" not read successfully"<<endl;
                 results.clear();
                 return results;
             }
             if(resultsit->vars.n_cols!=names.n_elem)
             {
-                cout<<*datafilesit1<<" and "<<*datafilesit2<<" do not match."<<endl;
+                cout<<dataf<<" and "<<varf<<" do not match."<<endl;
                 results.clear();
                 return results;
             }
-            resultsit->varnames.resize(names.n_elem);
-            for(j=0;j<names.n_elem;j++)resultsit->varnames[j]=names(j);
+            resultsit->varnames=fstvs(names);
         }
         ++datafilesit;
         names.clear();

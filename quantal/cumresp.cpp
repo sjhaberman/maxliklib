@@ -23,7 +23,7 @@ f2v berresp(const int & , const char & , const resp & , const vec & );
 f2v cumresp(const int & order, const char & transform, const resp & y,
     const vec & beta)
 {
-    int i,n;
+    uword i,n;
     resp z, zz;
     z.iresp={0};
     zz.iresp={1};

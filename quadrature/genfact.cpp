@@ -2,11 +2,11 @@
 //Set sizes are in sizes.
 #include<armadillo>
 using namespace arma;
-imat genfact(const ivec & sizes)
+umat genfact(const uvec & sizes)
 {
-    int i,j,n;
-    imat results;
-    ivec comb(sizes.n_elem,fill::zeros);
+    uword i,j,n;
+    umat results;
+    uvec comb(sizes.n_elem,fill::zeros);
     n=prod(sizes);
     results.set_size(sizes.n_elem,n);
     for(j=0;j<n;j++)
