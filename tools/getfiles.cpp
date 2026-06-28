@@ -12,15 +12,10 @@
 #include<string.h>
 using namespace std;
 using namespace arma;
-struct vn
-{
-    vector<string>varnames;
-    mat vars;
-};
+struct vn{vector<string>varnames; mat vars;};
 string keylookup(const string & , const vector<pair<string,string>> & );
 vector<string>fstvs(const field<string> & );
 vector<vn>getfiles(const vector<vector<pair<string,string>>> & datafiles){
-//fl locates delimiters, i and j are counters, and nd is the number of data files.
     bool flag, prev=false;
     vector<vn> results(datafiles.size());
     string dataf, varf;
@@ -36,54 +31,45 @@ vector<vn>getfiles(const vector<vector<pair<string,string>>> & datafiles){
             return results;
         }
         varf=keylookup("variables",*datafilesit);
-        if(varf=="")
-        {
+        if(varf==""){
             flag=resultsit->vars.load(csv_name(dataf,
                 names,csv_opts::strict));
-            if(!flag)
-            {
+            if(!flag){
                 cout<<dataf<<" not read successfully"<<endl;
                 results.clear();
                 return results;
             }
-            if(resultsit->vars.n_cols!=names.n_elem)
-            {
+            if(resultsit->vars.n_cols!=names.n_elem){
                 cout<<dataf<<" data and labels do not match."<<endl;
                 results.clear();
                 return results;
             }
-            if(resultsit->vars.n_rows==0)
-            {
+            if(resultsit->vars.n_rows==0){
                 cout<<dataf<<" has no content."<<endl;
                 results.clear();
                 return results;
             }
             resultsit->varnames=fstvs(names);
         }
-        else
-        {
+        else{
             flag=resultsit->vars.load(dataf);
-            if(!flag)
-            {
+            if(!flag){
                 cout<<dataf<<" not read successfully"<<endl;
                 results.clear();
                 return results;
             }
-            if(resultsit->vars.n_rows==0)
-            {
+            if(resultsit->vars.n_rows==0){
                 cout<<dataf<<" has no content."<<endl;
                 results.clear();
                 return results;
             }
             flag=names.load(varf);
-            if(!flag)
-            {
+            if(!flag){
                 cout<<varf<<" not read successfully"<<endl;
                 results.clear();
                 return results;
             }
-            if(resultsit->vars.n_cols!=names.n_elem)
-            {
+            if(resultsit->vars.n_cols!=names.n_elem){
                 cout<<dataf<<" and "<<varf<<" do not match."<<endl;
                 results.clear();
                 return results;
