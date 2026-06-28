@@ -2,29 +2,29 @@
 //c>0.0 is the tolerance.
 //p is the vector of probabilities of length n between 0 and 1.
 //The distribution of the sum S of X(i), i from 0 to n-1, is sought, where
-//the X(i) are mutuall independent Bernoulli random variables such that X(i)
+//the X(i) are mutually independent Bernoulli random variables such that X(i)
 //is 1 with probability p(i).  The returned vector lw has elements from 0 to n,
 //and lw(i) is the probability that S=i for i from 0 to n.
 #include<armadillo>
 using namespace arma;
-vec lw(const double & c, const vec & p)
-{
+vec lw(const double & c, const vec & p){
     double d,sumd,xn;
-    int bottom,bottom1,i,it,n,top,top1;
-    vec dist(p.n_elem+1),pp(2);
+    uword bottom,bottom1,i,it,n,top,top1;
+//Find n.
+    n=p.n_elem;
+    vec dist(n+1),pp(2);
 //Distribution of S(0)=X(0).
     dist(0)=1.0-p(0);
     dist(1)=p(0);
-//Find n.
-    n=p.n_elem;
+    if(n==1) return dist;
 //bottom is lower bound for nonzero entries of S(k), the sum of X(j) for j from 0
 //to k<n.  top is upper bound for nonzero entries of S(k)
     bottom=0;
     top=1;
+    xn=0.0;
 //Cycle through X(it) for it from 1 to n-1.
-    for(it=1;it<n;it++)
-    {
-        xn=double(it);
+    for(it=1;it<n;it++){
+        xn+=1.0;
 //Bound for when S(it)<=i or S(it)>=i has negligible probability.
         d=xn*c/(2.0*xn+1.0);
 //Tentative new values of bottom and top.
@@ -37,20 +37,16 @@ vec lw(const double & c, const vec & p)
         dist.subvec(bottom1,top1)=conv(dist.subvec(bottom,top),pp);
 //Negligibility check.
         sumd=0.0;
-        for(i=bottom1;i<top;i++)
-        {
+        for(i=bottom1;i<top;i++){
             sumd=sumd+dist(i);
 //Update bottom.
-            if(i==bottom1&&sumd>d)
-            {
+            if(i==bottom1&&sumd>d){
                 bottom=bottom1;
                 break;
             }
-            else
-            {
+            else{
 //Insert 0 when needed.
-                if(sumd>d)
-                {
+                if(sumd>d){
                     dist.subvec(bottom,i-1)=zeros(i-bottom);
                     bottom=i;
                     break;
@@ -59,19 +55,16 @@ vec lw(const double & c, const vec & p)
         }
         sumd=0.0;
 //Update top.
-        for(i=top1;i>bottom;i--)
-        {
+        for(i=top1;i>bottom;i--){
             sumd=sumd+dist(i);
-            if(i==top1&&sumd>d)
-            {
+            if(i==top1&&sumd>d){
                 top=top1;
                 break;
             }
             else
             {
 //Insert 0 when needed.
-                if(sumd>d)
-                {
+                if(sumd>d){
                     dist.subvec(i+1,top1)=zeros(top1-i);
                     top=i;
                     break;
@@ -80,8 +73,7 @@ vec lw(const double & c, const vec & p)
         }
     }
 //Adjust if needed for insertion of 0.
-    if(bottom>0||top<n)
-    {
+    if(bottom>0||top<n){
         sumd=sum(dist.subvec(bottom,top));
         dist.subvec(bottom,top)=dist.subvec(bottom,top)/sumd;
     }

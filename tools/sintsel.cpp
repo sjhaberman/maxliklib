@@ -2,21 +2,8 @@
 //xselect gives elements to select.
 #include<armadillo>
 using namespace arma;
-struct xsel
-{
-    bool all;
-    uvec list;
-};
-int sintsel(const xsel & xselect, const int & n)
-{
-    int d;
-    if(xselect.all)
-    {
-        d = n;
-    }
-    else
-    {
-        d = xselect.list.n_elem;
-    }
-    return d;
+struct xsel{bool all; uvec list;};
+uword sintsel(const xsel & xselect, const uword & n){
+    if(xselect.all) return n;
+    return xselect.list.n_elem;
 }

@@ -21,19 +21,8 @@
 #include<armadillo>
 using namespace std;
 using namespace arma;
-struct f2v
-{
-    double value;
-    vec grad;
-    mat hess;
-};
-struct maxf2v
-{
-    vec locmax;
-    double max;
-    vec grad;
-    mat hess;
-};
+struct f2v{double value; vec grad; mat hess;};
+struct maxf2v{vec locmax; double max; vec grad; mat hess;};
 struct params
 {
     bool print;
@@ -49,8 +38,7 @@ maxf2v maxf2vvar(const int & , const vec & , const f2v & );
 maxf2v maxlinq2(const int & , const params & , const vec & , const maxf2v & ,
     const std::function <f2v(const int &, const vec &)> );
 maxf2v gradascent(const int & order, const params & mparams, const vec & start,
-    const function<f2v(const int &, const vec &)> f)
-{
+    const function<f2v(const int &, const vec &)> f){
     f2v fy0;
     uword i;
     maxf2v vary0, vary1;
@@ -62,12 +50,11 @@ maxf2v gradascent(const int & order, const params & mparams, const vec & start,
 // Return if starting impossible.
     if(isnan(vary0.max)||mparams.maxit<=0) return vary0;
 // Iterations.
-    for(i=0;i<mparams.maxit;i++)
-    {
+    for(i=0;i<mparams.maxit;i++){
 // Stop if gradient of zero.
         v=vary0.grad;
         if(!any(v)) return vary0;
-        if(norm(v,2)>mparams.kappa)v=(mparams.kappa/norm(v,2))*v;
+        if(norm(v)>mparams.kappa)v=(mparams.kappa/norm(v))*v;
 // Line search.
         vary1 = maxlinq2(order, mparams, v, vary0, f);
         if(mparams.print)cout<<"Iteration="<<i<<", Function="<<vary1.max<<endl;

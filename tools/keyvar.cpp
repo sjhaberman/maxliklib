@@ -2,26 +2,26 @@
 #include<armadillo>
 using namespace arma;
 using namespace std;
-vector<string> keyvar(const string & name, const vector<vector<string>> & controlvec )
-{
-    vector<string>result(0);
-    vector<string>t(2),u(2);
-    t[0]=name;
-    t[1]=" ";
-    u[0]=name;
-    u[1]="~~";
-    vector<string>::iterator resultit;
-    vector<vector<string>>::const_iterator citb,cite;
-    vector<vector<string>>::const_iterator cit;
-    citb=lower_bound(controlvec.cbegin(),controlvec.cend(),t);
-    cite=upper_bound(controlvec.cbegin(),controlvec.cend(),u);
-    if(citb==cite)return result;
-    result.resize(distance(citb,cite));
-    cit=citb;
-    for(resultit=result.begin();resultit!=result.end();++resultit)
-    {
-           *resultit=(*cit)[1];
-           ++cit;
+bool svecsort(const pair<string,vector<pair<string,string>>> & a,
+    const pair<string,vector<pair<string,string>>> & b)
+    {return(a.first<b.first);};
+vector<vector<pair<string,string>>> keyvar(const string & name, const vector<pair<string,vector<pair<string,string>>>> & controlvec ){
+    vector<vector<pair<string,string>>> result;
+    pair<string,vector<pair<string,string>>>t;
+    t.first=name;
+    vector<vector<pair<string,string>>>::iterator resultit;
+    pair<vector<pair<string,vector<pair<string,string>>>>::const_iterator,
+        vector<pair<string,vector<pair<string,string>>>>::const_iterator> cit;
+    vector<pair<string,vector<pair<string,string>>>>::const_iterator cit1;
+    cit=equal_range(controlvec.cbegin(),controlvec.cend(),t,svecsort);
+    if(cit.first==controlvec.cend())return result;
+    if(cit.first==cit.second)return result;
+    result.resize(distance(cit.first,cit.second));
+    cit1=cit.first;
+    for(resultit=result.begin();resultit!=result.end();++resultit){
+        resultit->resize(cit1->second.size());
+        copy(cit1->second.begin(),cit1->second.end(),resultit->begin());
+        ++cit1;
     }
     return result;
 }

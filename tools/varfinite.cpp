@@ -3,29 +3,18 @@
 #include<armadillo>
 using namespace arma;
 using namespace std;
-struct varlocs
-{
-    vector<string>catnames;
-    vector<int> forms;
-    vec offset;
-    vector<int> positions;
-    vector<string> preds;
-    char type;
-    char transform;
-    mat transition;
-    string varname;
-};
-vector<varlocs>::iterator varlookup(const string & , vector<varlocs> &);
-bool varfinite(const string & name, vector<varlocs> & vartab,
-    vector<vector<int>> & patdata)
-{
-    size_t i;
-    vector<varlocs>::iterator vartabit;
+struct varlocs{vector<uword> forms;
+    vector<uword> positions; string varname;};
+vector<varlocs>::const_iterator varlookup(const string & ,
+    const vector<varlocs> &);
+bool varfinite(const string & name, const vector<varlocs> & vartab,
+    const vector<vector<uword>> & patdata){
+    uword i;
+    vector<varlocs>::const_iterator vartabit;
     vartabit=varlookup(name,vartab);
-    i=distance(vartab.begin(),vartabit);
-    vector<vector<int>>::iterator patdatait;
-    for(patdatait=patdata.begin();patdatait!=patdata.end();++patdatait)
-    {
+    i=distance(vartab.cbegin(),vartabit);
+    vector<vector<uword>>::const_iterator patdatait;
+    for(patdatait=patdata.cbegin();patdatait!=patdata.cend();++patdatait){
         if((*patdatait)[i]==0)return false;
     }
     return true;

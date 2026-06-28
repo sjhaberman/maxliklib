@@ -5,44 +5,28 @@
 //'L' for logistic, and 'N' for normal.
 //If order is 0, only the function is
 //found, if order is 1, then the function and gradient are found.
-//If order is 2,
-//then the function, gradient, and Hessian are returned.
+//If order is 2, then the function, gradient, and Hessian are returned.
+//Models have y-beta(0))/exp(beta1)) with a standard minimum Gumbel,
+//maximum Gumbel, logistic, or normal distribution.
 #include<armadillo>
 using namespace arma;
-struct f2
-{
-    double value;
-    double der;
-    double der2;
-};
-struct f2v
-{
-    double value;
-    vec grad;
-    mat hess;
-};
-struct resp
-{
-    ivec iresp;
-    vec dresp;
-};
+struct f2{double value; double der; double der2;};
+struct f2v{double value; vec grad; mat hess;};
 f2 gumbell(const int & , const double &);
 f2 gumbelu(const int & , const double &);
 f2 logistic(const int & , const double  &);
 f2 normal(const int & , const double & );
-f2v contresp(const int & order, const char & transform, const resp & y,
-    const vec &  beta)
-{
+f2v contresp(const int & order, const char & transform, const vec & y,
+    const vec &  beta){
     double z,zz,z1,z2;
     f2 result;
     f2v results;
     zz=exp(beta(1));
-    z1=zz*y.dresp(0);
+    z1=zz*y(0);
     z=beta(0)+z1;
     if(order>0) results.grad.set_size(2);
     if(order>1) results.hess.set_size(2,2);
-    switch (transform)
-    {
+    switch (transform){
         case 'G':
             result = gumbell(order, z);
             break;
@@ -55,14 +39,12 @@ f2v contresp(const int & order, const char & transform, const resp & y,
         default: result = normal(order, z);
     }
     results.value=result.value+beta(1);
-    if(order>0)
-    {
+    if(order>0){
         results.grad(0)=result.der;
         z2=z1*result.der;
         results.grad(1)=z2+1.0;
     }
-    if(order>1)
-    {
+    if(order>1){
         results.hess(0,0)=result.der2;
         results.hess(1,0)=z1*result.der2;
         results.hess(0,1)=results.hess(1,0);

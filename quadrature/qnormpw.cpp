@@ -4,24 +4,19 @@
 #define STATS_ENABLE_ARMA_WRAPPERS
 #include "stats.hpp"
 using namespace arma;
-struct pw
-{
-    vec points;
-    vec weights;
-};
-pw qnormpw(const int & n)
-{
+struct pw{vec points; vec weights;};
+pw qnormpw(const uword & n){
     double x,xn;
-    int i;
+    uword i;
     pw pws;
     pws.points.set_size(n);
     pws.weights.set_size(n);
-    xn=double(n);
-    for(i=0;i<n;i++)
-    {
-        x=(double(i)+0.5)/xn;
+    xn=1.0/double(n);
+    pws.weights.fill(xn);
+    x=0.5*xn;
+    for(i=0;i<n;i++){
         pws.points(i)=stats::qnorm(x,0.0,1.0);
-        pws.weights(i)=1.0/xn;
+        x+=xn;
     }
     pws.points=pws.points/stddev(pws.points,1);
     return pws;

@@ -25,39 +25,23 @@
 //then the function, gradient, and Hessian are returned.
 #include<armadillo>
 using namespace arma;
-struct f2v
-{
-    double value;
-    vec grad;
-    mat hess;
-};
-struct model
-{
-   char type;
-   char transform;
-};
-struct resp
-{
-   ivec iresp;
-   vec dresp;
-};
-f2v berresp(const int & , const char &, const resp &, const vec & );
-f2v contresp(const int & , const char & , const resp & , const vec & );
-f2v cumresp(const int & , const char &, const resp &, const vec &) ;
-f2v gradresp(const int & , const char &, const resp &, const vec & );
-f2v maxberresp(const int & , const char &, const resp &, const vec & );
-f2v gammad(const int & , const resp &, const vec & );
-f2v betad(const int & , const resp &, const vec & );
-f2v dirichlet(const int & , const resp &, const vec & );
-f2v logmean(const int & , const resp &, const vec & );
-f2v maxberresp(const int & , const char & , const resp &, const vec & );
-f2v multlogit(const int & , const resp &, const vec & );
-f2v ranklogit(const int & , const resp &, const vec   & );
-f2v truncresp(const int & , const char &, const resp & , const vec & );
-f2v genresp(const int & order, const model & choice, const resp & y, const vec & beta)
-{
-    switch(choice.type)
-    {
+struct f2v{double value; vec grad; mat hess;};
+struct model{char type; char transform;};
+f2v berresp(const int & , const char &, const vec &, const vec & );
+f2v contresp(const int & , const char & , const vec & , const vec & );
+f2v cumresp(const int & , const char &, const vec &, const vec &) ;
+f2v gradresp(const int & , const char &, const vec &, const vec & );
+f2v maxberresp(const int & , const char &, const vec &, const vec & );
+f2v gammad(const int & , const vec &, const vec & );
+f2v betad(const int & , const vec &, const vec & );
+f2v dirichlet(const int & , const vec &, const vec & );
+f2v logmean(const int & , const vec &, const vec & );
+f2v maxberresp(const int & , const char & , const vec &, const vec & );
+f2v multlogit(const int & , const vec &, const vec & );
+f2v ranklogit(const int & , const vec &, const vec   & );
+f2v truncresp(const int & , const char &, const vec & , const vec & );
+f2v genresp(const int & order, const model & choice, const vec & y, const vec & beta){
+    switch(choice.type){
         case 'B': return betad(order, y, beta);
         case 'C': return cumresp(order, choice.transform, y, beta);
         case 'D': return contresp(order, choice.transform, y, beta);

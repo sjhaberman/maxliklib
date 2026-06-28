@@ -19,26 +19,10 @@
 #include<armadillo>
 using namespace std;
 using namespace arma;
-struct bounds
-{
-     double lower;
-     double upper;
-};
-struct f2v
-{
-    double value;
-    vec grad;
-    mat hess;
-};
-struct maxf2v
-{
-    vec locmax;
-    double max;
-    vec grad;
-    mat hess;
-};
-struct params
-{
+struct bounds{double lower; double upper;};
+struct f2v{double value; vec grad; mat hess;};
+struct maxf2v{vec locmax; double max; vec grad; mat hess;};
+struct params{
     bool print;
     uword maxit;
     uword maxits;
@@ -52,11 +36,11 @@ maxf2v maxf2vvar(const int & , const vec &,const f2v &);
 double modit(const double &, const double &, const double &,
     const double &, const bounds & );
 bounds rebound(const double &, const double &, const bounds & );
-double maxquad(const double & , const double & , const double & , const double & ,
+double maxquad(const double & , const double & ,
+    const double & , const double & ,
     const double & , const double & );
 maxf2v maxlinq2(const int & order, const params & mparams, const vec & v,
-    const maxf2v & vary0, const function<f2v(const int &, const vec &)>f)
-{
+    const maxf2v & vary0, const function<f2v(const int &, const vec &)>f){
 // Values alpha1 and alpha2 correspond respectively to vectors y1 and y2.
 // Bounds on optimal line position are lower and upper.
 // The derivative in the direction v at y1 is der1, and
@@ -66,7 +50,7 @@ maxf2v maxlinq2(const int & order, const params & mparams, const vec & v,
 // By reordering if needed, f.value(y1)is at least f.value(y2).
     bounds b;
     double alpha1, alpha2, alpha3, deltaf, der1, der2, der3, normv,
-    stepmax, width;
+        stepmax, width;
 // vy1 gives value, gradient, and Hessian of f at y1,
 // vy2 is correponding information at y2,
 // and vy3 gives correponding information at y3.
@@ -84,7 +68,7 @@ maxf2v maxlinq2(const int & order, const params & mparams, const vec & v,
 //  Start at 0 and 1.
     alpha1=0.0;
 // Find maximum step size stepmax for line.
-    stepmax=mparams.kappa/norm(v,2);
+    stepmax=mparams.kappa/norm(v);
     alpha2=1.0;
     y0=vary0.locmax;
     y1=y0;
@@ -96,8 +80,7 @@ maxf2v maxlinq2(const int & order, const params & mparams, const vec & v,
 // b.upper is upper bound for location of maximum.
     b.upper=INFINITY;
 // modify bounds if needed so that alpha2 in range.
-    while(isnan(fy2.value))
-    {
+    while(isnan(fy2.value)){
         b.upper=alpha2;
         alpha2=(1.0-mparams.eta)*alpha1+mparams.eta*alpha2;
         y2=y0+alpha2*v;
@@ -105,8 +88,7 @@ maxf2v maxlinq2(const int & order, const params & mparams, const vec & v,
     }
     vary2=maxf2vvar(order, y2,fy2);
 // Switch if needed.
-    if(vary2.max>vary1.max)
-    {
+    if(vary2.max>vary1.max){
         alpha3=alpha1;
         alpha1=alpha2;
         alpha2=alpha3;
@@ -129,13 +111,9 @@ maxf2v maxlinq2(const int & order, const params & mparams, const vec & v,
         deltaf=vary1.max-vary0.max;
         if(deltaf>=mparams.gamma1*fabs(der1*alpha1))return vary1;
     }
-    else
-    {
-        b.upper=alpha2;
-    }
+    else b.upper=alpha2;
 // Up to maxit iterations.
-    for(i=0;i<mparams.maxits;i++)
-    {
+    for(i=0;i<mparams.maxits;i++){
 // See if maximum found exactly at this point.
         if(der1==0.0)return vary1;
 // Revise bounds.
@@ -145,8 +123,7 @@ maxf2v maxlinq2(const int & order, const params & mparams, const vec & v,
         y2=y0+alpha2*v;
         fy2=f(order, y2);
 // modify bounds if needed so that alpha2 in range.
-        while(!isfinite(fy2.value))
-        {
+        while(!isfinite(fy2.value)){
             b.upper=alpha2;
             alpha2=(1.0-mparams.eta)*alpha1+mparams.eta*alpha2;
             y2=y0+alpha2*v;
@@ -154,8 +131,7 @@ maxf2v maxlinq2(const int & order, const params & mparams, const vec & v,
         }
         vary2=maxf2vvar(order, y2, fy2);
 // Switch if needed.
-        if(vary2.max>vary1.max)
-        {
+        if(vary2.max>vary1.max){
             alpha3=alpha1;
             alpha1=alpha2;
             alpha2=alpha3;

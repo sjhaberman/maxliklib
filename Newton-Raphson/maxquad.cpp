@@ -4,8 +4,7 @@
 #include <cmath>
 double maxquad(const double & x0, const double & x1, const double & f0,
     const double & f1,
-    const double & g0, const double & stepmax)
-{
+    const double & g0, const double & stepmax){
     double c,d,diff;
     diff=x1-x0;
     d=fmax(2.0*(g0-(f1-f0)/diff)/diff,fabs(g0)/stepmax);

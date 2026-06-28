@@ -8,27 +8,15 @@
 //then the function, gradient, and Hessian are returned.
 #include<armadillo>
 using namespace arma;
-struct f2v
-{
-    double value;
-    vec grad;
-    mat hess;
-};
-struct resp
-{
-    ivec iresp;
-    vec dresp;
-};
-f2v logit(const int & , const resp & , const vec & );
-f2v loglogl(const int & , const resp & , const vec & );
-f2v loglogu(const int & , const resp & , const vec & );
-f2v probit(const int &, const resp & , const vec & );
-f2v berresp(const int & order, const char & transform, const resp & y,
-    const vec & beta)
-{
-    f2v result;
-    switch(transform)
-    {
+struct f2v{double value; vec grad; mat hess;};
+struct resp{ivec iresp; vec dresp;};
+f2v logit(const int & , const vec & , const vec & );
+f2v loglogl(const int & , const vec & , const vec & );
+f2v loglogu(const int & , const vec & , const vec & );
+f2v probit(const int &, const vec & , const vec & );
+f2v berresp(const int & order, const char & transform, const vec & y,
+    const vec & beta){
+    switch(transform){
         case 'G': return loglogl(order, y, beta);
         case 'H': return loglogu(order, y, beta);
         case 'L': return logit(order, y, beta);

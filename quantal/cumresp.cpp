@@ -8,29 +8,18 @@
 //then the function, gradient, and Hessian are returned.
 #include<armadillo>
 using namespace arma;
-struct f2v
-{
-    double value;
-    vec grad;
-    mat hess;
-};
-struct resp
-{
-    ivec iresp;
-    vec dresp;
-};
-f2v berresp(const int & , const char & , const resp & , const vec & );
-f2v cumresp(const int & order, const char & transform, const resp & y,
+struct f2v{double value; vec grad; mat hess;};
+f2v berresp(const int & , const char & , const vec & , const vec & );
+f2v cumresp(const int & order, const char & transform, const vec & y,
     const vec & beta)
 {
-    uword i,n;
-    resp z, zz;
-    z.iresp={0};
-    zz.iresp={1};
+    uword i,j,n;
+    vec z={0.0}, zz={1.0};
     vec gamma(1);
     f2v results, resultp;
     n=beta.n_elem;
     results.value=0.0;
+    j=y(0);
     if(order>0)
     {
         results.grad.zeros(n);
@@ -44,7 +33,7 @@ f2v cumresp(const int & order, const char & transform, const resp & y,
     for(i=0;i<n;i++)
     {
         gamma(0)=beta(i);
-        if(i<y.iresp(0))
+        if(i<j)
         {
             resultp=berresp(order, transform, zz, gamma);
             results.value=results.value+resultp.value;

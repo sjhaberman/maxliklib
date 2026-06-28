@@ -3,27 +3,22 @@
 #include<string.h>
 using namespace std;
 using namespace arma;
-vec parsevec(const string & v, const char & r)
-{
-    vector<double> results;
-    size_t fcount, m;
+vec parsevec(const string & v, const char & r){
+    vec results;
+    uword fcount, m;
     string v1;
     fcount=count(v.begin(),v.end(),r);
     results.resize(fcount+1);
-    vector<double>::iterator resultsit;
+    vec::iterator resultsit;
     v1=v;
-    for(resultsit=results.begin();resultsit!=results.end();++resultsit)
-    {
+    for(resultsit=results.begin();resultsit!=results.end();++resultsit){
         m=v1.find(r);
-        if(m==string::npos)
-        {
+        if(m==string::npos){
             try{*resultsit=stod(v1);}
             catch(...){*resultsit=datum::nan;}
         }
-        else
-        {
-            if(m==0||m==v1.length())
-            {
+        else{
+            if(m==0||m==v1.length()){
                 cout<<"Syntax error in control record."<<endl;
                 results.clear();
                 return results;

@@ -10,37 +10,24 @@
 #include<boost/math/special_functions/trigamma.hpp>
 using namespace arma;
 using namespace boost::math;
-struct f2v
-{
-    double value;
-    vec grad;
-    mat hess;
-};
-struct resp
-{
-    ivec iresp;
-    vec dresp;
-};
-f2v betad(const int & order, const resp & y, const vec & beta)
-{
+struct f2v{double value; vec grad; mat hess;};
+f2v betad(const int & order, const vec & y, const vec & beta){
     double dz,tz,y0,y1,z0,z1,zz,zzz;
     f2v results;
     if(order>0) results.grad.set_size(2);
     if(order>1) results.hess.set_size(2,2);
-    y0=log(y.dresp(0));
-    y1=log(1.0-y.dresp(0));
+    y0=log(y(0));
+    y1=log(1.0-y(0));
     z0=exp(beta(0));
     z1=exp(beta(1));
     zz=z0+z1;
     results.value=(z0-1.0)*y0+(z1-1.0)*y1+lgamma(zz)-lgamma(z0)-lgamma(z1);
-    if(order>0)
-    {
+    if(order>0){
        dz=digamma(zz);
        results.grad(0)=z0*(y0+dz-digamma(z0));
        results.grad(1)=z1*(y1+dz-digamma(z1));
     }
-    if(order>1)
-    {
+    if(order>1){
        tz=trigamma(zz);
        results.hess(0,0)=results.grad(0)+z0*z0*(tz-trigamma(z0));
        results.hess(0,1)=z0*z1*tz;

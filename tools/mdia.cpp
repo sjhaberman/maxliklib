@@ -3,29 +3,13 @@
 using namespace arma;
 using namespace std;
 //Function, gradient, and Hessian.
-struct f2v
-{
-    double value;
-    vec grad;
-    mat hess;
-};
-struct pw
-{
-    vec points;
-    vec weights;
-};
-struct maxf2v
-{
-    vec locmax;
-    double max;
-    vec grad;
-    mat hess;
-};
-struct params
-{
+struct f2v{double value; vec grad; mat hess;};
+struct pw{vec points; vec weights;};
+struct maxf2v{vec locmax; double max; vec grad; mat hess;};
+struct params{
     bool print;
-    int maxit;
-    int maxits;
+    uword maxit;
+    uword maxits;
     double eta;
     double gamma1;
     double gamma2;
@@ -36,8 +20,7 @@ f2v kl(const int & , const vec & , const mat & , const vec & , const vec & );
 maxf2v nrv(const int & , const params & , const vec & ,
     const function<f2v(const int &, const vec &)> );
 maxf2v mdia(const vec & p, const mat & T,
-    const vec & u, const params & mparams)
-{
+    const vec & u, const params & mparams){
     maxf2v results;
     maxf2v result;
     int order=2;

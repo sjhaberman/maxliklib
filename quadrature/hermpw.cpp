@@ -2,15 +2,10 @@
 //Order is n.
 #include<armadillo>
 using namespace arma;
-struct pw
-{
-    vec points;
-    vec weights;
-};
-pw hermpw(const int & n)
-{
+struct pw{vec points; vec weights;};
+pw hermpw(const int & n){
     vec p,w;
-    mat J(n,n,fill::zeros),K;
+    mat J(n,n),K;
     pw pws;
 //Set up matrix for eigenvalue computation.
     if(n>1){

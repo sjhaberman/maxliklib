@@ -29,24 +29,13 @@
 #include<armadillo>
 using namespace std;
 using namespace arma;
-struct f2v
-{
-    double value;
-    vec grad;
-    mat hess;
-};
-struct maxf2v
-{
-    vec locmax;
-    double max;
-    vec grad;
-    mat hess;
-};
+struct f2v{double value; vec grad; mat hess;};
+struct maxf2v{vec locmax; double max; vec grad; mat hess;};
 struct params
 {
     bool print;
-    int maxit;
-    int maxits;
+    uword maxit;
+    uword maxits;
     double eta;
     double gamma1;
     double gamma2;
@@ -61,9 +50,7 @@ maxf2v nrv(const int &, const params & , const vec & ,
     const function<f2v(const int & , const vec & )> f);
 maxf2v maxselect(const int & order, const params & mparams,
     const char & algorithm,
-    const vec & start, const function<f2v(const int & , const vec & )> f)
-{
-    
+    const vec & start, const function<f2v(const int & , const vec & )> f){
     maxf2v results;
     if(algorithm=='N'||algorithm=='L')results=nrv(order, mparams, start, f);
     if(algorithm=='C')results=conjgrad(order, mparams, start, f);

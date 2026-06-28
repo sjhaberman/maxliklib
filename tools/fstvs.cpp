@@ -3,8 +3,7 @@
 #include<string.h>
 using namespace std;
 using namespace arma;
-vector<string>fstvs(const field<string> & v)
-{
+vector<string>fstvs(const field<string> & v){
     vector<string> results;
     results.resize(v.n_elem);
     vector<string>::iterator resultsit;

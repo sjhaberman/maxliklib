@@ -3,22 +3,13 @@
 #include<armadillo>
 using namespace arma;
 // Combination of vector and matrix.
-struct vecmat
-{
-    vec v;
-    mat m;
-};
+struct vecmat{vec v; mat m;};
 vecmat wmc(const int & order, const vecmat & wx)
 {
-    int j,m,n;
-//m observations of dimension n.
-    m=wx.v.n_elem;
-    n=wx.m.n_cols;
     vecmat result;
 //Column vector of weighted means;
     result.v=trans(wx.m)*wx.v;
-    if(order>1)
-    {
+    if(order>1){
 //t is matrix of residuals.
 //u is matrix of residuals by weights.
         mat t(size(wx.m)),u(size(t));

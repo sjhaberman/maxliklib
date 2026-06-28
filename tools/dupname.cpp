@@ -4,8 +4,7 @@
 #include<string>
 using namespace arma;
 using namespace std;
-bool dupname(const vector<string> & names)
-{
+bool dupname(const vector<string> & names){
     if(names.size()<2)return true;
     vector<string> sortnames(names.size());
     copy(names.cbegin(),names.cend(),sortnames.begin());

@@ -6,23 +6,13 @@
 #include<armadillo>
 using namespace arma;
 //Function, gradient, and Hessian.
-struct f2v
-{
-    double value;
-    vec grad;
-    mat hess;
-};
+struct f2v{double value; vec grad; mat hess;};
 // Combination of vector and matrix.
-struct vecmat
-{
-    vec v;
-    mat m;
-};
+struct vecmat{vec v; mat m;};
 //Weighted mean and covariance matrix.
 //Data matrix is wx.m and data weight is wx.v.
 vecmat wmc(const int & , const vecmat & );
-f2v kl(const int & order, const vec & p, const mat & T, const vec & u, const vec & gamma)
-{
+f2v kl(const int & order, const vec & p, const mat & T, const vec & u, const vec & gamma){
     f2v results;
     double c;
     vec q=T*gamma;
@@ -30,14 +20,13 @@ f2v kl(const int & order, const vec & p, const mat & T, const vec & u, const vec
     c=sum(q);
     q=q/c;
     results.value=dot(gamma,u)-log(c);
-    if(order>0)
-    {
-        vecmat wx,wy;
-        wx.v=q;
-        wx.m=T;
-        wy=wmc(order,wx);
-        results.grad=u-wy.v;
-        if(order>1)results.hess=-wy.m;
-    }
+    if(order==0)return results;
+    vecmat wx,wy;
+    wx.v=q;
+    wx.m=T;
+    wy=wmc(order,wx);
+    results.grad=u-wy.v;
+    if(order==1) return results;
+    results.hess=-wy.m;
     return results;
 }

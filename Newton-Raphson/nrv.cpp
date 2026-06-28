@@ -21,24 +21,13 @@
 #include<armadillo>
 using namespace std;
 using namespace arma;
-struct f2v
-{
-    double value;
-    vec grad;
-    mat hess;
-};
-struct maxf2v
-{
-    vec locmax;
-    double max;
-    vec grad;
-    mat hess;
-};
+struct f2v{double value; vec grad; mat hess;};
+struct maxf2v{vec locmax; double max; vec grad; mat hess;};
 struct params
 {
     bool print;
-    int maxit;
-    int maxits;
+    uword maxit;
+    uword maxits;
     double eta;
     double gamma1;
     double gamma2;
@@ -49,10 +38,9 @@ maxf2v maxf2vvar(const int & , const vec & , const f2v & );
 maxf2v maxlinq2(const int & , const params &, const vec & , const maxf2v & ,
     const function <f2v(const int &, const vec & )> f);
 maxf2v nrv(const int & order, const params & mparams, const vec & start,
-    const function<f2v(const int &, const vec &)> f)
-{
+    const function<f2v(const int &, const vec &)> f){
     f2v fy0;
-    int i;
+    uword i;
     maxf2v vary0,vary1;
 // Function settings at start.
     vec v=start;
@@ -61,23 +49,18 @@ maxf2v nrv(const int & order, const params & mparams, const vec & start,
 // Return if starting impossible.
     if(isnan(vary0.max)||mparams.maxit<=0) return vary0;
 // Iterations.
-    for(i=0;i<mparams.maxit;i++)
-    {
+    for(i=0;i<mparams.maxit;i++){
 // Stop if gradient of zero.
         if(!any(vary0.grad)) return vary0;
 // Find Newton-Raphson step if possible.
-        if ((-vary0.hess).is_sympd())
-        {
+        if ((-vary0.hess).is_sympd()){
             v=solve(-vary0.hess,vary0.grad);
-            if(dot(v,vary0.grad)<mparams.gamma2*norm(v,2)*norm(vary0.grad,2))v=vary0.grad;
+            if(dot(v,vary0.grad)<mparams.gamma2*norm(v)*norm(vary0.grad))v=vary0.grad;
         }
-        else
-        {
-            v=vary0.grad;
-        }
+        else v=vary0.grad;
 // Line search.
-        if(norm(v,2)>mparams.kappa)v=(mparams.kappa/norm(v,2))*v;
-        vary1 = maxlinq2(order, mparams,v,vary0,f);
+        if(norm(v)>mparams.kappa)v=(mparams.kappa/norm(v))*v;
+        vary1 = maxlinq2(order,mparams,v,vary0,f);
         if(mparams.print)cout<<"Iteration="<<i<<", Function="<<vary1.max<<endl;
 //  Convergence check
         if(vary1.max<vary0.max+mparams.tol) return vary1;

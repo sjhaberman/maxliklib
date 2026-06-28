@@ -21,19 +21,8 @@
 #include<armadillo>
 using namespace std;
 using namespace arma;
-struct f2v
-{
-    double value;
-    vec grad;
-    mat hess;
-};
-struct maxf2v
-{
-    vec locmax;
-    double max;
-    vec grad;
-    mat hess;
-};
+struct f2v{double value; vec grad; mat hess;};
+struct maxf2v{vec locmax; double max; vec grad; mat hess;};
 struct params
 {
     bool print;
@@ -48,8 +37,7 @@ struct params
 maxf2v maxf2vvar(const int & , const vec & , const f2v & );
 maxf2v maxlinq2(const int & , const params & , const vec & , const maxf2v & ,
     const function<f2v(const int &, const vec &)> );
-maxf2v conjgrad(const int & order, const params & mparams, const vec & start, const function<f2v(const int & , const vec &)> f)
-{
+maxf2v conjgrad(const int & order, const params & mparams, const vec & start, const function<f2v(const int & , const vec &)> f){
     double tau;
     f2v fy0;
     uword i;
@@ -62,22 +50,17 @@ maxf2v conjgrad(const int & order, const params & mparams, const vec & start, co
 // Return if starting impossible.
     if(isnan(vary0.max)||mparams.maxit<=0) return vary0;
 // Iterations.
-    for(i=0;i<mparams.maxit;i++)
-    {
+    for(i=0;i<mparams.maxit;i++){
 // Stop if gradient of zero.
         v1=vary0.grad;
         if(!any(v1)) return vary0;
-        if(i>0)
-        {
+        if(i>0){
             tau=dot(v1-v2,v1)/dot(v2,v2);
             v=v1+tau*v;
 // Check for acceptable direction.
-            if(dot(v,v1)<mparams.gamma2*norm(v,2)*norm(v1,2))v=v1;
+            if(dot(v,v1)<mparams.gamma2*norm(v)*norm(v1))v=v1;
         }
-        else
-        {
-            v=v1;
-        }
+        else v=v1;
         if(norm(v)>mparams.kappa)v=(mparams.kappa/norm(v))*v;
 // Line search.
         vary1 = maxlinq2(order, mparams, v, vary0, f);

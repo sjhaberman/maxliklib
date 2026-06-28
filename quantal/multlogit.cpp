@@ -8,21 +8,11 @@
 //then the function, gradient, and Hessian are returned.
 #include<armadillo>
 using namespace arma;
-struct f2v
-{
-    double value;
-    vec grad;
-    mat hess;
-};
-struct resp
-{
-    ivec iresp;
-    vec dresp;
-};
-f2v multlogit(const int & order, const resp & y, const vec & beta)
-{
+struct f2v{double value; vec grad; mat hess;};
+f2v multlogit(const int & order, const vec & y, const vec & beta){
     double s;
-    int i, z;
+    uword i, z;
+    z=y(0);
     vec e=exp(beta);
     f2v results;
     s=1.0+sum(e);
@@ -30,9 +20,7 @@ f2v multlogit(const int & order, const resp & y, const vec & beta)
     if(order>0) results.grad=-e/s;
     if(order>1) results.hess
         =diagmat(results.grad)+results.grad*trans(results.grad);
-    if(y.iresp(0)>0)
-    {
-        z=y.iresp(0)-1;
+    if(z>0){
         results.value=beta(z)+results.value;
         if(order>0) results.grad(z)=1.0+results.grad(z);
     }

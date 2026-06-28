@@ -4,19 +4,11 @@
 #include<armadillo>
 using namespace arma;
 using namespace std;
-struct maxf2v
-{
-    vec locmax;
-    double max;
-    vec grad;
-    mat hess;
-};
+struct maxf2v{vec locmax; double max; vec grad; mat hess;};
 void savmaxf2v(const int & order , const maxf2v & vlm, const string & out,
-    const bool & fflag, const bool & pflag)
-{
-    int o=5, p, q=2;
-    if(order<2)
-    {
+    const bool & fflag, const bool & pflag){
+    uword o=5, p, q=2;
+    if(order<2){
         o=3;
         q=1;
     }
@@ -28,16 +20,14 @@ void savmaxf2v(const int & order , const maxf2v & vlm, const string & out,
     result(1).col(0)=vlm.locmax;
     result(2).set_size(p,1);
     result(2).col(0)=vlm.grad;
-    if(order>1)
-    {
+    if(order>1){
         result(3).set_size(p,p);
         result(3)=vlm.hess;
         result(4).set_size(p,p);
         result(4)=inv_sympd(-vlm.hess);
         result(1).col(1)=sqrt(diagvec(result(4)));
     }
-    if(fflag)
-    {
+    if(fflag)    {
         try{result.save(out);}
         catch(...){cout<<"Cannot save to specified file"<<endl;}
     }
