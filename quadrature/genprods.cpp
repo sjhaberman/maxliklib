@@ -5,8 +5,7 @@ using namespace std;
 using namespace arma;
 struct pw{vec points; vec weights;};
 struct vecmat{vec v; mat m;};
-vecmat genprods(const imat & indices, const vector<pw> & pws)
-{
+vecmat genprods(const umat & indices, const vector<pw> & pws){
     double w;
     uword i,j;
     vecmat results;

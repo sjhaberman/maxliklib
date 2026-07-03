@@ -1,17 +1,14 @@
-//Numerical approximation of gradient and Hessian.  Original function is f, evaluation is at x, and step size is delta.
+//Numerical approximation of gradient and Hessian.
+//Original function is f, evaluation is at x, and step size is delta.
 #include<armadillo>
 using namespace std;
 using namespace arma;
-struct f2v
-{
-    double value;
-    vec grad;
-    mat hess;
-};
+struct f2v{double value; vec grad; mat hess;};
 f2v ngh(const int & order, const double & delta, const vec & x,
      const function <f2v(const int & , const vec & )>f)
 {
-    int order0=0,d,i,j,k;
+    int order0=0;
+    uword d,i,j,k;
     double delta2,deltasq;
     f2v result,fx,fu,fv,fyu,fzu,fyv, fzv;
     fx=f(order0,x);
@@ -23,8 +20,7 @@ f2v ngh(const int & order, const double & delta, const vec & x,
     vec u,v,yu,zu,yv,zv;
     u.set_size(d);
     v.set_size(d);
-    if(order>1)
-    {
+    if(order>1){
          yu.set_size(d);
          zu.set_size(d);
          yv.set_size(d);
@@ -32,8 +28,7 @@ f2v ngh(const int & order, const double & delta, const vec & x,
     }
     delta2=delta+delta;
     if(order>1)deltasq=delta*delta;
-    for(i=0;i<d;i++)
-    {
+    for(i=0;i<d;i++){
         u=x;
         v=x;
         u(i)=u(i)+delta;
@@ -47,13 +42,10 @@ f2v ngh(const int & order, const double & delta, const vec & x,
             return result;
         }
         result.grad(i)=(fu.value-fv.value)/delta2;
-        if(order>1)
-        {
+        if(order>1){
             result.hess(i,i)=(fu.value-2.0*fx.value+fv.value)/deltasq;
-            if(d>1)
-            {
-                for(j=0;j<i;j++)
-                {
+            if(d>1){
+                for(j=0;j<i;j++){
                     yu=u;
                     zu=u;
                     yv=v;
@@ -66,8 +58,7 @@ f2v ngh(const int & order, const double & delta, const vec & x,
                     fzu=f(order0,zu);
                     fyv=f(order0,yv);
                     fzv=f(order0,zv);
-                    if(isnan(fyu.value)||isnan(fzu.value)||isnan(fyv.value)||isnan(fzv.value))
-                    {
+                    if(isnan(fyu.value)||isnan(fzu.value)||isnan(fyv.value)||isnan(fzv.value)){
                          result.value=datum::nan;
                          result.grad.fill(datum::nan);
                          result.hess.fill(datum::nan);

@@ -3,7 +3,7 @@
 #include<armadillo>
 using namespace arma;
 struct pw{vec points; vec weights;};
-pw hermpw(const int & n){
+pw hermpw(const uword & n){
     vec p,w;
     mat J(n,n),K;
     pw pws;

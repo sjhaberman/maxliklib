@@ -5,41 +5,25 @@
 #include<armadillo>
 using namespace std;
 using namespace arma;
-struct f2v
-{
-    double value;
-    vec grad;
-    mat hess;
-};
-struct resp
-{
-    ivec iresp;
-    vec dresp;
-};
+struct f2v{double value; vec grad; mat hess;};
 //Parameters for function maximization.
 struct params
 {
     bool print;
-    int maxit;
-    int maxits;
+    uword maxit;
+    uword maxits;
     double eta;
     double gamma1;
     double gamma2;
     double kappa;
     double tol;
 };
-struct maxf2v
-{
-    vec locmax;
-    double max;
-    vec grad;
-    mat hess;
-};
+struct maxf2v{vec locmax; double max; vec grad; mat hess;};
 maxf2v maxselect(const int &, const params & , const char & , const vec & ,  
     const function<f2v(const int & , const vec & )> f);
-f2v regprodf(const int & , const field<resp> & , const vec & );
+f2v regprodf(const int & , const vector<vec> & , const vec & );
 maxf2v regprod(const int & order, const params & mparams, const char & algorithm,
-    const field<resp> & y, const vec & start)
+    const vector<vec> & y, const vec & start)
 {
     maxf2v results;
     int p;
@@ -50,6 +34,5 @@ maxf2v regprod(const int & order, const params & mparams, const char & algorithm
     const function<f2v(const int & order, const vec & start)> f=
         [&y](const int & order,const vec & start) mutable
         {return regprodf(order, y, start);};
-    results=maxselect(order, mparams, algorithm, start, f);
-    return results;
+    return maxselect(order, mparams, algorithm, start, f);
 }

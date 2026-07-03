@@ -23,8 +23,7 @@ vector<vn>getfiles(const vector<vector<pair<string,string>>> & datafiles){
     vector<vector<pair<string,string>>>::const_iterator datafilesit;
     field<string>names;
     datafilesit=datafiles.begin();
-    for(resultsit=results.begin();resultsit!=results.end();++resultsit)
-    {
+    for(resultsit=results.begin();resultsit!=results.end();++resultsit){
         dataf=keylookup("data",*datafilesit);
         if(dataf==""){
             results.clear();

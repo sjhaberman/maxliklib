@@ -7,32 +7,19 @@
 #include<armadillo>
 using namespace std;
 using namespace arma;
-struct f2v
-{
-    double value;
-    vec grad;
-    mat hess;
-};
-struct resp
-{
-    ivec iresp;
-    vec dresp;
-};
-f2v regprodf(const int & order, const field<resp> & y, const vec & beta)
-{
-    int d, i, j, k, n, p;
+struct f2v{double value; vec grad; mat hess;};
+f2v regprodf(const int & order, const vector<vec> & y, const vec & beta){
+    uword d, i, j, k, n, p;
     double diff, a, b;
     n=y.n_elem;
     p=beta.n_elem;
     f2v result;
     result.value=0.0;
-    if(order>0)
-    {
+    if(order>0){
         result.grad.set_size(p);
         result.grad.zeros();
     }
-    if(order>1)
-    {
+    if(order>1){
         result.hess.set_size(p,p);
         result.hess.zeros();
     }
