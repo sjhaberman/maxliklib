@@ -9,21 +9,19 @@
 #include<armadillo>
 using namespace std;
 using namespace arma;
-vec lwm(const double & c, const field<vec> & p ){
+vec lwm(const double & c, const vector<vec> & p ){
     double d,sumd,xn;
-    uword bottom,bottom1,i,it,maxsum,n, top,top1;
-    uvec cc;
+    uword bottom=0,bottom1,i,it,maxsum,n,top,top1;
     n=p.size();
-    cc.set_size(n);
-    for(i=0;i<n;i++)cc(i)=p(i).n_elem;
-    maxsum=sum(cc)-n;
+    vector<uword>cc(n);
+    for(it=0;it<n;it++) cc[it]=p[it].n_elem-1;
+    maxsum=accumulate(cc.begin(),cc.end(),bottom);
 //bottom is lower bound for nonzero entries of S(k), the sum of X(j) for j from 0
 //to k<n.  top is upper bound for nonzero entries of S(k)
-    bottom=0;
-    top=cc(0)-1;
+    top=cc[0];
     vec dist(maxsum+1);
 //S(0) has distribution of X(0).
-    dist.subvec(0,cc(0)-1)=p(0);
+    dist.subvec(0,cc[0])=p[0];
     if(n==1)return dist;
     xn=0.0;
 //Cycle through X(it) for it from 1 to n-1.
@@ -32,19 +30,15 @@ vec lwm(const double & c, const field<vec> & p ){
 //Bound for when S(it)<=i or S(it)>=i has negligible probability.
         d=xn*c/(2.0*xn+1.0);
 //Tentative new values of bottom and top.
-        bottom1=bottom;
-        top1=top+cc(it)-1;
+        top1=top+cc[it];
 //Convolution of distribution of S(it-1) and X(it).
-        dist.subvec(bottom1,top1)=conv(dist.subvec(bottom,top),p(it));
+        dist.subvec(bottom,top1)=conv(dist.subvec(bottom,top),p[it]);
 //Negligibility check.
         sumd=0.0;
 //Update bottom.
-        for(i=bottom1;i<top;i++){
+        for(i=bottom;i<top1;i++){
             sumd=sumd+dist(i);
-            if(i==bottom1&&sumd>d){
-                bottom=bottom1;
-                break;
-            }
+            if(i==bottom&&sumd>d) break;
             else{
 //Insert 0 when needed.
                 if(sumd>d){

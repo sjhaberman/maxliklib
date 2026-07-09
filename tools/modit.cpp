@@ -5,22 +5,15 @@
 #include<armadillo>
 using namespace std;
 using namespace arma;
-struct bounds
-{
-     double lower;
-     double upper;
-};
+struct bounds{double lower; double upper;};
 double modit(const double & eta, const double & alpha0, const double & alpha1,
-    const double & stepmax, const bounds & b)
-{
+    const double & stepmax, const bounds & b){
     double result;
-    if(alpha0<alpha1)
-    {
+    if(alpha0<alpha1){
         result=fmin(alpha0+stepmax,alpha1);
         if(isfinite(b.upper))result=fmin(result,alpha0+eta*(b.upper-alpha0));
     }
-    else
-    {
+    else{
         result=fmax(alpha0-stepmax,alpha1);
         if(isfinite(b.lower))result=fmax(result,alpha0+eta*(b.lower-alpha0));
     }

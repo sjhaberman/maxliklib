@@ -7,15 +7,15 @@ using namespace arma;
 struct pw{vec points; vec weights;};
 pw qnormpw(const uword & n){
     double x,xn;
-    uword i;
+    vec::iterator pit;
     pw pws;
     pws.points.set_size(n);
     pws.weights.set_size(n);
     xn=1.0/double(n);
     pws.weights.fill(xn);
     x=0.5*xn;
-    for(i=0;i<n;i++){
-        pws.points(i)=stats::qnorm(x,0.0,1.0);
+    for(pit=pws.points.begin();pit<pws.points.end();++pit){
+        *pit=stats::qnorm(x);
         x+=xn;
     }
     pws.points=pws.points/stddev(pws.points,1);

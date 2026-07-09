@@ -5,8 +5,7 @@ using namespace std;
 using namespace arma;
 struct f2v{double value; vec grad; mat hess;};
 f2v ngh(const int & order, const double & delta, const vec & x,
-     const function <f2v(const int & , const vec & )>f)
-{
+     const function <f2v(const int & , const vec & )>f){
     int order0=0;
     uword d,i,j,k;
     double delta2,deltasq;

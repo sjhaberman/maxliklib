@@ -4,14 +4,8 @@
 //and value, derivative, and second derivative returned if order is at least 2.
 #include<armadillo>
 using namespace arma;
-struct f2
-{
-    double value;
-    double der;
-    double der2;
-};
-f2 logistic(const int & order, const double & z)
-{
+struct f2{double value; double der; double der2;};
+f2 logistic(const int & order, const double & z){
     f2 results;
     double w, x, y;
     y=exp(z);

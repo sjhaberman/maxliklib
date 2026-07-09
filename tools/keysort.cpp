@@ -4,7 +4,7 @@ using namespace arma;
 using namespace std;
 vector<string>parse(const string & , const char & );
 vector<pair<string,vector<pair<string,string>>>> keysort(const field<string> & source){
-    uword i, i1, j, n, r;
+    uword i, j, n, r;
     n=source.n_rows;
     vector<pair<string,vector<pair<string,string>>>>result(n);
     vector<string>pieces;

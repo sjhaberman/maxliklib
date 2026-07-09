@@ -9,7 +9,7 @@
 using namespace arma;
 vec lw(const double & c, const vec & p){
     double d,sumd,xn;
-    uword bottom,bottom1,i,it,n,top,top1;
+    uword bottom,i,it, n,top,top1;
 //Find n.
     n=p.n_elem;
     vec dist(n+1),pp(2);
@@ -27,23 +27,19 @@ vec lw(const double & c, const vec & p){
         xn+=1.0;
 //Bound for when S(it)<=i or S(it)>=i has negligible probability.
         d=xn*c/(2.0*xn+1.0);
-//Tentative new values of bottom and top.
-        bottom1=bottom;
+//Tentative new values of top.
         top1=top+1;
 //Distribution of X(it).
         pp(0)=1.0-p(it);
         pp(1)=p(it);
 //Convolution of distribution of S(it-1) and X(it).
-        dist.subvec(bottom1,top1)=conv(dist.subvec(bottom,top),pp);
+        dist.subvec(bottom,top1)=conv(dist.subvec(bottom,top),pp);
 //Negligibility check.
         sumd=0.0;
-        for(i=bottom1;i<top;i++){
+        for(i=bottom;i<top1;i++){
             sumd=sumd+dist(i);
 //Update bottom.
-            if(i==bottom1&&sumd>d){
-                bottom=bottom1;
-                break;
-            }
+            if(i==bottom&&sumd>d) break;
             else{
 //Insert 0 when needed.
                 if(sumd>d){
@@ -61,8 +57,7 @@ vec lw(const double & c, const vec & p){
                 top=top1;
                 break;
             }
-            else
-            {
+            else{
 //Insert 0 when needed.
                 if(sumd>d){
                     dist.subvec(i+1,top1)=zeros(top1-i);
