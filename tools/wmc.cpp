@@ -4,8 +4,7 @@
 using namespace arma;
 // Combination of vector and matrix.
 struct vecmat{vec v; mat m;};
-vecmat wmc(const int & order, const vecmat & wx)
-{
+vecmat wmc(const int & order, const vecmat & wx){
     vecmat result;
 //Column vector of weighted means;
     result.v=trans(wx.m)*wx.v;
