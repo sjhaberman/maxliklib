@@ -31,17 +31,8 @@ using namespace std;
 using namespace arma;
 struct f2v{double value; vec grad; mat hess;};
 struct maxf2v{vec locmax; double max; vec grad; mat hess;};
-struct params
-{
-    bool print;
-    uword maxit;
-    uword maxits;
-    double eta;
-    double gamma1;
-    double gamma2;
-    double kappa;
-    double tol;
-};
+struct params{bool print; uword maxit; uword maxits; double eta; double gamma1;
+    double gamma2; double kappa; double tol;};
 maxf2v conjgrad(const int &, const params & , const vec & ,
     const function<f2v(const int & , const vec & )> f);
 maxf2v gradascent(const int &, const params & , const vec & ,
@@ -52,8 +43,8 @@ maxf2v maxselect(const int & order, const params & mparams,
     const char & algorithm,
     const vec & start, const function<f2v(const int & , const vec & )> f){
     maxf2v results;
-    if(algorithm=='N'||algorithm=='L')results=nrv(order, mparams, start, f);
-    if(algorithm=='C')results=conjgrad(order, mparams, start, f);
-    if(algorithm=='G')results=gradascent(order, mparams, start, f);
+    if(algorithm=='N'||algorithm=='L')return nrv(order, mparams, start, f);
+    if(algorithm=='C')return conjgrad(order, mparams, start, f);
+    if(algorithm=='G')return gradascent(order, mparams, start, f);
     return results;
 }

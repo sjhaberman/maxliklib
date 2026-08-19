@@ -17,23 +17,15 @@
 //The largest permitted step length is mparams.kappa>0.
 //If a main iteration leads to a change of the function f less
 //than mparams.tol, then iterations cease.
-//Function value at end of iteration is sent to standard output if mparams.print is true.
+//Function value at end of iteration is sent to standard output
+//if mparams.print is true.
 #include<armadillo>
 using namespace std;
 using namespace arma;
 struct f2v{double value; vec grad; mat hess;};
 struct maxf2v{vec locmax; double max; vec grad; mat hess;};
-struct params
-{
-    bool print;
-    uword maxit;
-    uword maxits;
-    double eta;
-    double gamma1;
-    double gamma2;
-    double kappa;
-    double tol;
-};
+struct params{bool print; uword maxit; uword maxits; double eta; double gamma1;
+    double gamma2; double kappa; double tol;};
 maxf2v maxf2vvar(const int & , const vec & , const f2v & );
 maxf2v maxlinq2(const int & , const params &, const vec & , const maxf2v & ,
     const function <f2v(const int &, const vec & )> f);
@@ -55,7 +47,8 @@ maxf2v nrv(const int & order, const params & mparams, const vec & start,
 // Find Newton-Raphson step if possible.
         if ((-vary0.hess).is_sympd()){
             v=solve(-vary0.hess,vary0.grad);
-            if(dot(v,vary0.grad)<mparams.gamma2*norm(v)*norm(vary0.grad))v=vary0.grad;
+            if(dot(v,vary0.grad)<mparams.gamma2*norm(v)*norm(vary0.grad))
+                v=vary0.grad;
         }
         else v=vary0.grad;
 // Line search.
