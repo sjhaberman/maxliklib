@@ -1,8 +1,8 @@
 //Function to maximize when finding minimum discriminant information
-//adjustment of a polytomous variable with vector p of s positive probabilities
-//to a vector q with s positive probabilities such that u=sum(T*q)
+//adjustment of a polytomous variable with vector p of r positive probabilities
+//to a vector q with r positive probabilities such that u=sum(trans(T)*q)
 //for an r by s matrix T
-//and a given vector u of dimension r.
+//and a given vector u of dimension s.   Here gamma has dimension s.
 #include<armadillo>
 using namespace arma;
 //Function, gradient, and Hessian.
@@ -12,7 +12,8 @@ struct vecmat{vec v; mat m;};
 //Weighted mean and covariance matrix.
 //Data matrix is wx.m and data weight is wx.v.
 vecmat wmc(const int & , const vecmat & );
-f2v kl(const int & order, const vec & p, const mat & T, const vec & u, const vec & gamma){
+f2v kl(const int & order, const vec & p, const mat & T, const vec & u,
+    const vec & gamma){
     f2v results;
     double c;
     vec q=T*gamma;

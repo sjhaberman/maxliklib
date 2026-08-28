@@ -23,17 +23,8 @@ using namespace std;
 using namespace arma;
 struct f2v{double value; vec grad; mat hess;};
 struct maxf2v{vec locmax; double max; vec grad; mat hess;};
-struct params
-{
-    bool print;
-    uword maxit;
-    uword maxits;
-    double eta;
-    double gamma1;
-    double gamma2;
-    double kappa;
-    double tol;
-};
+struct params{bool print; uword maxit; uword maxits; double eta; double gamma1;
+    double gamma2; double kappa; double tol;};
 maxf2v maxf2vvar(const int & , const vec & , const f2v & );
 maxf2v maxlinq2(const int & , const params & , const vec & , const maxf2v & ,
     const function<f2v(const int &, const vec &)> );

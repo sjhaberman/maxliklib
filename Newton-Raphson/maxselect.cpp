@@ -42,9 +42,7 @@ maxf2v nrv(const int &, const params & , const vec & ,
 maxf2v maxselect(const int & order, const params & mparams,
     const char & algorithm,
     const vec & start, const function<f2v(const int & , const vec & )> f){
-    maxf2v results;
     if(algorithm=='N'||algorithm=='L')return nrv(order, mparams, start, f);
     if(algorithm=='C')return conjgrad(order, mparams, start, f);
-    if(algorithm=='G')return gradascent(order, mparams, start, f);
-    return results;
+    return gradascent(order, mparams, start, f);
 }

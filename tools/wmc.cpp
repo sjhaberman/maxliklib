@@ -1,5 +1,6 @@
 //Weighted mean (order=1)and covariance matrix (order>1).
-//Data matrix is wx.m and data weight is wx.v.
+//Data matrix is wx.m and data weight is wx.v.  The number of
+//rows of wx.m is the number of elements of wx.m.
 #include<armadillo>
 using namespace arma;
 // Combination of vector and matrix.

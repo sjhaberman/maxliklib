@@ -1,4 +1,4 @@
-//Find variables satisfying a key word.
+//Find vectors of string pairs associated with a key.
 #include<armadillo>
 using namespace arma;
 using namespace std;
